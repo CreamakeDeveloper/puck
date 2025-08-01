@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release with npm pack
 
 on:
   push:
@@ -31,10 +31,12 @@ jobs:
         run: yarn build
 
       - name: Pack with npm
-        run: npm pack
-
-      - name: Rename output
-        run: mv puck-core-*.tgz puck-core-dist.tgz
+        id: pack
+        run: |
+          echo "Running npm pack..."
+          FILE=$(npm pack)
+          echo "Packed file: $FILE"
+          mv "$FILE" puck-core-dist.tgz
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

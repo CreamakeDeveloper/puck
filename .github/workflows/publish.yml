@@ -25,16 +25,17 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Build package
         run: yarn build
 
-      - name: Pack with npm
+      - name: Create .tgz package with npm pack
         id: pack
         run: |
           echo "Running npm pack..."
-          FILE=$(npm pack)
+          npm pack > output.log
+          FILE=$(tail -n 1 output.log)
           echo "Packed file: $FILE"
           mv "$FILE" puck-core-dist.tgz
 

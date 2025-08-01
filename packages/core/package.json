@@ -43,7 +43,6 @@
     "lint": "eslint \"**/*.ts*\"",
     "build": "rm -rf dist && tsup bundle/index.ts bundle/rsc.tsx bundle/no-external.ts",
     "test": "jest",
-    "prepare": "cp ../../README.md . && yarn build",
     "postpublish": "rm README.md"
   },
   "files": [

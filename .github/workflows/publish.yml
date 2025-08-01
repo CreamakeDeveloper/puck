@@ -33,9 +33,12 @@ jobs:
       - name: Prepare flat folder for packaging
         run: |
           mkdir -p temp-pack
-          cp -r dist/* temp-pack/
+          rsync -av dist/ temp-pack/ --exclude='.DS_Store'
           cp package.json temp-pack/
           [ -f ../../README.md ] && cp ../../README.md temp-pack/ || echo "README.md not found, skipping"
+
+      - name: Check temp-pack contents before packaging
+        run: ls -lah temp-pack/
 
       - name: Create .tgz package from flat folder
         run: |

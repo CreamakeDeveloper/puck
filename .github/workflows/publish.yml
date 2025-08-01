@@ -1,4 +1,4 @@
-name: Create Flat .tgz Release
+name: Create Release
 
 on:
   push:
@@ -9,17 +9,17 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  release:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: packages/core
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -30,26 +30,18 @@ jobs:
       - name: Build package
         run: yarn build
 
-      - name: Prepare flat folder for packaging
+      - name: Move dist files to root
         run: |
-          mkdir -p temp-pack
-          rsync -av dist/ temp-pack/ --exclude='.DS_Store'
-          cp package.json temp-pack/
-          [ -f ../../README.md ] && cp ../../README.md temp-pack/ || echo "README.md not found, skipping"
+          mv dist/* .
+          echo "Moved dist contents to root:"
+          ls -lh
 
-      - name: Check temp-pack contents before packaging
-        run: ls -lah temp-pack/
-
-      - name: Create .tgz package from flat folder
+      - name: Pack with npm
         run: |
-          cd temp-pack
-          npm pack > ../output.log
-          cd ..
-          FILE=$(tail -n 1 output.log)
-          echo "Packed file: $FILE"
-          mv temp-pack/$FILE puck-core-dist.tgz
+          npm --ignore-scripts pack
+          mv *.tgz puck-core-dist.tgz
 
-      - name: Create GitHub Release
+      - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
           files: packages/core/puck-core-dist.tgz

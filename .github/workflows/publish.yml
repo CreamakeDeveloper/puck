@@ -30,16 +30,11 @@ jobs:
       - name: Build package
         run: yarn build
 
-      - name: Move dist files to root
-        run: |
-          mv dist/* .
-          echo "Moved dist contents to root:"
-          ls -lh
-
       - name: Pack with npm
         run: |
           npm --ignore-scripts pack
           mv *.tgz puck-core-dist.tgz
+
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2

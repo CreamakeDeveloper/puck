@@ -22,10 +22,10 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: yarn install
 
       - name: Build package
-        run: npm run build
+        run: yarn build
 
       - name: Archive dist folder
         run: tar -czf puck-core-dist.tgz dist/

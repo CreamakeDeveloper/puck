@@ -3,7 +3,7 @@ name: Create Flat .tgz Release
 on:
   push:
     tags:
-      - 'v*' # Örnek: v0.0.5, v1.2.0
+      - 'v*'
 
 permissions:
   contents: write
@@ -35,7 +35,7 @@ jobs:
           mkdir -p temp-pack
           cp -r dist/* temp-pack/
           cp package.json temp-pack/
-          cp ../../README.md temp-pack/
+          [ -f ../../README.md ] && cp ../../README.md temp-pack/ || echo "README.md not found, skipping"
 
       - name: Create .tgz package from flat folder
         run: |

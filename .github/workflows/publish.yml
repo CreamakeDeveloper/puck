@@ -1,10 +1,10 @@
-name: Create Release with dist
+name: Create Release
 
 on:
   push:
     tags:
-      - 'v*' # örnek: v1.0.0, v2.3.1
-      
+      - 'v*'
+
 permissions:
   contents: write
 
@@ -30,8 +30,11 @@ jobs:
       - name: Build package
         run: yarn build
 
-      - name: Archive dist folder
-        run: tar -czf puck-core-dist.tgz dist/
+      - name: Pack with npm
+        run: npm pack
+
+      - name: Rename output
+        run: mv puck-core-*.tgz puck-core-dist.tgz
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

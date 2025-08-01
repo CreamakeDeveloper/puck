@@ -1,0 +1,109 @@
+.Button {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--puck-color-white);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.05ch;
+  font-family: var(--puck-font-family);
+  font-size: 14px;
+  font-weight: 400;
+  box-sizing: border-box;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 50ms ease-in;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.Button:hover,
+.Button:active {
+  transition: none;
+}
+
+.Button--medium {
+  min-height: 34px;
+  padding-bottom: 7px;
+  padding-inline-start: 19px;
+  padding-inline-end: 19px;
+  padding-top: 7px;
+}
+
+.Button--large {
+  padding-bottom: 11px;
+  padding-inline-start: 19px;
+  padding-inline-end: 19px;
+  padding-top: 11px;
+}
+
+.Button-icon {
+  margin-top: 2px;
+}
+
+.Button--primary {
+  background: #fac101;
+  color: #000000;
+  font-weight: 500;
+}
+
+.Button:focus-visible {
+  outline: 2px solid #fac101;
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .Button--primary:hover {
+    background-color: #ef9800;
+    color: #000000;
+  }
+}
+
+.Button--primary:active {
+  background-color: #d18500;
+  color: #000000;
+}
+
+.Button--secondary {
+  border: 1px solid #fac101;
+  color: #fac101;
+  background: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .Button--secondary:hover {
+    background-color: #fac101;
+    color: #000000;
+    border-color: #fac101;
+  }
+}
+
+.Button--secondary:active {
+  background-color: #ef9800;
+  color: #000000;
+  border-color: #ef9800;
+}
+
+.Button--flush {
+  border-radius: 0;
+}
+
+.Button--disabled,
+.Button--disabled:hover {
+  background-color: var(--puck-color-grey-07);
+  color: var(--puck-color-grey-03);
+  cursor: not-allowed;
+}
+
+.Button--fullWidth {
+  justify-content: center;
+  width: 100%;
+}
+
+.Button-spinner {
+  padding-inline-start: 8px;
+}

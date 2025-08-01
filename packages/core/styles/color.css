@@ -1,0 +1,115 @@
+:root {
+  /*
+   * Color palette - Ana renk: #fac101 (Altın), İkincil renk: #000 (Siyah)
+   */
+
+  /* Ana Renk Paleti - Altın/Sarı (#fac101 bazlı) */
+  --puck-color-primary-01: #3d2700;
+  --puck-color-primary-02: #5a3900;
+  --puck-color-primary-03: #784c00;
+  --puck-color-primary-04: #965f00;
+  --puck-color-primary-05: #b47200;
+  --puck-color-primary-06: #d18500;
+  --puck-color-primary-07: #ef9800;
+  --puck-color-primary-08: #fac101;
+  --puck-color-primary-09: #fbd234;
+  --puck-color-primary-10: #fce267;
+  --puck-color-primary-11: #fdf19a;
+  --puck-color-primary-12: #fef8cd;
+
+  /* İkincil Renk Paleti - Siyah/Gri (#000 bazlı) */
+  --puck-color-secondary-01: #000000;
+  --puck-color-secondary-02: #1a1a1a;
+  --puck-color-secondary-03: #333333;
+  --puck-color-secondary-04: #4d4d4d;
+  --puck-color-secondary-05: #666666;
+  --puck-color-secondary-06: #808080;
+  --puck-color-secondary-07: #999999;
+  --puck-color-secondary-08: #b3b3b3;
+  --puck-color-secondary-09: #cccccc;
+  --puck-color-secondary-10: #e6e6e6;
+  --puck-color-secondary-11: #f3f3f3;
+  --puck-color-secondary-12: #fafafa;
+
+  /* Mevcut isimlendirme ile uyumluluk için mapping */
+  --puck-color-rose-01: #3d2700;
+  --puck-color-rose-02: #5a3900;
+  --puck-color-rose-03: #784c00;
+  --puck-color-rose-04: #965f00;
+  --puck-color-rose-05: #b47200;
+  --puck-color-rose-06: #d18500;
+  --puck-color-rose-07: #ef9800;
+  --puck-color-rose-08: #fac101;
+  --puck-color-rose-09: #fbd234;
+  --puck-color-rose-10: #fce267;
+  --puck-color-rose-11: #fdf19a;
+  --puck-color-rose-12: #fef8cd;
+
+  --puck-color-azure-01: #000000;
+  --puck-color-azure-02: #1a1a1a;
+  --puck-color-azure-03: #333333;
+  --puck-color-azure-04: #4d4d4d;
+  --puck-color-azure-05: #666666;
+  --puck-color-azure-06: #808080;
+  --puck-color-azure-07: #999999;
+  --puck-color-azure-08: #b3b3b3;
+  --puck-color-azure-09: #cccccc;
+  --puck-color-azure-10: #e6e6e6;
+  --puck-color-azure-11: #f3f3f3;
+  --puck-color-azure-12: #fafafa;
+
+  --puck-color-green-01: #1a2e00;
+  --puck-color-green-02: #2d4800;
+  --puck-color-green-03: #406200;
+  --puck-color-green-04: #537c00;
+  --puck-color-green-05: #669600;
+  --puck-color-green-06: #79b000;
+  --puck-color-green-07: #8cca00;
+  --puck-color-green-08: #9fe400;
+  --puck-color-green-09: #b8ea4d;
+  --puck-color-green-10: #d1f099;
+  --puck-color-green-11: #e8f7cc;
+  --puck-color-green-12: #f4fbe6;
+
+  --puck-color-yellow-01: #3d2700;
+  --puck-color-yellow-02: #5a3900;
+  --puck-color-yellow-03: #784c00;
+  --puck-color-yellow-04: #965f00;
+  --puck-color-yellow-05: #b47200;
+  --puck-color-yellow-06: #d18500;
+  --puck-color-yellow-07: #ef9800;
+  --puck-color-yellow-08: #fac101;
+  --puck-color-yellow-09: #fbd234;
+  --puck-color-yellow-10: #fce267;
+  --puck-color-yellow-11: #fdf19a;
+  --puck-color-yellow-12: #fef8cd;
+
+  --puck-color-red-01: #4c0000;
+  --puck-color-red-02: #660000;
+  --puck-color-red-03: #800000;
+  --puck-color-red-04: #990000;
+  --puck-color-red-05: #b30000;
+  --puck-color-red-06: #cc0000;
+  --puck-color-red-07: #e60000;
+  --puck-color-red-08: #ff1a1a;
+  --puck-color-red-09: #ff4d4d;
+  --puck-color-red-10: #ff8080;
+  --puck-color-red-11: #ffb3b3;
+  --puck-color-red-12: #ffe6e6;
+
+  --puck-color-grey-01: #000000;
+  --puck-color-grey-02: #1a1a1a;
+  --puck-color-grey-03: #333333;
+  --puck-color-grey-04: #4d4d4d;
+  --puck-color-grey-05: #666666;
+  --puck-color-grey-06: #808080;
+  --puck-color-grey-07: #999999;
+  --puck-color-grey-08: #b3b3b3;
+  --puck-color-grey-09: #cccccc;
+  --puck-color-grey-10: #e6e6e6;
+  --puck-color-grey-11: #f3f3f3;
+  --puck-color-grey-12: #fafafa;
+
+  --puck-color-black: #000000;
+  --puck-color-white: #ffffff;
+}

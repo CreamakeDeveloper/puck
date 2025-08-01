@@ -1,0 +1,12 @@
+{
+  "packages": [
+    "apps/docs",
+    "packages/core",
+    "packages/create-puck-app",
+    "packages/field-contentful",
+    "packages/plugin-emotion-cache",
+    "packages/plugin-heading-analyzer"
+  ],
+  "version": "0.19.3",
+  "npmClient": "yarn"
+}

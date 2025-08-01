@@ -1,9 +1,9 @@
-name: Create Release with npm pack
+name: Create Flat .tgz Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*' # Örnek: v0.0.5, v1.2.0
 
 permissions:
   contents: write
@@ -30,14 +30,20 @@ jobs:
       - name: Build package
         run: yarn build
 
-      - name: Create .tgz package with npm pack
-        id: pack
+      - name: Prepare flat folder for packaging
         run: |
-          echo "Running npm pack..."
-          npm pack > output.log
+          mkdir -p temp-pack
+          cp -r dist/* temp-pack/
+          cp package.json temp-pack/
+
+      - name: Create .tgz package from flat folder
+        run: |
+          cd temp-pack
+          npm pack > ../output.log
+          cd ..
           FILE=$(tail -n 1 output.log)
           echo "Packed file: $FILE"
-          mv "$FILE" puck-core-dist.tgz
+          mv temp-pack/$FILE puck-core-dist.tgz
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

@@ -1,45 +1,38 @@
-name: Publish release
+name: Create Release with dist
+
 on:
   push:
-    branches:
-      - "releases/**"
-permissions:
-  contents: write
+    tags:
+      - 'v*' # örnek: v1.0.0, v2.3.1
+
 jobs:
-  tag-and-publish-to-npm:
+  build-and-release:
     runs-on: ubuntu-latest
-    if: "startsWith(github.event.head_commit.message, 'release: ')"
+    defaults:
+      run:
+        working-directory: packages/core
+
     steps:
-      - uses: actions/checkout@v2.0.0
-      - name: Extract version
-        shell: bash
-        run: echo "TAG_NAME=$(git log -1 --oneline --pretty=%B | sed 's/release:\ //g')" >> $GITHUB_ENV
-      - name: Tag commit
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GH_TOKEN }}"
-          tag: ${{ env.TAG_NAME }}
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: yarn
+        run: npm install
 
-      - name: Publish all packages
-        run: ./scripts/publish.sh latest
+      - name: Build package
+        run: npm run build
+
+      - name: Archive dist folder
+        run: tar -czf puck-core-dist.tgz dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: packages/core/puck-core-dist.tgz
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Trigger a new build to ensure Vercel creates a distinct release branch, rather than reusing latest
-      - name: Triggering new build
-        run: |
-          git config --global user.name 'chrisvxd'
-          git config --global user.email 'chrisvxd@users.noreply.github.com'
-          git commit -m "ci: trigger build" --allow-empty
-          git push
-
-    timeout-minutes: 10
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

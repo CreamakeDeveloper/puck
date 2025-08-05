@@ -1,6 +1,7 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../store";
 import {
+  ArrowLeft,
   ChevronDown,
   ChevronUp,
   Globe,
@@ -30,6 +31,9 @@ const HeaderInner = <
     headerTitle,
     headerPath,
     iframe: _iframe,
+    onBack,
+    backButtonText = "Geri Dön",
+    backButtonIcon = ArrowLeft,
   } = usePropsContext();
 
   const dispatch = useAppStore((s) => s.dispatch);
@@ -144,6 +148,19 @@ const HeaderInner = <
       >
         <div className={getClassName("inner")}>
           <div className={getClassName("toggle")}>
+            {onBack && (
+              <div className={getClassName("backButton-container")}>
+                <button
+                  className={getClassName("backButton")}
+                  onClick={onBack}
+                  type="button"
+                  title={backButtonText}
+                >
+                  {backButtonIcon && React.createElement(backButtonIcon, { size: 24 })}
+                  <span>{backButtonText}</span>
+                </button>
+              </div>
+            )}
             <div className={getClassName("leftSideBarToggle")}>
               <IconButton
                 type="button"

@@ -15,14 +15,19 @@ export const Button: ComponentConfig<ButtonProps> = {
       type: "text",
       placeholder: "Lorem ipsum...",
       contentEditable: true,
+      group: "İçerik",
     },
-    href: { type: "text" },
+    href: { 
+      type: "text",
+      group: "Davranış",
+    },
     variant: {
       type: "radio",
       options: [
         { label: "primary", value: "primary" },
         { label: "secondary", value: "secondary" },
       ],
+      group: "Görünüm",
     },
   },
   defaultProps: {

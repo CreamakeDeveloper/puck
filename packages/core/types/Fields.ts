@@ -13,6 +13,7 @@ export type BaseField = {
   labelIcon?: ReactElement;
   metadata?: Metadata;
   visible?: boolean;
+  group?: string;
 };
 
 export type TextField = BaseField & {

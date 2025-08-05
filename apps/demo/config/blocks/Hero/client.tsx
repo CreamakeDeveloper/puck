@@ -12,6 +12,7 @@ export const Hero: ComponentConfig<HeroProps> = {
       type: "external",
       placeholder: "Select a quote",
       showSearch: false,
+      group: "İçerik",
       renderFooter: ({ items }) => {
         return (
           <div>
@@ -72,13 +73,22 @@ export const Hero: ComponentConfig<HeroProps> = {
       },
       getItemSummary: (item) => item.label,
     },
-    title: { type: "text", contentEditable: true },
-    description: { type: "textarea", contentEditable: true },
+    title: { 
+      type: "text", 
+      contentEditable: true,
+      group: "İçerik",
+    },
+    description: { 
+      type: "textarea", 
+      contentEditable: true,
+      group: "İçerik",
+    },
     buttons: {
       type: "array",
       min: 1,
       max: 4,
       getItemSummary: (item) => item.label || "Button",
+      group: "Etkileşim",
       arrayFields: {
         label: { type: "text", contentEditable: true },
         href: { type: "text" },
@@ -101,9 +111,11 @@ export const Hero: ComponentConfig<HeroProps> = {
         { label: "left", value: "left" },
         { label: "center", value: "center" },
       ],
+      group: "Düzen",
     },
     image: {
       type: "object",
+      group: "Görsel",
       objectFields: {
         content: { type: "slot" },
         url: {
@@ -133,7 +145,10 @@ export const Hero: ComponentConfig<HeroProps> = {
         },
       },
     },
-    padding: { type: "text" },
+    padding: { 
+      type: "text",
+      group: "Düzen",
+    },
   },
   defaultProps: {
     title: "Hero",

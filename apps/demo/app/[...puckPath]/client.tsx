@@ -5,6 +5,7 @@ import headingAnalyzer from "@/plugin-heading-analyzer/src/HeadingAnalyzer";
 import config from "../../config";
 import { useDemoData } from "../../lib/use-demo-data";
 import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
   const metadata = {
@@ -33,6 +34,11 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
         <Puck
           config={config}
           data={data}
+          onBack={() => {
+            window.history.back();
+          }}
+          backButtonText="Geri Dön"
+          backButtonIcon={ArrowLeft}
           onPublish={async (data) => {
             localStorage.setItem(key, JSON.stringify(data));
           }}

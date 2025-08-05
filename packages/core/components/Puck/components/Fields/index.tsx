@@ -6,11 +6,12 @@ import { AppStore, useAppStore, useAppStoreApi } from "../../../../store";
 
 import styles from "./styles.module.css";
 import { getClassNameFactory } from "../../../../lib";
-import { memo, ReactNode, useCallback, useMemo } from "react";
+import { memo, ReactNode, useCallback, useMemo, useState } from "react";
 import { ItemSelector } from "../../../../lib/data/get-item";
 import { useRegisterFieldsSlice } from "../../../../store/slices/fields";
 import { useShallow } from "zustand/react/shallow";
 import { StoreApi } from "zustand";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const getClassName = getClassNameFactory("PuckFields", styles);
 
@@ -149,6 +150,39 @@ const FieldsChild = ({ fieldName }: { fieldName: string }) => {
 
 const FieldsChildMemo = memo(FieldsChild);
 
+const FieldGroup = ({
+  title,
+  children,
+  isExpanded,
+  onToggle,
+}: {
+  title: string;
+  children: ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) => {
+  return (
+    <div className={getClassName("group")}>
+      <button
+        type="button"
+        className={getClassName("groupTitle")}
+        onClick={onToggle}
+        title={isExpanded ? `${title} Daralt` : `${title} Genişlet`}
+      >
+        <div className={getClassName("groupTitleText")}>{title}</div>
+        <div className={getClassName("groupTitleIcon")}>
+          {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        </div>
+      </button>
+      {isExpanded && (
+        <div className={getClassName("groupContent")}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const FieldsInternal = ({ wrapFields = true }: { wrapFields?: boolean }) => {
   const overrides = useAppStore((s) => s.overrides);
   const componentResolving = useAppStore((s) => {
@@ -174,9 +208,45 @@ const FieldsInternal = ({ wrapFields = true }: { wrapFields?: boolean }) => {
     })
   );
 
+  const fields = useAppStore((s) => s.fields.fields);
+  const setUi = useAppStore((s) => s.setUi);
+  const [fieldGroups, setFieldGroups] = useState<Record<string, boolean>>({});
+
   const isLoading = fieldsLoading || componentResolving;
 
   const Wrapper = useMemo(() => overrides.fields || DefaultFields, [overrides]);
+
+  // Field'ları kendi group özelliklerine göre gruplandır
+  const groupedFields = useMemo(() => {
+    const groups: Record<string, string[]> = {};
+    const ungroupedFields: string[] = [];
+
+    fieldNames.forEach((fieldName) => {
+      const field = fields[fieldName];
+      if (!field) return;
+
+      const groupName = field.group;
+      
+      if (groupName) {
+        if (!groups[groupName]) {
+          groups[groupName] = [];
+        }
+        groups[groupName].push(fieldName);
+      } else {
+        ungroupedFields.push(fieldName);
+      }
+    });
+
+    // Gruplu field'ları önce ekle
+    const result = Object.entries(groups).filter(([, fields]) => fields.length > 0);
+    
+    // Grupsuz field'lar varsa onları da ekle
+    if (ungroupedFields.length > 0) {
+      result.push(["Fields", ungroupedFields]);
+    }
+
+    return result;
+  }, [fieldNames, fields]);
 
   return (
     <form
@@ -186,9 +256,27 @@ const FieldsInternal = ({ wrapFields = true }: { wrapFields?: boolean }) => {
       }}
     >
       <Wrapper isLoading={isLoading} itemSelector={itemSelector}>
-        {fieldNames.map((fieldName) => (
-          <FieldsChildMemo key={fieldName} fieldName={fieldName} />
-        ))}
+        {groupedFields.map(([groupName, groupFieldNames]) => {
+          const isExpanded = fieldGroups[groupName] === true; // Varsayılan olarak kapalı
+          
+          return (
+            <FieldGroup
+              key={groupName}
+              title={groupName}
+              isExpanded={isExpanded}
+              onToggle={() => {
+                setFieldGroups(prev => ({
+                  ...prev,
+                  [groupName]: !isExpanded
+                }));
+              }}
+            >
+              {groupFieldNames.map((fieldName) => (
+                <FieldsChildMemo key={fieldName} fieldName={fieldName} />
+              ))}
+            </FieldGroup>
+          );
+        })}
       </Wrapper>
       {isLoading && (
         <div className={getClassName("loadingOverlay")}>

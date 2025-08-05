@@ -118,6 +118,9 @@ type PuckProps<
   };
   initialHistory?: InitialHistory;
   metadata?: Metadata;
+  onBack?: () => void;
+  backButtonText?: string;
+  backButtonIcon?: React.ComponentType<{ size?: number | string }>;
 };
 
 const propsContext = createContext<Partial<PuckProps>>({});

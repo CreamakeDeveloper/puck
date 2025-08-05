@@ -44,3 +44,56 @@
   border-top: 1px solid var(--puck-color-grey-09);
   margin-top: 8px;
 }
+
+/* Field Group Styles */
+.PuckFields-group {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.PuckFields-groupTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-bottom: 0;
+  cursor: pointer;
+  font-size: var(--puck-font-size-xs);
+  color: var(--puck-color-grey-04);
+  transition: all 0.2s ease;
+}
+
+.PuckFields-groupTitle:focus {
+  outline: 2px solid var(--puck-color-blue-05);
+  outline-offset: 2px;
+}
+
+.PuckFields-groupTitleText {
+  font-family: inherit;
+}
+
+.PuckFields-groupTitleIcon {
+  color: var(--puck-color-grey-05);
+  transition: transform 0.2s ease;
+}
+
+.PuckFields-groupTitle:hover .PuckFields-groupTitleIcon {
+  color: var(--puck-color-grey-03);
+}
+
+.PuckFields-groupContent {
+  padding-left: 8px;
+  border-left: 2px solid #fac101;
+}
+
+.PuckFields-group .PuckFields-field {
+  margin-bottom: 8px;
+}
+
+.PuckFields-group .PuckFields-field:last-child {
+  margin-bottom: 0;
+}

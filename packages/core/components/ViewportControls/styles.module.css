@@ -29,6 +29,7 @@
   font-size: var(--puck-font-size-xxxs);
   padding: 0;
   width: 96px;
+  color: #000;
 }
 
 .ViewportControls-zoomSelect:dir(rtl) {

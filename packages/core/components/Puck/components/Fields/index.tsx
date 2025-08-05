@@ -242,7 +242,7 @@ const FieldsInternal = ({ wrapFields = true }: { wrapFields?: boolean }) => {
     
     // Grupsuz field'lar varsa onları da ekle
     if (ungroupedFields.length > 0) {
-      result.push(["Fields", ungroupedFields]);
+      result.push(["Modül İçerik ve Özellikleri", ungroupedFields]);
     }
 
     return result;

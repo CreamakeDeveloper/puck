@@ -6,14 +6,18 @@ import config from "../../config";
 import { useDemoData } from "../../lib/use-demo-data";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
   const metadata = {
     example: "Hello, world",
   };
 
+  const router = useRouter();
+  const [currentPath, setCurrentPath] = useState(path);
+
   const { data, resolvedData, key } = useDemoData({
-    path,
+    path: currentPath,
     isEdit,
     metadata,
   });
@@ -43,7 +47,12 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
             localStorage.setItem(key, JSON.stringify(data));
           }}
           plugins={[headingAnalyzer]}
-          headerPath={path}
+          headerPath={currentPath}
+          onPageChange={(newPath) => {
+            setCurrentPath(newPath);
+            // URL'yi güncelle
+            router.push(`${newPath}/edit`);
+          }}
           iframe={{
             enabled: params.get("disableIframe") === "true" ? false : true,
           }}
@@ -51,7 +60,7 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
             headerActions: ({ children }) => (
               <>
                 <div>
-                  <Button href={path} newTab variant="secondary">
+                  <Button href={currentPath} newTab variant="secondary">
                     View page
                   </Button>
                 </div>

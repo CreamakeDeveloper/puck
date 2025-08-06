@@ -41,6 +41,86 @@
   word-break: break-all;
 }
 
+/* Sayfa seçici stilleri */
+.PuckHeader-pageSelector {
+  position: relative;
+  display: inline-block;
+}
+
+.PuckHeader-pageSelectorButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid var(--puck-color-grey-08);
+  border-radius: 6px;
+  color: var(--puck-color-black);
+  cursor: pointer;
+  font-size: var(--puck-font-size-sm);
+  font-weight: 500;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 150px;
+  justify-content: space-between;
+}
+
+.PuckHeader-pageSelectorButton:hover {
+  border-color: var(--puck-color-grey-06);
+  background: var(--puck-color-grey-11);
+}
+
+.PuckHeader-pageSelectorButton:focus {
+  outline: 2px solid var(--puck-color-blue-05);
+  outline-offset: 2px;
+}
+
+.PuckHeader-pageSelectorText {
+  font-weight: 500;
+}
+
+.PuckHeader-pageSelectorIcon {
+  transition: transform 0.2s ease;
+}
+
+.PuckHeader-pageDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--puck-color-white);
+  border: 1px solid var(--puck-color-grey-08);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.PuckHeader-pageDropdownItem {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--puck-color-black);
+  cursor: pointer;
+  font-size: var(--puck-font-size-sm);
+  text-align: left;
+  transition: background-color 0.2s ease;
+  font-family: inherit;
+}
+
+.PuckHeader-pageDropdownItem:hover {
+  background: var(--puck-color-grey-11);
+}
+
+.PuckHeader-pageDropdownItem:focus {
+  outline: none;
+  background: var(--puck-color-blue-11);
+}
+
 .PuckHeader-tools {
   display: flex;
   gap: 16px;

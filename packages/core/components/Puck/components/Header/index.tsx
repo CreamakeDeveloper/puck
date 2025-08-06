@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../store";
 import {
   ArrowLeft,
@@ -34,10 +34,58 @@ const HeaderInner = <
     onBack,
     backButtonText = "Geri Dön",
     backButtonIcon = ArrowLeft,
+    onPageChange,
   } = usePropsContext();
 
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
+
+  // Sayfa listesi state'i
+  const [pageDropdownOpen, setPageDropdownOpen] = useState(false);
+  const [selectedPage, setSelectedPage] = useState(headerPath || "/");
+
+  // Örnek sayfa listesi - gerçek uygulamada bu veri API'den gelecek
+  const pages = [
+    { path: "/", title: "Ana Sayfa" },
+    { path: "/hakkimizda", title: "Hakkımızda" },
+    { path: "/hizmetler", title: "Hizmetler" },
+    { path: "/iletisim", title: "İletişim" },
+    { path: "/blog", title: "Blog" },
+  ];
+
+  const currentPage = pages.find(page => page.path === selectedPage) || pages[0];
+
+  // Sayfa değiştirme fonksiyonu
+  const handlePageChange = useCallback((newPath: string) => {
+    setSelectedPage(newPath);
+    setPageDropdownOpen(false);
+    
+    // onPageChange callback'ini çağır
+    if (onPageChange) {
+      onPageChange(newPath);
+    }
+    
+    console.log("Sayfa değiştirildi:", newPath);
+  }, [onPageChange]);
+
+  // Dropdown dışına tıklandığında kapatma
+  const pageSelectorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (pageSelectorRef.current && !pageSelectorRef.current.contains(event.target as Node)) {
+        setPageDropdownOpen(false);
+      }
+    };
+
+    if (pageDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [pageDropdownOpen]);
 
   // DEPRECATED
   const defaultHeaderRender = useMemo((): Overrides["header"] => {
@@ -185,15 +233,37 @@ const HeaderInner = <
             </div>
           </div>
           <div className={getClassName("title")}>
-            <Heading rank="2" size="xs">
-              {headerTitle || rootTitle || "Page"}
-              {headerPath && (
-                <>
-                  {" "}
-                  <code className={getClassName("path")}>{headerPath}</code>
-                </>
+            <div className={getClassName("pageSelector")} ref={pageSelectorRef}>
+              <button
+                type="button"
+                className={getClassName("pageSelectorButton")}
+                onClick={() => setPageDropdownOpen(!pageDropdownOpen)}
+                title="Sayfa seç"
+              >
+                <span className={getClassName("pageSelectorText")}>
+                  {currentPage.title}
+                </span>
+                <ChevronDown 
+                  size={16} 
+                  className={getClassName("pageSelectorIcon")}
+                />
+              </button>
+              
+              {pageDropdownOpen && (
+                <div className={getClassName("pageDropdown")}>
+                  {pages.map((page) => (
+                    <button
+                      key={page.path}
+                      type="button"
+                      className={getClassName("pageDropdownItem")}
+                      onClick={() => handlePageChange(page.path)}
+                    >
+                      {page.title}
+                    </button>
+                  ))}
+                </div>
               )}
-            </Heading>
+            </div>
           </div>
           <div className={getClassName("tools")}>
             <div className={getClassName("menuButton")}>

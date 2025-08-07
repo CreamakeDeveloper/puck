@@ -102,6 +102,7 @@ const HeaderInner = <
     onBack,
     backButtonText = "Geri Dön",
     backButtonIcon = ArrowLeft,
+    onPageNavigate, // Sayfa navigasyonu için yeni prop
   } = usePropsContext();
 
   // Sayfa yönetimi state'leri
@@ -406,7 +407,24 @@ const HeaderInner = <
                           <span>Sayfalar ({filteredPages.length})</span>
                         </div>
                         {filteredPages.map((page) => (
-                          <div key={page.id} className={getClassName("commandItem")}>
+                          <button 
+                            key={page.id} 
+                            className={getClassName("commandItem")}
+                            onClick={() => {
+                              // Önce custom handler'ı dene
+                              if (onPageNavigate) {
+                                onPageNavigate(page);
+                              } else {
+                                // Fallback olarak window.location kullan
+                                if (typeof window !== 'undefined') {
+                                  // Next.js için: /pages/[slug] veya direkt /[slug]
+                                  window.location.href = `/pages/${page.slug}`;
+                                }
+                              }
+                              setDropdownOpen(false);
+                            }}
+                            type="button"
+                          >
                             <FileText size={16} className={getClassName("commandItemIcon")} />
                             <div className={getClassName("commandItemText")}>
                               <span className={getClassName("commandItemTitle")}>{page.title}</span>
@@ -438,7 +456,7 @@ const HeaderInner = <
                                 <Trash size={14} />
                               </button>
                             </div>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     )}

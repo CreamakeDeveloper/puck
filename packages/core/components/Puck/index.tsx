@@ -121,6 +121,7 @@ type PuckProps<
   onBack?: () => void;
   backButtonText?: string;
   backButtonIcon?: React.ComponentType<{ size?: number | string }>;
+  onPageNavigate?: (page: { id: string; title: string; slug: string; content: string }) => void;
 };
 
 const propsContext = createContext<Partial<PuckProps>>({});

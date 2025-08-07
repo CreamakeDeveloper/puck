@@ -92,6 +92,6 @@
 
 @supports (font-variation-settings: normal) {
   :root {
-    --puck-font-family: InterVariable, var(--fallback-font-stack);
+   
   }
 }

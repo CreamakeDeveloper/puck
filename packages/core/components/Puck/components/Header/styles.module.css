@@ -8,21 +8,30 @@
 }
 
 .PuckHeader-inner {
-  align-items: end;
+  align-items: center;
   display: grid;
   gap: var(--puck-space-px);
   grid-template-areas: "left middle right";
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr auto;
   grid-template-rows: auto;
   padding: var(--puck-space-px);
 }
 
 .PuckHeader-toggle {
+  grid-area: left;
   color: var(--puck-color-grey-05);
   display: flex;
   align-items: center;
   margin-inline-start: -4px;
   padding-top: 2px;
+}
+
+.PuckHeader-commandCenter {
+  grid-area: middle;
+}
+
+.PuckHeader-tools {
+  grid-area: right;
 }
 
 .PuckHeader--rightSideBarVisible .PuckHeader-rightSideBarToggle,
@@ -91,6 +100,479 @@
   transform: translateY(1px);
 }
 
+
+/* VSCode Command Center Tarzı Tasarım */
+.PuckHeader-commandCenter {
+  display: flex;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.PuckHeader-commandCenterWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.PuckHeader-commandButton {
+  width: 100%;
+  background: var(--puck-color-grey-11);
+  border: 1px solid var(--puck-color-grey-09);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-height: 40px;
+}
+
+.PuckHeader-commandButton:hover {
+  background: var(--puck-color-grey-10);
+  border-color: var(--puck-color-grey-08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.PuckHeader-commandButton:focus {
+  outline: 2px solid var(--puck-color-blue-05);
+  outline-offset: 2px;
+}
+
+.PuckHeader-commandButtonLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.PuckHeader-commandIcon {
+  color: var(--puck-color-grey-05);
+  flex-shrink: 0;
+}
+
+.PuckHeader-commandText {
+  font-size: var(--puck-font-size-sm);
+  font-weight: 500;
+  color: var(--puck-color-black);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.PuckHeader-commandPath {
+  font-family: var(--puck-font-family-monospaced);
+  font-size: var(--puck-font-size-xs);
+  color: var(--puck-color-grey-05);
+  background: var(--puck-color-grey-10);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.PuckHeader-commandButtonRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.PuckHeader-commandHint {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--puck-color-grey-10);
+  color: var(--puck-color-grey-05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: var(--puck-font-size-xs);
+  font-weight: 500;
+}
+
+.PuckHeader-commandChevron {
+  color: var(--puck-color-grey-05);
+  transition: all 0.2s ease;
+}
+
+.PuckHeader-commandChevron--open {
+  transform: rotate(180deg);
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-commandPalette {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--puck-color-white);
+  border: 1px solid var(--puck-color-grey-09);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.PuckHeader-commandPaletteHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--puck-color-grey-10);
+}
+
+.PuckHeader-searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.PuckHeader-searchIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--puck-color-grey-05);
+  pointer-events: none;
+}
+
+.PuckHeader-searchInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 40px 0 40px;
+  border: 1px solid var(--puck-color-grey-09);
+  border-radius: 8px;
+  background: var(--puck-color-grey-11);
+  font-size: var(--puck-font-size-sm);
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.PuckHeader-searchInput:focus {
+  outline: none;
+  border-color: var(--puck-color-blue-05);
+  background: var(--puck-color-white);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.PuckHeader-clearSearch {
+  position: absolute;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--puck-color-grey-09);
+  border: none;
+  border-radius: 4px;
+  color: var(--puck-color-grey-05);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.PuckHeader-clearSearch:hover {
+  background: var(--puck-color-grey-08);
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-commandList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.PuckHeader-commandSection {
+  margin-bottom: 16px;
+}
+
+.PuckHeader-commandSection:last-child {
+  margin-bottom: 0;
+}
+
+.PuckHeader-sectionHeader {
+  padding: 8px 12px 4px;
+  font-size: var(--puck-font-size-xs);
+  font-weight: 600;
+  color: var(--puck-color-grey-05);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.PuckHeader-commandItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 2px 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  font-family: inherit;
+  position: relative;
+}
+
+.PuckHeader-commandItem:hover {
+  background: var(--puck-color-grey-11);
+  border: 1px solid var(--puck-color-grey-09);
+}
+
+.PuckHeader-commandItemIcon {
+  color: var(--puck-color-grey-05);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.PuckHeader-commandItemText {
+  flex: 1;
+  min-width: 0;
+}
+
+.PuckHeader-commandItemTitle {
+  display: block;
+  font-size: var(--puck-font-size-sm);
+  font-weight: 500;
+  color: var(--puck-color-black);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.PuckHeader-commandItemDesc {
+  display: block;
+  font-size: var(--puck-font-size-xs);
+  color: var(--puck-color-grey-05);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.PuckHeader-commandItemShortcut {
+  background: var(--puck-color-grey-10);
+  color: var(--puck-color-grey-05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: var(--puck-font-size-xs);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.PuckHeader-commandItemActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.PuckHeader-commandItem:hover .PuckHeader-commandItemActions {
+  opacity: 1;
+}
+
+.PuckHeader-commandActionButton {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--puck-color-grey-05);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.PuckHeader-commandActionButton:hover {
+  background: var(--puck-color-grey-10);
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-commandActionButton--delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.PuckHeader-emptyState,
+.PuckHeader-emptySearchState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.PuckHeader-emptyStateIcon,
+.PuckHeader-emptySearchIcon {
+  color: var(--puck-color-grey-08);
+  margin-bottom: 12px;
+}
+
+.PuckHeader-emptyStateText,
+.PuckHeader-emptySearchText {
+  font-size: var(--puck-font-size-sm);
+  color: var(--puck-color-grey-05);
+  margin: 0 0 4px 0;
+}
+
+.PuckHeader-emptyStateSubtext {
+  font-size: var(--puck-font-size-xs);
+  color: var(--puck-color-grey-06);
+  margin: 0;
+}
+
+/* Modal Stilleri */
+.PuckHeader-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.PuckHeader-modalContent {
+  background: var(--puck-color-white);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.PuckHeader-modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--puck-color-grey-09);
+}
+
+.PuckHeader-modalHeader h3 {
+  margin: 0;
+  font-size: var(--puck-font-size-lg);
+  font-weight: 600;
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--puck-color-grey-05);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.PuckHeader-closeButton:hover {
+  background: var(--puck-color-grey-10);
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-modalBody {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.PuckHeader-formGroup {
+  margin-bottom: 20px;
+}
+
+.PuckHeader-formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: var(--puck-font-size-sm);
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-input,
+.PuckHeader-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--puck-color-grey-09);
+  border-radius: 6px;
+  font-size: var(--puck-font-size-sm);
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.PuckHeader-input:focus,
+.PuckHeader-textarea:focus {
+  outline: none;
+  border-color: var(--puck-color-blue-05);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.PuckHeader-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.PuckHeader-modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--puck-color-grey-09);
+  background: var(--puck-color-grey-11);
+  flex-shrink: 0;
+  min-height: 60px;
+}
+
+.PuckHeader-cancelButton {
+  padding: 10px 20px;
+  border: 1px solid var(--puck-color-grey-08);
+  background: var(--puck-color-white);
+  color: var(--puck-color-grey-05);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--puck-font-size-sm);
+  transition: all 0.2s ease;
+  height: 40px;
+}
+
+.PuckHeader-cancelButton:hover {
+  background: var(--puck-color-grey-10);
+  color: var(--puck-color-black);
+}
+
+.PuckHeader-saveButton {
+  padding: 10px 20px;
+  border: none;
+  background: var(--puck-color-grey-08);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--puck-font-size-sm);
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  height: 40px;
+  min-width: 80px;
+}
+
+.PuckHeader-saveButton:hover {
+  background: var(--puck-color-grey-10);
+}
 
 @media (min-width: 638px) {
   .PuckHeader-menuButton {

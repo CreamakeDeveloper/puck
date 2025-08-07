@@ -407,7 +407,7 @@ const HeaderInner = <
                           <span>Sayfalar ({filteredPages.length})</span>
                         </div>
                         {filteredPages.map((page) => (
-                          <button 
+                          <div 
                             key={page.id} 
                             className={getClassName("commandItem")}
                             onClick={() => {
@@ -423,7 +423,24 @@ const HeaderInner = <
                               }
                               setDropdownOpen(false);
                             }}
-                            type="button"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                // Önce custom handler'ı dene
+                                if (onPageNavigate) {
+                                  onPageNavigate(page);
+                                } else {
+                                  // Fallback olarak window.location kullan
+                                  if (typeof window !== 'undefined') {
+                                    // Next.js için: /pages/[slug] veya direkt /[slug]
+                                    window.location.href = `/pages/${page.slug}`;
+                                  }
+                                }
+                                setDropdownOpen(false);
+                              }
+                            }}
                           >
                             <FileText size={16} className={getClassName("commandItemIcon")} />
                             <div className={getClassName("commandItemText")}>
@@ -456,7 +473,7 @@ const HeaderInner = <
                                 <Trash size={14} />
                               </button>
                             </div>
-                          </button>
+                          </div>
                         ))}
                       </div>
                     )}

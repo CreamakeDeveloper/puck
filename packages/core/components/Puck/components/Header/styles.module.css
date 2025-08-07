@@ -316,6 +316,7 @@
   text-align: left;
   font-family: inherit;
   position: relative;
+  user-select: none;
 }
 
 .PuckHeader-commandItem:hover {

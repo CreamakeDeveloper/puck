@@ -114,7 +114,25 @@
   position: relative;
   width: 100%;
   max-width: 500px;
-  margin-left: -210px !important; /* sayfalama butonunu biraz daha sola kaydır */
+  margin-left: -210px !important; /* sayfalama butonunu eski haline bırak */
+}
+
+/* Dil butonunu sayfalama butonunun sağına al, araya boşluk koy ve sağa yanaştır */
+.PuckHeader-languageButtonWrap {
+  position: absolute;
+  right: -480px; /* sayfalama ile araya mesafe bırak ve sağ tarafa yanaştır */
+  top: 0;
+  width: 360px;
+}
+
+.PuckHeader-languagePalette {
+  right: 0;
+  left: auto; /* paleti butonun altına, sağa hizalı aç */
+}
+
+/* Dil butonunda, sol (Dil) ile sağ (⌘/CTRL + G) arasında SEO’daki gibi ekstra iç boşluk */
+.PuckHeader-languageButtonWrap .PuckHeader-commandButtonRight {
+  margin-left: 12px;
 }
 
 .PuckHeader-commandButton {

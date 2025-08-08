@@ -273,8 +273,11 @@ const HeaderInner = <
   const [seoActiveTab, setSeoActiveTab] = useState<'general' | 'jsonld' | 'opengraph' | 'preview'>('general');
   const commandWrapperRef = useRef<HTMLDivElement | null>(null);
   const seoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const languageWrapperRef = useRef<HTMLDivElement | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [languageSearchTerm, setLanguageSearchTerm] = useState('');
 
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
@@ -319,11 +322,19 @@ const HeaderInner = <
       ) {
         setSeoOpen(false);
       }
+
+      if (
+        languageDropdownOpen &&
+        languageWrapperRef.current &&
+        !languageWrapperRef.current.contains(target)
+      ) {
+        setLanguageDropdownOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [dropdownOpen, seoOpen]);
+  }, [dropdownOpen, seoOpen, languageDropdownOpen]);
 
   // Klavye kısayolları: Ctrl+K -> Sayfalama (sayfa listesi) aç, Ctrl+L -> SEO aç
   useEffect(() => {
@@ -345,11 +356,19 @@ const HeaderInner = <
         e.preventDefault();
         setDropdownOpen(true);
         setSeoOpen(false);
+        setLanguageDropdownOpen(false);
       }
       if (key === 'l') {
         e.preventDefault();
         setSeoOpen(true);
         setDropdownOpen(false);
+        setLanguageDropdownOpen(false);
+      }
+      if (key === 'g') {
+        e.preventDefault();
+        setLanguageDropdownOpen(true);
+        setDropdownOpen(false);
+        setSeoOpen(false);
       }
     };
 
@@ -392,6 +411,7 @@ const HeaderInner = <
 
     setDropdownOpen(false);
     setCurrentPageId(id);
+    setSelectedLanguageId(selected.languageId || null);
   }, [dispatch]);
 
   const handleAddPage = useCallback(async () => {
@@ -419,7 +439,7 @@ const HeaderInner = <
         content: newPage.content ?? '',
         seo: newPage.seo,
         isActive: newPage.isActive ?? true,
-        languageId: selectedLanguageId || undefined,
+        languageId: newPage.languageId || selectedLanguageId || undefined,
       });
       if (result) {
         setCurrentPageId(result.id);
@@ -538,6 +558,7 @@ const HeaderInner = <
           editingPage?.isActive ??
           newPage?.isActive ??
           true,
+        languageId: (editingPage?.languageId ?? newPage?.languageId ?? selectedLanguageId) || undefined,
       };
 
       const normalizedTitle = (payload.title || '').trim().toLowerCase();
@@ -899,46 +920,6 @@ const HeaderInner = <
               className={getClassName("seoSettingsWrapper")}
               style={{ marginLeft: 130, position: "relative" }}
             >
-              {/* Dil Seçimi */}
-              <div className={getClassName("languageSelector")} style={{ marginRight: 8 }}>
-                <select
-                  value={selectedLanguageId || ''}
-                  onChange={(e) => setSelectedLanguageId(e.target.value || null)}
-                  className={getClassName("languageSelect")}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 6,
-                    border: '1px solid var(--puck-color-grey-09)',
-                    background: 'var(--puck-color-grey-11)',
-                    fontSize: 14,
-                    minWidth: 120
-                  }}
-                >
-                  <option value="">Tüm Diller</option>
-                  {languages.map((lang) => (
-                    <option key={lang.id} value={lang.id}>
-                      {lang.name} {lang.isDefault ? '(Varsayılan)' : ''}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setLanguageModalOpen(true)}
-                  className={getClassName("addLanguageButton")}
-                  style={{
-                    marginLeft: 4,
-                    padding: '8px 12px',
-                    borderRadius: 6,
-                    border: '1px solid var(--puck-color-grey-09)',
-                    background: 'var(--puck-color-grey-11)',
-                    fontSize: 14,
-                    cursor: 'pointer'
-                  }}
-                  type="button"
-                  title="Dil Yönetimi"
-                >
-                  +
-                </button>
-              </div>
               <button
                 className={getClassName("commandButton")}
                 onClick={() => setSeoOpen(!seoOpen)}
@@ -1298,6 +1279,102 @@ const HeaderInner = <
                   />
                 </div>
               </button>
+              {/* Dil Komut Paleti Butonu - sayfalamanın sağına, absolute konumlandır */}
+              <div ref={languageWrapperRef} className={getClassName("languageButtonWrap")}>
+                <button
+                  className={getClassName("commandButton")}
+                  onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
+                  type="button"
+                  title="Dil Seçimi"
+                  style={{ width: 'auto' }}
+                >
+                  <div className={getClassName("commandButtonLeft")}>
+                    <Globe size={18} className={getClassName("commandIcon")} />
+                    <span className={getClassName("commandText")}>
+                      {languages.find(l => l.id === selectedLanguageId)?.name || 'Dil'}
+                    </span>
+                  </div>
+                  <div className={getClassName("commandButtonRight")}>
+                    <span className={getClassName("commandHint")}>⌘/CTRL + G</span>
+                    <ChevronDown 
+                      size={16} 
+                      className={`${getClassName("commandChevron")} ${languageDropdownOpen ? getClassName("commandChevron--open") : ""}`} 
+                    />
+                  </div>
+                </button>
+
+                {languageDropdownOpen && (
+                  <div className={`${getClassName("commandPalette")} ${getClassName("languagePalette")}`} style={{ width: 220 }}>
+                    <div className={getClassName("commandPaletteHeader")}>
+                      <div className={getClassName("searchBox")}>
+                        <Search size={16} className={getClassName("searchIcon")} />
+                        <input
+                          type="text"
+                          placeholder="Dil ara..."
+                          value={languageSearchTerm}
+                          onChange={(e) => setLanguageSearchTerm(e.target.value)}
+                          className={getClassName("searchInput")}
+                          autoFocus
+                        />
+                        {languageSearchTerm && (
+                          <button
+                            className={getClassName("clearSearch")}
+                            onClick={() => setLanguageSearchTerm('')}
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={getClassName("commandList")}>
+                      <div className={getClassName("commandSection")}>
+                        <div className={getClassName("sectionHeader")}>
+                          <span>Diller</span>
+                        </div>
+                        {/* Tüm Diller seçeneği */}
+                        <div
+                          className={`${getClassName("commandItem")} ${!selectedLanguageId ? getClassName("commandItem--selected") : ''}`}
+                          onClick={() => { setSelectedLanguageId(null); setLanguageDropdownOpen(false); }}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <Globe size={16} className={getClassName("commandItemIcon")} />
+                          <div className={getClassName("commandItemText")}>
+                            <span className={getClassName("commandItemTitle")}>Tüm Diller</span>
+                          </div>
+                        </div>
+
+                        {languages
+                          .filter(l => l.name.toLowerCase().includes(languageSearchTerm.toLowerCase()) || l.code.toLowerCase().includes(languageSearchTerm.toLowerCase()))
+                          .map((lang) => (
+                            <div
+                              key={lang.id}
+                              className={`${getClassName("commandItem")} ${selectedLanguageId === lang.id ? getClassName("commandItem--selected") : ''}`}
+                              onClick={() => { setSelectedLanguageId(lang.id); setLanguageDropdownOpen(false); }}
+                              role="button"
+                              tabIndex={0}
+                            >
+                              <Globe size={16} className={getClassName("commandItemIcon")} />
+                              <div className={getClassName("commandItemText")}>
+                                <span className={getClassName("commandItemTitle")}>{lang.name}</span>
+                                <span className={getClassName("commandItemDesc")}>{lang.code}{lang.isDefault ? ' · Varsayılan' : ''}</span>
+                              </div>
+                            </div>
+                        ))}
+                      </div>
+
+                      {languages.length === 0 && !languageSearchTerm && (
+                        <div className={getClassName("emptyState")}>
+                          <FileText size={32} className={getClassName("emptyStateIcon")} />
+                          <p className={getClassName("emptyStateText")}>Henüz dil yok</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               
               {dropdownOpen && (
                 <div className={getClassName("commandPalette")}>

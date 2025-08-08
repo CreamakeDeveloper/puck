@@ -30,7 +30,14 @@ type SEO = {
   description?: string;
   canonical?: string;
   robots?: string;
-  keywords?: string;
+  jsonLd?: string;
+  openGraph?: {
+    title?: string;
+    description?: string;
+    image?: string;
+    type?: string;
+    url?: string;
+  };
   [key: string]: any;
 };
 
@@ -223,6 +230,38 @@ const HeaderInner = <
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen, seoOpen]);
+
+  // Klavye kısayolları: Ctrl+K -> Sayfalama (sayfa listesi) aç, Ctrl+L -> SEO aç
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isModifier = e.ctrlKey || e.metaKey;
+      if (!isModifier) return;
+
+      const target = e.target as HTMLElement | null;
+      const tagName = (target?.tagName || '').toLowerCase();
+      const isEditable =
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        (target && (target as any).isContentEditable);
+      if (isEditable) return;
+
+      const key = e.key.toLowerCase();
+
+      if (key === 'k') {
+        e.preventDefault();
+        setDropdownOpen(true);
+        setSeoOpen(false);
+      }
+      if (key === 'l') {
+        e.preventDefault();
+        setSeoOpen(true);
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSelectPage = useCallback(async (id: string) => {
     const selected = await getPage(id);
@@ -493,6 +532,30 @@ const HeaderInner = <
     (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.robots as string) ?? "index"
   );
 
+  const rootSlug = useAppStore((s) => {
+    const rootData = s.state.indexes.nodes["root"]?.data as any;
+    return rootData?.props?.slug ?? "";
+  });
+
+  const seoJsonLd = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.jsonLd as string) ?? ""
+  );
+  const seoOgTitle = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.openGraph?.title as string) ?? ""
+  );
+  const seoOgDescription = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.openGraph?.description as string) ?? ""
+  );
+  const seoOgImage = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.openGraph?.image as string) ?? ""
+  );
+  const seoOgType = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.openGraph?.type as string) ?? ""
+  );
+  const seoOgUrl = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.openGraph?.url as string) ?? ""
+  );
+
   const leftSideBarVisible = useAppStore((s) => s.state.ui.leftSideBarVisible);
   const rightSideBarVisible = useAppStore(
     (s) => s.state.ui.rightSideBarVisible
@@ -516,6 +579,107 @@ const HeaderInner = <
     },
     [dispatch, leftSideBarVisible, rightSideBarVisible]
   );
+
+  // SEO dropdown açıldığında canonical alanını uygun şekilde otomatik doldur (opsiyonel)
+  useEffect(() => {
+    if (!seoOpen) return;
+
+    const hasWindow = typeof window !== "undefined";
+    const origin = hasWindow ? window.location.origin : "";
+    const currentPath = (headerPath && headerPath.toString()) || (rootSlug ? `/${rootSlug}` : (hasWindow ? window.location.pathname : ""));
+    const computedCanonical = origin && currentPath ? `${origin}${currentPath.startsWith("/") ? "" : "/"}${currentPath}` : "";
+
+    if (!seoCanonical && computedCanonical) {
+      dispatch({
+        type: 'setData',
+        data: (prev: any) => ({
+          ...prev,
+          root: {
+            ...prev?.root,
+            props: {
+              ...prev?.root?.props,
+              seo: { ...prev?.root?.props?.seo, canonical: computedCanonical },
+            },
+          },
+        }),
+      });
+    }
+
+    const effectiveCanonical = seoCanonical || computedCanonical;
+    if (!seoOgUrl && effectiveCanonical) {
+      dispatch({
+        type: 'setData',
+        data: (prev: any) => ({
+          ...prev,
+          root: {
+            ...prev?.root,
+            props: {
+              ...prev?.root?.props,
+              seo: {
+                ...prev?.root?.props?.seo,
+                openGraph: {
+                  ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                  url: effectiveCanonical,
+                },
+              },
+            },
+          },
+        }),
+      });
+    }
+
+    const effectiveTitle = seoTitle || rootTitle || "";
+
+    // JSON-LD varsayılanı (boşsa doldur)
+    if (!seoJsonLd) {
+      const jsonLdObj: any = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: effectiveTitle,
+      };
+      if (effectiveCanonical) jsonLdObj.url = effectiveCanonical;
+
+      dispatch({
+        type: 'setData',
+        data: (prev: any) => ({
+          ...prev,
+          root: {
+            ...prev?.root,
+            props: {
+              ...prev?.root?.props,
+              seo: { ...prev?.root?.props?.seo, jsonLd: JSON.stringify(jsonLdObj, null, 2) },
+            },
+          },
+        }),
+      });
+    }
+
+    // Open Graph varsayılanları (eksik olanları doldur)
+    if (!seoOgUrl || !seoOgType || !seoOgTitle || !seoOgDescription) {
+      dispatch({
+        type: 'setData',
+        data: (prev: any) => ({
+          ...prev,
+          root: {
+            ...prev?.root,
+            props: {
+              ...prev?.root?.props,
+              seo: {
+                ...prev?.root?.props?.seo,
+                openGraph: {
+                  ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                  url: (prev?.root?.props?.seo?.openGraph?.url ?? effectiveCanonical) ?? undefined,
+                  type: prev?.root?.props?.seo?.openGraph?.type ?? 'website',
+                  title: prev?.root?.props?.seo?.openGraph?.title ?? effectiveTitle,
+                  description: prev?.root?.props?.seo?.openGraph?.description ?? seoDescription ?? '',
+                },
+              },
+            },
+          },
+        }),
+      });
+    }
+  }, [seoOpen]);
 
   return (
     <CustomHeader
@@ -596,7 +760,7 @@ const HeaderInner = <
               </button>
 
               {seoOpen && (
-                <div className={getClassName("commandPalette")} style={{ width: 420 }}>
+                  <div className={getClassName("commandPalette")} style={{ width: 420 }}>
                   <div className={getClassName("commandPaletteHeader")}>
                     <div className={getClassName("sectionHeader")}>
                       <span>SEO Ayarları</span>
@@ -649,29 +813,29 @@ const HeaderInner = <
                         rows={3}
                       />
                     </div>
-                    <div className={getClassName("formGroup")}>
-                      <label>Canonical</label>
-                      <input
-                        type="text"
-                        value={seoCanonical}
-                        onChange={(e) => {
-                          dispatch({
-                            type: 'setData',
-                            data: (prev: any) => ({
-                              ...prev,
-                              root: {
-                                ...prev?.root,
-                                props: {
-                                  ...prev?.root?.props,
-                                  seo: { ...prev?.root?.props?.seo, canonical: e.target.value },
+                      <div className={getClassName("formGroup")}>
+                        <label>Canonical (opsiyonel)</label>
+                        <input
+                          type="text"
+                          value={seoCanonical}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: { ...prev?.root?.props?.seo, canonical: e.target.value },
+                                  },
                                 },
-                              },
-                            }),
-                          });
-                        }}
-                        className={getClassName("input")}
-                      />
-                    </div>
+                              }),
+                            });
+                          }}
+                          className={getClassName("input")}
+                        />
+                      </div>
                     <div className={getClassName("formGroup")}>
                       <label>Robots</label>
                       <select
@@ -699,6 +863,178 @@ const HeaderInner = <
                         <option value="nofollow">nofollow</option>
                       </select>
                     </div>
+
+                      <div className={getClassName("formGroup")}>
+                        <label>JSON-LD (opsiyonel)</label>
+                        <textarea
+                          value={seoJsonLd}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: { ...prev?.root?.props?.seo, jsonLd: e.target.value },
+                                  },
+                                },
+                              }),
+                            });
+                          }}
+                          className={getClassName("textarea")}
+                          rows={4}
+                          placeholder="JSON-LD (örnek: https://schema.org)"
+                        />
+                      </div>
+
+                      <div className={getClassName("formGroup")}>
+                        <label>Open Graph Başlık (opsiyonel)</label>
+                        <input
+                          type="text"
+                          value={seoOgTitle}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: {
+                                      ...prev?.root?.props?.seo,
+                                      openGraph: {
+                                        ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                                        title: e.target.value,
+                                      },
+                                    },
+                                  },
+                                },
+                              }),
+                            });
+                          }}
+                          className={getClassName("input")}
+                        />
+                      </div>
+                      <div className={getClassName("formGroup")}>
+                        <label>Open Graph Açıklama (opsiyonel)</label>
+                        <textarea
+                          value={seoOgDescription}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: {
+                                      ...prev?.root?.props?.seo,
+                                      openGraph: {
+                                        ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                                        description: e.target.value,
+                                      },
+                                    },
+                                  },
+                                },
+                              }),
+                            });
+                          }}
+                          className={getClassName("textarea")}
+                          rows={3}
+                        />
+                      </div>
+                      <div className={getClassName("formGroup")}>
+                        <label>Open Graph Görsel URL (opsiyonel)</label>
+                        <input
+                          type="text"
+                          value={seoOgImage}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: {
+                                      ...prev?.root?.props?.seo,
+                                      openGraph: {
+                                        ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                                        image: e.target.value,
+                                      },
+                                    },
+                                  },
+                                },
+                              }),
+                            });
+                          }}
+                          className={getClassName("input")}
+                        />
+                      </div>
+                      <div className={getClassName("formGroup")}>
+                        <label>Open Graph Türü (opsiyonel)</label>
+                        <input
+                          type="text"
+                          value={seoOgType}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: {
+                                      ...prev?.root?.props?.seo,
+                                      openGraph: {
+                                        ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                                        type: e.target.value,
+                                      },
+                                    },
+                                  },
+                                },
+                              }),
+                            });
+                          }}
+                          className={getClassName("input")}
+                          placeholder="website, article vb."
+                        />
+                      </div>
+                      <div className={getClassName("formGroup")}>
+                        <label>Open Graph URL (opsiyonel)</label>
+                        <input
+                          type="text"
+                          value={seoOgUrl}
+                          onChange={(e) => {
+                            dispatch({
+                              type: 'setData',
+                              data: (prev: any) => ({
+                                ...prev,
+                                root: {
+                                  ...prev?.root,
+                                  props: {
+                                    ...prev?.root?.props,
+                                    seo: {
+                                      ...prev?.root?.props?.seo,
+                                      openGraph: {
+                                        ...(prev?.root?.props?.seo?.openGraph ?? {}),
+                                        url: e.target.value,
+                                      },
+                                    },
+                                  },
+                                },
+                              }),
+                            });
+                          }}
+                          className={getClassName("input")}
+                        />
+                      </div>
                   </div>
                 </div>
               )}
@@ -842,7 +1178,7 @@ const HeaderInner = <
                       <div className={getClassName("emptySearchState")}>
                         <Search size={24} className={getClassName("emptySearchIcon")} />
                         <p className={getClassName("emptySearchText")}>
-                          "<strong>{searchTerm}</strong>" için sonuç bulunamadı
+                          &quot;<strong>{searchTerm}</strong>&quot; için sonuç bulunamadı
                         </p>
                       </div>
                     )}
@@ -851,7 +1187,7 @@ const HeaderInner = <
                       <div className={getClassName("emptyState")}>
                         <FileText size={32} className={getClassName("emptyStateIcon")} />
                         <p className={getClassName("emptyStateText")}>Henüz sayfa yok</p>
-                        <p className={getClassName("emptyStateSubtext")}>İlk sayfanızı oluşturmak için Ctrl+N'e basın</p>
+                        <p className={getClassName("emptyStateSubtext")}>İlk sayfanızı oluşturmak için Ctrl+N&apos;e basın</p>
                       </div>
                     )}
                   </div>
@@ -965,34 +1301,7 @@ const HeaderInner = <
                 />
               </div>
 
-              {/* SEO Sekmesi: Anahtar Kelimeler ve Yayın Durumu */}
-              <div className={getClassName("formGroup")}>
-                <label>Anahtar Kelimeler</label>
-                <input
-                  type="text"
-                  value={
-                    editingPage
-                      ? (editingPage.seo?.keywords ?? "")
-                      : (newPage.seo?.keywords ?? "")
-                  }
-                  onChange={(e) => {
-                    const keywords = e.target.value;
-                    if (editingPage) {
-                      setEditingPage({
-                        ...editingPage,
-                        seo: { ...(editingPage.seo ?? {}), keywords },
-                      });
-                    } else {
-                      setNewPage({
-                        ...newPage,
-                        seo: { ...(newPage.seo ?? {}), keywords },
-                      });
-                    }
-                  }}
-                  placeholder="Örn: blog, ürün, kampanya"
-                  className={getClassName("input")}
-                />
-              </div>
+              {/* Yayın Durumu */}
 
               <div className={getClassName("formGroup")}>
                 <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1026,13 +1335,14 @@ const HeaderInner = <
               >
                 İptal
               </button>
-              <button
-                className={getClassName("saveButton")}
+              <Button
                 onClick={editingPage ? handleUpdatePage : handleAddPage}
+                icon={<Globe size="14px" />}
                 type="button"
+                variant="primary"
               >
                 {editingPage ? 'Güncelle' : 'Kaydet'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

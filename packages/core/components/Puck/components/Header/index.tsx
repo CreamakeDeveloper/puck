@@ -40,6 +40,7 @@ type Page = {
   slug: string;
   content: string;
   seo?: SEO;
+  isActive?: boolean;
 };
 
 // API fonksiyonları
@@ -107,6 +108,42 @@ const deletePage = async (id: string): Promise<boolean> => {
   }
 };
 
+// Özel admin uçları (varsa) için yardımcılar
+const createPagePrivate = async (
+  page: Omit<Page, "id">
+): Promise<Page | null> => {
+  try {
+    const response = await fetch("/api/private/create/page", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(page),
+    });
+    if (!response.ok) throw new Error("Özel uç: sayfa oluşturulamadı");
+    return response.json();
+  } catch (error) {
+    console.warn("/api/private/create/page çağrısı başarısız, /api/pages kullanılacak.", error);
+    return null;
+  }
+};
+
+const updatePagePrivate = async (
+  id: string,
+  data: Partial<Page>
+): Promise<Page | null> => {
+  try {
+    const response = await fetch("/api/private/update/page", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...data }),
+    });
+    if (!response.ok) throw new Error("Özel uç: sayfa güncellenemedi");
+    return response.json();
+  } catch (error) {
+    console.warn("/api/private/update/page çağrısı başarısız, /api/pages kullanılacak.", error);
+    return null;
+  }
+};
+
 const getClassName = getClassNameFactory("PuckHeader", styles);
 
 const HeaderInner = <
@@ -130,15 +167,19 @@ const HeaderInner = <
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
-  const [newPage, setNewPage] = useState({
+  const [newPage, setNewPage] = useState<Omit<Page, 'id'>>({
     title: '',
     slug: '',
     content: '',
+    seo: undefined,
+    isActive: true,
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [seoOpen, setSeoOpen] = useState(false);
   const commandWrapperRef = useRef<HTMLDivElement | null>(null);
   const seoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
@@ -182,11 +223,17 @@ const HeaderInner = <
   // Sayfa CRUD işlemleri
   const handleAddPage = useCallback(async () => {
     if (!newPage.title || !newPage.slug) return;
-    
-    const result = await addPage(newPage);
+
+    const result = await addPage({
+      title: newPage.title,
+      slug: newPage.slug,
+      content: newPage.content ?? '',
+      seo: newPage.seo,
+      isActive: newPage.isActive ?? true,
+    });
     if (result) {
       await loadPages();
-      setNewPage({ title: '', slug: '', content: '' });
+      setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true });
       setModalOpen(false);
     }
   }, [newPage, loadPages]);
@@ -245,7 +292,67 @@ const HeaderInner = <
     });
 
     setDropdownOpen(false);
+    setCurrentPageId(id);
   }, [dispatch]);
+
+  // Yayınlama/Kaydetme akışı
+  const handlePublish = useCallback(async () => {
+    try {
+      setIsPublishing(true);
+      const data = appStore.getState().state.data as any;
+
+      const rootProps = (data?.root?.props || {}) as {
+        title?: string;
+        slug?: string;
+        seo?: SEO;
+        isActive?: boolean;
+      };
+
+      const mergedSeo: SEO | undefined = (() => {
+        const anySeo = rootProps.seo || editingPage?.seo || newPage?.seo;
+        if (!anySeo) return undefined;
+        return {
+          ...(editingPage?.seo || {}),
+          ...(newPage?.seo || {}),
+          ...(rootProps.seo || {}),
+        } as SEO;
+      })();
+
+      const payload: Omit<Page, 'id'> = {
+        title: rootProps.title ?? editingPage?.title ?? newPage?.title ?? '',
+        slug: rootProps.slug ?? editingPage?.slug ?? newPage?.slug ?? '',
+        content: JSON.stringify(data?.content ?? []),
+        seo: mergedSeo,
+        isActive:
+          rootProps.isActive ??
+          editingPage?.isActive ??
+          newPage?.isActive ??
+          true,
+      };
+
+      if (currentPageId) {
+        // Önce özel uç, başarısız olursa public uç
+        const updated = (await updatePagePrivate(currentPageId, payload))
+          || (await updatePage(currentPageId, payload));
+        if (!updated) throw new Error('Sayfa güncellenemedi');
+      } else {
+        // Önce özel uç, başarısız olursa public uç
+        const created = (await createPagePrivate(payload))
+          || (await addPage(payload));
+        if (!created) throw new Error('Sayfa oluşturulamadı');
+        setCurrentPageId(created.id);
+      }
+
+      await loadPages();
+
+      // Dışarıya haber ver
+      onPublish && onPublish(data as G["UserData"]);
+    } catch (e) {
+      console.error('Yayınlama sırasında hata:', e);
+    } finally {
+      setIsPublishing(false);
+    }
+  }, [appStore, currentPageId, onPublish, loadPages, editingPage]);
 
   // Filtrelenmiş sayfalar
   const filteredPages = useMemo(() => {
@@ -360,13 +467,10 @@ const HeaderInner = <
         <>
           <CustomHeaderActions>
             <Button
-              onClick={() => {
-                const data = appStore.getState().state.data;
-                onPublish && onPublish(data as G["UserData"]);
-              }}
+              onClick={handlePublish}
               icon={<Globe size="14px" />}
             >
-              Publish
+              {isPublishing ? 'Kaydediliyor...' : 'Kaydet'}
             </Button>
           </CustomHeaderActions>
         </>
@@ -722,14 +826,10 @@ const HeaderInner = <
               renderHeaderActions={() => (
                 <CustomHeaderActions>
                   <Button
-                    onClick={() => {
-                      const data = appStore.getState().state
-                        .data as G["UserData"];
-                      onPublish && onPublish(data);
-                    }}
+                    onClick={handlePublish}
                     icon={<Globe size="14px" />}
                   >
-                    Yayınla
+                    {isPublishing ? 'Kaydediliyor...' : 'Kaydet'}
                   </Button>
                 </CustomHeaderActions>
               )}
@@ -807,6 +907,53 @@ const HeaderInner = <
                   className={getClassName("textarea")}
                   rows={6}
                 />
+              </div>
+
+              {/* SEO Sekmesi: Anahtar Kelimeler ve Yayın Durumu */}
+              <div className={getClassName("formGroup")}>
+                <label>Anahtar Kelimeler</label>
+                <input
+                  type="text"
+                  value={
+                    editingPage
+                      ? (editingPage.seo?.keywords ?? "")
+                      : (newPage.seo?.keywords ?? "")
+                  }
+                  onChange={(e) => {
+                    const keywords = e.target.value;
+                    if (editingPage) {
+                      setEditingPage({
+                        ...editingPage,
+                        seo: { ...(editingPage.seo ?? {}), keywords },
+                      });
+                    } else {
+                      setNewPage({
+                        ...newPage,
+                        seo: { ...(newPage.seo ?? {}), keywords },
+                      });
+                    }
+                  }}
+                  placeholder="Örn: blog, ürün, kampanya"
+                  className={getClassName("input")}
+                />
+              </div>
+
+              <div className={getClassName("formGroup")}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={editingPage ? (editingPage.isActive ?? true) : (newPage.isActive ?? true)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      if (editingPage) {
+                        setEditingPage({ ...editingPage, isActive: checked });
+                      } else {
+                        setNewPage({ ...newPage, isActive: checked });
+                      }
+                    }}
+                  />
+                  Yayın Durumu
+                </label>
               </div>
 
 

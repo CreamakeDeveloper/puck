@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState, useEffect } from "react";
+import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../store";
 import {
   ArrowLeft,
@@ -25,11 +25,21 @@ import { getClassNameFactory } from "../../../../lib";
 import styles from "./styles.module.css";
 
 // Page tipi tanımı
+type SEO = {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  robots?: string;
+  keywords?: string;
+  [key: string]: any;
+};
+
 type Page = {
   id: string;
   title: string;
   slug: string;
   content: string;
+  seo?: SEO;
 };
 
 // API fonksiyonları
@@ -41,6 +51,17 @@ const getPages = async (): Promise<Page[]> => {
   } catch (error) {
     console.error('Sayfa listesi alınırken hata:', error);
     return [];
+  }
+};
+
+const getPage = async (id: string): Promise<Page | null> => {
+  try {
+    const response = await fetch(`/api/pages/${id}`);
+    if (!response.ok) throw new Error('Sayfa getirilemedi');
+    return response.json();
+  } catch (error) {
+    console.error('Sayfa alınırken hata:', error);
+    return null;
   }
 };
 
@@ -109,8 +130,16 @@ const HeaderInner = <
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
-  const [newPage, setNewPage] = useState({ title: '', slug: '', content: '' });
+  const [newPage, setNewPage] = useState({
+    title: '',
+    slug: '',
+    content: '',
+    seo: { title: '', description: '', canonical: '', robots: 'index' as string },
+  });
   const [searchTerm, setSearchTerm] = useState('');
+  const [seoOpen, setSeoOpen] = useState(false);
+  const commandWrapperRef = useRef<HTMLDivElement | null>(null);
+  const seoWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
@@ -128,15 +157,28 @@ const HeaderInner = <
   // Dropdown dışarı tıklanınca kapat
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (dropdownOpen && !target.closest(`.${getClassName("commandCenterWrapper")}`)) {
+      const target = event.target as Node;
+
+      if (
+        dropdownOpen &&
+        commandWrapperRef.current &&
+        !commandWrapperRef.current.contains(target)
+      ) {
         setDropdownOpen(false);
+      }
+
+      if (
+        seoOpen &&
+        seoWrapperRef.current &&
+        !seoWrapperRef.current.contains(target)
+      ) {
+        setSeoOpen(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [dropdownOpen]);
+  }, [dropdownOpen, seoOpen]);
 
   // Sayfa CRUD işlemleri
   const handleAddPage = useCallback(async () => {
@@ -145,7 +187,7 @@ const HeaderInner = <
     const result = await addPage(newPage);
     if (result) {
       await loadPages();
-      setNewPage({ title: '', slug: '', content: '' });
+      setNewPage({ title: '', slug: '', content: '', seo: { title: '', description: '', canonical: '', robots: 'index' } });
       setModalOpen(false);
     }
   }, [newPage, loadPages]);
@@ -169,6 +211,42 @@ const HeaderInner = <
       await loadPages();
     }
   }, [loadPages]);
+
+  const handleSelectPage = useCallback(async (id: string) => {
+    const selected = await getPage(id);
+    if (!selected) return;
+
+    const safeParseContent = (value: unknown) => {
+      if (!value) return [] as any[];
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [] as any[];
+        }
+      }
+      return value as any[];
+    };
+
+    dispatch({
+      type: 'setData',
+      data: (prevData: any) => ({
+        ...prevData,
+        content: safeParseContent(selected.content),
+        root: {
+          ...prevData?.root,
+          props: {
+            ...prevData?.root?.props,
+            title: selected.title,
+            slug: selected.slug,
+            seo: selected.seo ?? prevData?.root?.props?.seo,
+          },
+        },
+      }),
+    });
+
+    setDropdownOpen(false);
+  }, [dispatch]);
 
   // Filtrelenmiş sayfalar
   const filteredPages = useMemo(() => {
@@ -239,6 +317,19 @@ const HeaderInner = <
 
     return rootData.props.title ?? "";
   });
+
+  const seoTitle = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.title as string) ?? ""
+  );
+  const seoDescription = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.description as string) ?? ""
+  );
+  const seoCanonical = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.canonical as string) ?? ""
+  );
+  const seoRobots = useAppStore(
+    (s) => ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.robots as string) ?? "index"
+  );
 
   const leftSideBarVisible = useAppStore((s) => s.state.ui.leftSideBarVisible);
   const rightSideBarVisible = useAppStore(
@@ -322,9 +413,142 @@ const HeaderInner = <
                 <PanelRight focusable="false" />
               </IconButton>
             </div>
+
+            {/* SEO Hızlı Ayarları - toggle alanına taşındı */}
+            <div
+              ref={seoWrapperRef}
+              className={getClassName("seoSettingsWrapper")}
+              style={{ marginLeft: 150, position: "relative" }}
+            >
+              <button
+                className={getClassName("commandButton")}
+                onClick={() => setSeoOpen(!seoOpen)}
+                type="button"
+                title="SEO Ayarları"
+              >
+                <div className={getClassName("commandButtonLeft")}>
+                  <Search size={18} className={getClassName("commandIcon")} />
+                  <span className={getClassName("commandText")}>SEO</span>
+                </div>
+                <div className={getClassName("commandButtonRight")}>
+                  <ChevronDown
+                    size={16}
+                    className={`${getClassName("commandChevron")} ${seoOpen ? getClassName("commandChevron--open") : ""}`}
+                  />
+                </div>
+              </button>
+
+              {seoOpen && (
+                <div className={getClassName("commandPalette")} style={{ width: 420 }}>
+                  <div className={getClassName("commandPaletteHeader")}>
+                    <div className={getClassName("sectionHeader")}>
+                      <span>SEO Ayarları</span>
+                    </div>
+                  </div>
+                  <div className={getClassName("commandList")}>
+                    <div className={getClassName("formGroup")}>
+                      <label>Meta Başlık</label>
+                      <input
+                        type="text"
+                        value={seoTitle}
+                        onChange={(e) => {
+                          dispatch({
+                            type: 'setData',
+                            data: (prev: any) => ({
+                              ...prev,
+                              root: {
+                                ...prev?.root,
+                                props: {
+                                  ...prev?.root?.props,
+                                  seo: { ...prev?.root?.props?.seo, title: e.target.value },
+                                },
+                              },
+                            }),
+                          });
+                        }}
+                        className={getClassName("input")}
+                      />
+                    </div>
+                    <div className={getClassName("formGroup")}>
+                      <label>Meta Açıklama</label>
+                      <textarea
+                        value={seoDescription}
+                        onChange={(e) => {
+                          dispatch({
+                            type: 'setData',
+                            data: (prev: any) => ({
+                              ...prev,
+                              root: {
+                                ...prev?.root,
+                                props: {
+                                  ...prev?.root?.props,
+                                  seo: { ...prev?.root?.props?.seo, description: e.target.value },
+                                },
+                              },
+                            }),
+                          });
+                        }}
+                        className={getClassName("textarea")}
+                        rows={3}
+                      />
+                    </div>
+                    <div className={getClassName("formGroup")}>
+                      <label>Canonical</label>
+                      <input
+                        type="text"
+                        value={seoCanonical}
+                        onChange={(e) => {
+                          dispatch({
+                            type: 'setData',
+                            data: (prev: any) => ({
+                              ...prev,
+                              root: {
+                                ...prev?.root,
+                                props: {
+                                  ...prev?.root?.props,
+                                  seo: { ...prev?.root?.props?.seo, canonical: e.target.value },
+                                },
+                              },
+                            }),
+                          });
+                        }}
+                        className={getClassName("input")}
+                      />
+                    </div>
+                    <div className={getClassName("formGroup")}>
+                      <label>Robots</label>
+                      <select
+                        value={seoRobots}
+                        onChange={(e) => {
+                          dispatch({
+                            type: 'setData',
+                            data: (prev: any) => ({
+                              ...prev,
+                              root: {
+                                ...prev?.root,
+                                props: {
+                                  ...prev?.root?.props,
+                                  seo: { ...prev?.root?.props?.seo, robots: e.target.value },
+                                },
+                              },
+                            }),
+                          });
+                        }}
+                        className={getClassName("input")}
+                      >
+                        <option value="index">index</option>
+                        <option value="noindex">noindex</option>
+                        <option value="follow">follow</option>
+                        <option value="nofollow">nofollow</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className={getClassName("commandCenter")}>
-            <div className={getClassName("commandCenterWrapper")}>
+            <div ref={commandWrapperRef} className={getClassName("commandCenterWrapper")}>
               <button
                 className={getClassName("commandButton")}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -385,7 +609,7 @@ const HeaderInner = <
                         className={getClassName("commandItem")}
                         onClick={() => {
                           setEditingPage(null);
-                          setNewPage({ title: '', slug: '', content: '' });
+                          setNewPage({ title: '', slug: '', content: '', seo: { title: '', description: '', canonical: '', robots: 'index' } });
                           setModalOpen(true);
                           setDropdownOpen(false);
                         }}
@@ -406,7 +630,19 @@ const HeaderInner = <
                           <span>Sayfalar ({filteredPages.length})</span>
                         </div>
                         {filteredPages.map((page) => (
-                          <div key={page.id} className={getClassName("commandItem")}>
+                          <div
+                            key={page.id}
+                            className={getClassName("commandItem")}
+                            onClick={() => handleSelectPage(page.id)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleSelectPage(page.id);
+                              }
+                            }}
+                          > 
                             <FileText size={16} className={getClassName("commandItemIcon")} />
                             <div className={getClassName("commandItemText")}>
                               <span className={getClassName("commandItemTitle")}>{page.title}</span>
@@ -572,6 +808,75 @@ const HeaderInner = <
                   className={getClassName("textarea")}
                   rows={6}
                 />
+              </div>
+
+              {/* SEO Alanları */}
+              <div className={getClassName("formGroup")}>
+                <label>Meta Başlık</label>
+                <input
+                  type="text"
+                  value={editingPage ? (editingPage.seo?.title || "") : (newPage.seo?.title || "")}
+                  onChange={(e) => {
+                    if (editingPage) {
+                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), title: e.target.value } });
+                    } else {
+                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), title: e.target.value } });
+                    }
+                  }}
+                  placeholder="Meta başlık"
+                  className={getClassName("input")}
+                />
+              </div>
+              <div className={getClassName("formGroup")}>
+                <label>Meta Açıklama</label>
+                <textarea
+                  value={editingPage ? (editingPage.seo?.description || "") : (newPage.seo?.description || "")}
+                  onChange={(e) => {
+                    if (editingPage) {
+                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), description: e.target.value } });
+                    } else {
+                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), description: e.target.value } });
+                    }
+                  }}
+                  placeholder="Meta açıklama"
+                  className={getClassName("textarea")}
+                  rows={3}
+                />
+              </div>
+              <div className={getClassName("formGroup")}>
+                <label>Canonical</label>
+                <input
+                  type="text"
+                  value={editingPage ? (editingPage.seo?.canonical || "") : (newPage.seo?.canonical || "")}
+                  onChange={(e) => {
+                    if (editingPage) {
+                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), canonical: e.target.value } });
+                    } else {
+                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), canonical: e.target.value } });
+                    }
+                  }}
+                  placeholder="https://example.com/sayfa"
+                  className={getClassName("input")}
+                />
+              </div>
+              <div className={getClassName("formGroup")}>
+                <label>Robots</label>
+                <select
+                  value={editingPage ? (editingPage.seo?.robots || 'index') : (newPage.seo?.robots || 'index')}
+                  onChange={(e) => {
+                    if (editingPage) {
+                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), robots: e.target.value } });
+                    } else {
+                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), robots: e.target.value } });
+                    }
+                  }}
+                  className={getClassName("input")}
+                >
+                  <option value="index">index</option>
+                  <option value="noindex">noindex</option>
+                  <option value="follow">follow</option>
+                  <option value="nofollow">nofollow</option>
+                </select>
               </div>
             </div>
             

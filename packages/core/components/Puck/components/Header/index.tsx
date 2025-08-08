@@ -189,6 +189,7 @@ const HeaderInner = <
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [seoOpen, setSeoOpen] = useState(false);
+  const [seoActiveTab, setSeoActiveTab] = useState<'general' | 'jsonld' | 'opengraph' | 'preview'>('general');
   const commandWrapperRef = useRef<HTMLDivElement | null>(null);
   const seoWrapperRef = useRef<HTMLDivElement | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
@@ -762,12 +763,19 @@ const HeaderInner = <
 
               {seoOpen && (
                   <div className={getClassName("commandPalette")} style={{ width: 420 }}>
-                  <div className={getClassName("commandPaletteHeader")}>
+                  <div className={getClassName("commandPaletteHeader")}> 
                     <div className={getClassName("sectionHeader")}>
                       <span>SEO Ayarları</span>
                     </div>
+                    <div style={{display:'flex', gap:8, marginTop:8}}>
+                      <button type="button" className={getClassName("commandItem")} onClick={() => setSeoActiveTab('general')} style={{padding:'8px 10px', borderRadius:6, border: seoActiveTab==='general' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', background: seoActiveTab==='general' ? 'var(--puck-color-grey-11)' : 'transparent'}}>Genel</button>
+                      <button type="button" className={getClassName("commandItem")} onClick={() => setSeoActiveTab('jsonld')} style={{padding:'8px 10px', borderRadius:6, border: seoActiveTab==='jsonld' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', background: seoActiveTab==='jsonld' ? 'var(--puck-color-grey-11)' : 'transparent'}}>JSON-LD</button>
+                      <button type="button" className={getClassName("commandItem")} onClick={() => setSeoActiveTab('opengraph')} style={{padding:'8px 10px', borderRadius:6, border: seoActiveTab==='opengraph' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', background: seoActiveTab==='opengraph' ? 'var(--puck-color-grey-11)' : 'transparent'}}>Open Graph</button>
+                      <button type="button" className={getClassName("commandItem")} onClick={() => setSeoActiveTab('preview')} style={{padding:'8px 10px', borderRadius:6, border: seoActiveTab==='preview' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', background: seoActiveTab==='preview' ? 'var(--puck-color-grey-11)' : 'transparent'}}>Önizleme</button>
+                    </div>
                   </div>
                   <div className={getClassName("commandList")}>
+                    {seoActiveTab === 'general' && (
                     <div className={getClassName("formGroup")}>
                       <label>Meta Başlık</label>
                       <input
@@ -791,6 +799,8 @@ const HeaderInner = <
                         className={getClassName("input")}
                       />
                     </div>
+                    )}
+                    {seoActiveTab === 'general' && (
                     <div className={getClassName("formGroup")}>
                       <label>Meta Açıklama</label>
                       <textarea
@@ -814,6 +824,7 @@ const HeaderInner = <
                         rows={3}
                       />
                     </div>
+                    )}
                       <div className={getClassName("formGroup")}>
                         <label>Canonical (opsiyonel)</label>
                         <input
@@ -837,6 +848,7 @@ const HeaderInner = <
                           className={getClassName("input")}
                         />
                       </div>
+                    {seoActiveTab === 'general' && (
                     <div className={getClassName("formGroup")}>
                       <label>Robots</label>
                       <select
@@ -864,7 +876,9 @@ const HeaderInner = <
                         <option value="nofollow">nofollow</option>
                       </select>
                     </div>
+                    )}
 
+                    {seoActiveTab === 'jsonld' && (
                       <div className={getClassName("formGroup")}>
                         <label>JSON-LD (opsiyonel)</label>
                         <textarea
@@ -889,7 +903,9 @@ const HeaderInner = <
                           placeholder="JSON-LD (örnek: https://schema.org)"
                         />
                       </div>
+                    )}
 
+                    {seoActiveTab === 'opengraph' && (
                       <div className={getClassName("formGroup")}>
                         <label>Open Graph Başlık (opsiyonel)</label>
                         <input
@@ -919,6 +935,8 @@ const HeaderInner = <
                           className={getClassName("input")}
                         />
                       </div>
+                      )}
+                      {seoActiveTab === 'opengraph' && (
                       <div className={getClassName("formGroup")}>
                         <label>Open Graph Açıklama (opsiyonel)</label>
                         <textarea
@@ -948,6 +966,8 @@ const HeaderInner = <
                           rows={3}
                         />
                       </div>
+                      )}
+                      {seoActiveTab === 'opengraph' && (
                       <div className={getClassName("formGroup")}>
                         <label>Open Graph Görsel URL (opsiyonel)</label>
                         <input
@@ -977,6 +997,8 @@ const HeaderInner = <
                           className={getClassName("input")}
                         />
                       </div>
+                      )}
+                      {seoActiveTab === 'opengraph' && (
                       <div className={getClassName("formGroup")}>
                         <label>Open Graph Türü (opsiyonel)</label>
                         <input
@@ -1007,6 +1029,8 @@ const HeaderInner = <
                           placeholder="website, article vb."
                         />
                       </div>
+                      )}
+                      {seoActiveTab === 'opengraph' && (
                       <div className={getClassName("formGroup")}>
                         <label>Open Graph URL (opsiyonel)</label>
                         <input
@@ -1036,6 +1060,18 @@ const HeaderInner = <
                           className={getClassName("input")}
                         />
                       </div>
+                      )}
+
+                    {seoActiveTab === 'preview' && (
+                      <div className={getClassName("formGroup")}>
+                        <label>Google Önizleme</label>
+                        <div style={{padding: '12px', border:'1px solid var(--puck-color-grey-09)', borderRadius:8}}>
+                          <div style={{color:'#1a0dab', fontSize:16, lineHeight:1.3, marginBottom:2}}>{seoTitle || rootTitle || 'Sayfa Başlığı'}</div>
+                          <div style={{color:'#006621', fontSize:12, marginBottom:4}}>{seoCanonical || 'https://www.ornek.com/ornek-sayfa'}</div>
+                          <div style={{color:'#545454', fontSize:13}}>{seoDescription || 'Bu alan arama sonuçlarında görünecek açıklamayı temsil eder.'}</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

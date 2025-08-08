@@ -75,7 +75,7 @@ const FieldSideBar = () => {
     s.selectedItem
       ? s.config.components[s.selectedItem.type]?.["label"] ??
         s.selectedItem.type.toString()
-      : "Page"
+      : "Sayfa"
   );
 
   return (

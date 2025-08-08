@@ -228,62 +228,6 @@ const HeaderInner = <
   }, [dropdownOpen, seoOpen]);
 
   // Sayfa CRUD işlemleri
-  const handleAddPage = useCallback(async () => {
-    if (!newPage.title || !newPage.slug) return;
-
-    const duplicateTitle = pages.some(
-      (p) => p.title.trim().toLowerCase() === newPage.title.trim().toLowerCase()
-    );
-    const duplicateSlug = pages.some(
-      (p) => p.slug.trim().toLowerCase() === newPage.slug.trim().toLowerCase()
-    );
-    if (duplicateTitle || duplicateSlug) {
-      window.alert(
-        duplicateSlug
-          ? 'Aynı slug ile bir sayfa zaten mevcut.'
-          : 'Aynı başlık ile bir sayfa zaten mevcut.'
-      );
-      return;
-    }
-
-    try {
-      const result = await addPage({
-        title: newPage.title,
-        slug: newPage.slug,
-        content: newPage.content ?? '',
-        seo: newPage.seo,
-        isActive: newPage.isActive ?? true,
-      });
-      if (result) {
-        await loadPages();
-        setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true });
-        setModalOpen(false);
-      }
-    } catch (e: any) {
-      window.alert(e?.message || 'Sayfa eklenemedi');
-    }
-  }, [newPage, loadPages, pages]);
-
-  const handleUpdatePage = useCallback(async () => {
-    if (!editingPage) return;
-    
-    const result = await updatePage(editingPage.id, editingPage);
-    if (result) {
-      await loadPages();
-      setEditingPage(null);
-      setModalOpen(false);
-    }
-  }, [editingPage, loadPages]);
-
-  const handleDeletePage = useCallback(async (id: string) => {
-    if (!confirm('Bu sayfayı silmek istediğinizden emin misiniz?')) return;
-    
-    const success = await deletePage(id);
-    if (success) {
-      await loadPages();
-    }
-  }, [loadPages]);
-
   const handleSelectPage = useCallback(async (id: string) => {
     const selected = await getPage(id);
     if (!selected) return;
@@ -320,6 +264,66 @@ const HeaderInner = <
     setDropdownOpen(false);
     setCurrentPageId(id);
   }, [dispatch]);
+
+  const handleAddPage = useCallback(async () => {
+    if (!newPage.title || !newPage.slug) return;
+
+    const duplicateTitle = pages.some(
+      (p) => p.title.trim().toLowerCase() === newPage.title.trim().toLowerCase()
+    );
+    const duplicateSlug = pages.some(
+      (p) => p.slug.trim().toLowerCase() === newPage.slug.trim().toLowerCase()
+    );
+    if (duplicateTitle || duplicateSlug) {
+      window.alert(
+        duplicateSlug
+          ? 'Aynı slug ile bir sayfa zaten mevcut.'
+          : 'Aynı başlık ile bir sayfa zaten mevcut.'
+      );
+      return;
+    }
+
+    try {
+      const result = await addPage({
+        title: newPage.title,
+        slug: newPage.slug,
+        content: newPage.content ?? '',
+        seo: newPage.seo,
+        isActive: newPage.isActive ?? true,
+      });
+      if (result) {
+        setCurrentPageId(result.id);
+        await handleSelectPage(result.id);
+        await loadPages();
+        setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true });
+        setModalOpen(false);
+      }
+    } catch (e: any) {
+      window.alert(e?.message || 'Sayfa eklenemedi');
+    }
+  }, [newPage, loadPages, pages, handleSelectPage]);
+
+  const handleUpdatePage = useCallback(async () => {
+    if (!editingPage) return;
+    
+    const result = await updatePage(editingPage.id, editingPage);
+    if (result) {
+      await loadPages();
+      setEditingPage(null);
+      setModalOpen(false);
+    }
+  }, [editingPage, loadPages]);
+
+  const handleDeletePage = useCallback(async (id: string) => {
+    if (!confirm('Bu sayfayı silmek istediğinizden emin misiniz?')) return;
+    
+    const success = await deletePage(id);
+    if (success) {
+      await loadPages();
+    }
+  }, [loadPages]);
+
+  
 
   // Yayınlama/Kaydetme akışı
   const handlePublish = useCallback(async () => {
@@ -587,7 +591,7 @@ const HeaderInner = <
             <div
               ref={seoWrapperRef}
               className={getClassName("seoSettingsWrapper")}
-              style={{ marginLeft: 100, position: "relative" }}
+              style={{ marginLeft: 130, position: "relative" }}
             >
               <button
                 className={getClassName("commandButton")}

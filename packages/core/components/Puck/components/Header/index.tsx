@@ -134,7 +134,6 @@ const HeaderInner = <
     title: '',
     slug: '',
     content: '',
-    seo: { title: '', description: '', canonical: '', robots: 'index' as string },
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [seoOpen, setSeoOpen] = useState(false);
@@ -187,7 +186,7 @@ const HeaderInner = <
     const result = await addPage(newPage);
     if (result) {
       await loadPages();
-      setNewPage({ title: '', slug: '', content: '', seo: { title: '', description: '', canonical: '', robots: 'index' } });
+      setNewPage({ title: '', slug: '', content: '' });
       setModalOpen(false);
     }
   }, [newPage, loadPages]);
@@ -609,7 +608,7 @@ const HeaderInner = <
                         className={getClassName("commandItem")}
                         onClick={() => {
                           setEditingPage(null);
-                          setNewPage({ title: '', slug: '', content: '', seo: { title: '', description: '', canonical: '', robots: 'index' } });
+                          setNewPage({ title: '', slug: '', content: '' });
                           setModalOpen(true);
                           setDropdownOpen(false);
                         }}
@@ -810,74 +809,7 @@ const HeaderInner = <
                 />
               </div>
 
-              {/* SEO Alanları */}
-              <div className={getClassName("formGroup")}>
-                <label>Meta Başlık</label>
-                <input
-                  type="text"
-                  value={editingPage ? (editingPage.seo?.title || "") : (newPage.seo?.title || "")}
-                  onChange={(e) => {
-                    if (editingPage) {
-                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), title: e.target.value } });
-                    } else {
-                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), title: e.target.value } });
-                    }
-                  }}
-                  placeholder="Meta başlık"
-                  className={getClassName("input")}
-                />
-              </div>
-              <div className={getClassName("formGroup")}>
-                <label>Meta Açıklama</label>
-                <textarea
-                  value={editingPage ? (editingPage.seo?.description || "") : (newPage.seo?.description || "")}
-                  onChange={(e) => {
-                    if (editingPage) {
-                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), description: e.target.value } });
-                    } else {
-                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), description: e.target.value } });
-                    }
-                  }}
-                  placeholder="Meta açıklama"
-                  className={getClassName("textarea")}
-                  rows={3}
-                />
-              </div>
-              <div className={getClassName("formGroup")}>
-                <label>Canonical</label>
-                <input
-                  type="text"
-                  value={editingPage ? (editingPage.seo?.canonical || "") : (newPage.seo?.canonical || "")}
-                  onChange={(e) => {
-                    if (editingPage) {
-                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), canonical: e.target.value } });
-                    } else {
-                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), canonical: e.target.value } });
-                    }
-                  }}
-                  placeholder="https://example.com/sayfa"
-                  className={getClassName("input")}
-                />
-              </div>
-              <div className={getClassName("formGroup")}>
-                <label>Robots</label>
-                <select
-                  value={editingPage ? (editingPage.seo?.robots || 'index') : (newPage.seo?.robots || 'index')}
-                  onChange={(e) => {
-                    if (editingPage) {
-                      setEditingPage({ ...editingPage, seo: { ...(editingPage.seo || {}), robots: e.target.value } });
-                    } else {
-                      setNewPage({ ...newPage, seo: { ...(newPage.seo || {}), robots: e.target.value } });
-                    }
-                  }}
-                  className={getClassName("input")}
-                >
-                  <option value="index">index</option>
-                  <option value="noindex">noindex</option>
-                  <option value="follow">follow</option>
-                  <option value="nofollow">nofollow</option>
-                </select>
-              </div>
+
             </div>
             
             <div className={getClassName("modalFooter")}>

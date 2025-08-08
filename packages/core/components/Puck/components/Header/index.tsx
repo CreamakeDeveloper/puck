@@ -116,6 +116,14 @@ const HeaderInner = <
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
 
+  // Editor base path'ini mevcut URL'den çıkar
+  const getEditorBasePath = useCallback(() => {
+    if (typeof window === "undefined") return "/";
+    // Ör: /admin/themes/10/editor/... → /admin/themes/10/editor
+    const match = window.location.pathname.match(/^(.*\/admin\/themes\/[^\/]+\/editor)(?:\/.*)?$/);
+    return match?.[1] ?? "/";
+  }, []);
+
   // Sayfa verilerini yükle
   const loadPages = useCallback(async () => {
     const pagesData = await getPages();
@@ -148,6 +156,13 @@ const HeaderInner = <
       await loadPages();
       setNewPage({ title: '', slug: '', content: '' });
       setModalOpen(false);
+      // Yeni oluşturulan sayfaya yönlendir
+      if (onPageNavigate) {
+        onPageNavigate(result);
+      } else if (typeof window !== 'undefined') {
+        const base = getEditorBasePath();
+        window.location.href = `${base}/pages/${result.slug}`;
+      }
     }
   }, [newPage, loadPages]);
 
@@ -417,8 +432,9 @@ const HeaderInner = <
                               } else {
                                 // Fallback olarak window.location kullan
                                 if (typeof window !== 'undefined') {
-                                  // Next.js için: /pages/[slug] veya direkt /[slug]
-                                  window.location.href = `/pages/${page.slug}`;
+                                  const base = getEditorBasePath();
+                                  // /admin/themes/:id/editor/pages/:slug
+                                  window.location.href = `${base}/pages/${page.slug}`;
                                 }
                               }
                               setDropdownOpen(false);
@@ -434,8 +450,8 @@ const HeaderInner = <
                                 } else {
                                   // Fallback olarak window.location kullan
                                   if (typeof window !== 'undefined') {
-                                    // Next.js için: /pages/[slug] veya direkt /[slug]
-                                    window.location.href = `/pages/${page.slug}`;
+                                    const base = getEditorBasePath();
+                                    window.location.href = `${base}/pages/${page.slug}`;
                                   }
                                 }
                                 setDropdownOpen(false);

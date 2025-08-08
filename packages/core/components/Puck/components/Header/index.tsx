@@ -752,6 +752,7 @@ const HeaderInner = <
                   <span className={getClassName("commandText")}>SEO</span>
                 </div>
                 <div className={getClassName("commandButtonRight")}>
+                  <span className={getClassName("commandHint")}>CTRL + L</span>
                   <ChevronDown
                     size={16}
                     className={`${getClassName("commandChevron")} ${seoOpen ? getClassName("commandChevron--open") : ""}`}
@@ -1057,10 +1058,7 @@ const HeaderInner = <
                   )}
                 </div>
                 <div className={getClassName("commandButtonRight")}>
-                  <span className={getClassName("commandHint")}>
-                    <Command size={12} />
-                    <span>P</span>
-                  </span>
+                  <span className={getClassName("commandHint")}>CTRL + K</span>
                   <ChevronDown 
                     size={16} 
                     className={`${getClassName("commandChevron")} ${dropdownOpen ? getClassName("commandChevron--open") : ""}`} 

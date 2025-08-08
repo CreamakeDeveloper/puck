@@ -221,7 +221,7 @@
 }
 
 .PuckHeader-commandPaletteHeader {
-  padding: 16px;
+  padding: 16px 16px 8px;
   border-bottom: 1px solid var(--puck-color-grey-10);
 }
 
@@ -282,11 +282,11 @@
 .PuckHeader-commandList {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 12px;
 }
 
 .PuckHeader-commandSection {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .PuckHeader-commandSection:last-child {
@@ -294,7 +294,7 @@
 }
 
 .PuckHeader-sectionHeader {
-  padding: 8px 12px 4px;
+  padding: 8px 12px 8px;
   font-size: var(--puck-font-size-xs);
   font-weight: 600;
   color: var(--puck-color-grey-05);
@@ -505,7 +505,11 @@
 }
 
 .PuckHeader-formGroup {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 .PuckHeader-formGroup label {
@@ -584,6 +588,10 @@
 
 .PuckHeader-saveButton:hover {
   background: var(--puck-color-grey-10);
+}
+
+.PuckHeader-seoSettingsWrapper .PuckHeader-commandButtonRight {
+  margin-left: 12px;
 }
 
 @media (min-width: 638px) {

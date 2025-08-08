@@ -168,8 +168,7 @@ const HeaderInner = <
     backButtonText = "Geri Dön",
     backButtonIcon = ArrowLeft,
   } = usePropsContext();
-
-  // Sayfa yönetimi state'leri
+  
   const [pages, setPages] = useState<Page[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -191,7 +190,6 @@ const HeaderInner = <
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
 
-  // Sayfa verilerini yükle
   const loadPages = useCallback(async () => {
     const pagesData = await getPages();
     setPages(pagesData);
@@ -201,7 +199,6 @@ const HeaderInner = <
     loadPages();
   }, [loadPages]);
 
-  // Dropdown dışarı tıklanınca kapat
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -227,7 +224,6 @@ const HeaderInner = <
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen, seoOpen]);
 
-  // Sayfa CRUD işlemleri
   const handleSelectPage = useCallback(async (id: string) => {
     const selected = await getPage(id);
     if (!selected) return;
@@ -325,7 +321,6 @@ const HeaderInner = <
 
   
 
-  // Yayınlama/Kaydetme akışı
   const handlePublish = useCallback(async () => {
     try {
       setIsPublishing(true);
@@ -360,12 +355,10 @@ const HeaderInner = <
           true,
       };
 
-      // Kopya kontrolü ve kullanıcıya uyarı (istemci tarafı UX)
       const normalizedTitle = (payload.title || '').trim().toLowerCase();
       const normalizedSlug = (payload.slug || '').trim().toLowerCase();
 
       if (!currentPageId) {
-        // Yeni sayfa oluşturma
         const duplicateTitle = pages.some(
           (p) => p.title.trim().toLowerCase() === normalizedTitle
         );
@@ -382,7 +375,6 @@ const HeaderInner = <
           return;
         }
       } else {
-        // Güncelleme: kendisi hariç kopya kontrolü
         const duplicateTitle = pages.some(
           (p) => p.id !== currentPageId && p.title.trim().toLowerCase() === normalizedTitle
         );
@@ -401,12 +393,10 @@ const HeaderInner = <
       }
 
       if (currentPageId) {
-        // Önce özel uç, başarısız olursa public uç
         const updated = (await updatePagePrivate(currentPageId, payload))
           || (await updatePage(currentPageId, payload));
         if (!updated) throw new Error('Sayfa güncellenemedi');
       } else {
-        // Önce özel uç, başarısız olursa public uç
         const created = (await createPagePrivate(payload))
           || (await addPage(payload));
         if (!created) throw new Error('Sayfa oluşturulamadı');
@@ -415,7 +405,6 @@ const HeaderInner = <
 
       await loadPages();
 
-      // Dışarıya haber ver
       onPublish && onPublish(data as G["UserData"]);
     } catch (e) {
       console.error('Yayınlama sırasında hata:', e);
@@ -424,7 +413,6 @@ const HeaderInner = <
     }
   }, [appStore, currentPageId, onPublish, loadPages, editingPage]);
 
-  // Filtrelenmiş sayfalar
   const filteredPages = useMemo(() => {
     return pages.filter(page => 
       page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -432,7 +420,6 @@ const HeaderInner = <
     );
   }, [pages, searchTerm]);
 
-  // DEPRECATED
   const defaultHeaderRender = useMemo((): Overrides["header"] => {
     if (renderHeader) {
       console.warn(
@@ -457,7 +444,6 @@ const HeaderInner = <
     return DefaultOverride;
   }, [renderHeader]);
 
-  // DEPRECATED
   const defaultHeaderActionsRender = useMemo((): Overrides["headerActions"] => {
     if (renderHeaderActions) {
       console.warn(
@@ -586,8 +572,6 @@ const HeaderInner = <
                 <PanelRight focusable="false" />
               </IconButton>
             </div>
-
-            {/* SEO Hızlı Ayarları - toggle alanına taşındı */}
             <div
               ref={seoWrapperRef}
               className={getClassName("seoSettingsWrapper")}
@@ -805,7 +789,9 @@ const HeaderInner = <
                         {filteredPages.map((page) => (
                           <div
                             key={page.id}
-                            className={getClassName("commandItem")}
+                            className={`${getClassName("commandItem")} ${
+                              page.id === currentPageId ? getClassName("commandItem--selected") : ""
+                            }`}
                             onClick={() => handleSelectPage(page.id)}
                             role="button"
                             tabIndex={0}

@@ -41,6 +41,14 @@ type SEO = {
   [key: string]: any;
 };
 
+type Language = {
+  id: string;
+  name: string;
+  code: string;
+  isDefault?: boolean;
+  isActive?: boolean;
+};
+
 type Page = {
   id: string;
   title: string;
@@ -48,6 +56,7 @@ type Page = {
   content: string;
   seo?: SEO;
   isActive?: boolean;
+  languageId?: string; // Dil ID'si eklendi
 };
 
 // API fonksiyonları
@@ -122,6 +131,67 @@ const deletePage = async (id: string): Promise<boolean> => {
   }
 };
 
+// Dil API fonksiyonları
+const getLanguages = async (): Promise<Language[]> => {
+  try {
+    const response = await fetch('/api/languages');
+    if (!response.ok) throw new Error('Diller getirilemedi');
+    return response.json();
+  } catch (error) {
+    console.error('Dil listesi alınırken hata:', error);
+    return [];
+  }
+};
+
+const addLanguage = async (language: Omit<Language, 'id'>): Promise<Language | null> => {
+  try {
+    const response = await fetch('/api/languages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(language),
+    });
+    if (!response.ok) {
+      let message = 'Dil eklenemedi';
+      try {
+        const err = await response.json();
+        message = err?.message || err?.error || message;
+      } catch {}
+      throw new Error(message);
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Dil eklenirken hata:', error);
+    throw error;
+  }
+};
+
+const updateLanguage = async (id: string, data: Partial<Language>): Promise<Language | null> => {
+  try {
+    const response = await fetch(`/api/languages/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Dil güncellenemedi');
+    return response.json();
+  } catch (error) {
+    console.error('Dil güncellenirken hata:', error);
+    return null;
+  }
+};
+
+const deleteLanguage = async (id: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`/api/languages/${id}`, {
+      method: 'DELETE',
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Dil silinirken hata:', error);
+    return false;
+  }
+};
+
 // Özel admin uçları (varsa) için yardımcılar
 const createPagePrivate = async (
   page: Omit<Page, "id">
@@ -177,14 +247,25 @@ const HeaderInner = <
   } = usePropsContext();
   
   const [pages, setPages] = useState<Page[]>([]);
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
+  const [editingLanguage, setEditingLanguage] = useState<Language | null>(null);
   const [newPage, setNewPage] = useState<Omit<Page, 'id'>>({
     title: '',
     slug: '',
     content: '',
     seo: undefined,
+    isActive: true,
+    languageId: undefined,
+  });
+  const [newLanguage, setNewLanguage] = useState<Omit<Language, 'id'>>({
+    name: '',
+    code: '',
+    isDefault: false,
     isActive: true,
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -203,9 +284,21 @@ const HeaderInner = <
     setPages(pagesData);
   }, []);
 
+  const loadLanguages = useCallback(async () => {
+    const languagesData = await getLanguages();
+    setLanguages(languagesData);
+    
+    // Varsayılan dili seç
+    const defaultLanguage = languagesData.find(lang => lang.isDefault);
+    if (defaultLanguage && !selectedLanguageId) {
+      setSelectedLanguageId(defaultLanguage.id);
+    }
+  }, [selectedLanguageId]);
+
   useEffect(() => {
     loadPages();
-  }, [loadPages]);
+    loadLanguages();
+  }, [loadPages, loadLanguages]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -326,18 +419,19 @@ const HeaderInner = <
         content: newPage.content ?? '',
         seo: newPage.seo,
         isActive: newPage.isActive ?? true,
+        languageId: selectedLanguageId || undefined,
       });
       if (result) {
         setCurrentPageId(result.id);
         await handleSelectPage(result.id);
         await loadPages();
-        setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true });
+        setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true, languageId: undefined });
         setModalOpen(false);
       }
     } catch (e: any) {
       window.alert(e?.message || 'Sayfa eklenemedi');
     }
-  }, [newPage, loadPages, pages, handleSelectPage]);
+  }, [newPage, loadPages, pages, handleSelectPage, selectedLanguageId]);
 
   const handleUpdatePage = useCallback(async () => {
     if (!editingPage) return;
@@ -358,6 +452,57 @@ const HeaderInner = <
       await loadPages();
     }
   }, [loadPages]);
+
+  // Dil yönetimi fonksiyonları
+  const handleAddLanguage = useCallback(async () => {
+    if (!newLanguage.name || !newLanguage.code) return;
+
+    const duplicateName = languages.some(
+      (l) => l.name.trim().toLowerCase() === newLanguage.name.trim().toLowerCase()
+    );
+    const duplicateCode = languages.some(
+      (l) => l.code.trim().toLowerCase() === newLanguage.code.trim().toLowerCase()
+    );
+    if (duplicateName || duplicateCode) {
+      window.alert(
+        duplicateCode
+          ? 'Aynı kod ile bir dil zaten mevcut.'
+          : 'Aynı isim ile bir dil zaten mevcut.'
+      );
+      return;
+    }
+
+    try {
+      const result = await addLanguage(newLanguage);
+      if (result) {
+        await loadLanguages();
+        setNewLanguage({ name: '', code: '', isDefault: false, isActive: true });
+        setLanguageModalOpen(false);
+      }
+    } catch (e: any) {
+      window.alert(e?.message || 'Dil eklenemedi');
+    }
+  }, [newLanguage, loadLanguages, languages]);
+
+  const handleUpdateLanguage = useCallback(async () => {
+    if (!editingLanguage) return;
+    
+    const result = await updateLanguage(editingLanguage.id, editingLanguage);
+    if (result) {
+      await loadLanguages();
+      setEditingLanguage(null);
+      setLanguageModalOpen(false);
+    }
+  }, [editingLanguage, loadLanguages]);
+
+  const handleDeleteLanguage = useCallback(async (id: string) => {
+    if (!confirm('Bu dili silmek istediğinizden emin misiniz?')) return;
+    
+    const success = await deleteLanguage(id);
+    if (success) {
+      await loadLanguages();
+    }
+  }, [loadLanguages]);
 
   
 
@@ -454,11 +599,23 @@ const HeaderInner = <
   }, [appStore, currentPageId, onPublish, loadPages, editingPage]);
 
   const filteredPages = useMemo(() => {
-    return pages.filter(page => 
-      page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      page.slug.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [pages, searchTerm]);
+    let filtered = pages;
+    
+    // Dil filtresi
+    if (selectedLanguageId) {
+      filtered = filtered.filter(page => page.languageId === selectedLanguageId);
+    }
+    
+    // Arama filtresi
+    if (searchTerm) {
+      filtered = filtered.filter(page => 
+        page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        page.slug.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  }, [pages, searchTerm, selectedLanguageId]);
 
   const defaultHeaderRender = useMemo((): Overrides["header"] => {
     if (renderHeader) {
@@ -742,6 +899,46 @@ const HeaderInner = <
               className={getClassName("seoSettingsWrapper")}
               style={{ marginLeft: 130, position: "relative" }}
             >
+              {/* Dil Seçimi */}
+              <div className={getClassName("languageSelector")} style={{ marginRight: 8 }}>
+                <select
+                  value={selectedLanguageId || ''}
+                  onChange={(e) => setSelectedLanguageId(e.target.value || null)}
+                  className={getClassName("languageSelect")}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: 6,
+                    border: '1px solid var(--puck-color-grey-09)',
+                    background: 'var(--puck-color-grey-11)',
+                    fontSize: 14,
+                    minWidth: 120
+                  }}
+                >
+                  <option value="">Tüm Diller</option>
+                  {languages.map((lang) => (
+                    <option key={lang.id} value={lang.id}>
+                      {lang.name} {lang.isDefault ? '(Varsayılan)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => setLanguageModalOpen(true)}
+                  className={getClassName("addLanguageButton")}
+                  style={{
+                    marginLeft: 4,
+                    padding: '8px 12px',
+                    borderRadius: 6,
+                    border: '1px solid var(--puck-color-grey-09)',
+                    background: 'var(--puck-color-grey-11)',
+                    fontSize: 14,
+                    cursor: 'pointer'
+                  }}
+                  type="button"
+                  title="Dil Yönetimi"
+                >
+                  +
+                </button>
+              </div>
               <button
                 className={getClassName("commandButton")}
                 onClick={() => setSeoOpen(!seoOpen)}
@@ -1175,7 +1372,21 @@ const HeaderInner = <
                             <FileText size={16} className={getClassName("commandItemIcon")} />
                             <div className={getClassName("commandItemText")}>
                               <span className={getClassName("commandItemTitle")}>{page.title}</span>
-                              <span className={getClassName("commandItemDesc")}>/{page.slug}</span>
+                              <span className={getClassName("commandItemDesc")}>
+                                /{page.slug}
+                                {page.languageId && (
+                                  <span style={{ 
+                                    marginLeft: 8, 
+                                    fontSize: 12, 
+                                    color: 'var(--puck-color-grey-06)',
+                                    background: 'var(--puck-color-grey-10)',
+                                    padding: '2px 6px',
+                                    borderRadius: 4
+                                  }}>
+                                    {languages.find(l => l.id === page.languageId)?.name || page.languageId}
+                                  </span>
+                                )}
+                              </span>
                             </div>
                             <div className={getClassName("commandItemActions")}>
                               <button
@@ -1319,6 +1530,29 @@ const HeaderInner = <
               </div>
               
               <div className={getClassName("formGroup")}>
+                <label>Dil</label>
+                <select
+                  value={editingPage ? (editingPage.languageId || '') : (newPage.languageId || '')}
+                  onChange={(e) => {
+                    const value = e.target.value || undefined;
+                    if (editingPage) {
+                      setEditingPage({ ...editingPage, languageId: value });
+                    } else {
+                      setNewPage({ ...newPage, languageId: value });
+                    }
+                  }}
+                  className={getClassName("input")}
+                >
+                  <option value="">Dil Seçin</option>
+                  {languages.map((lang) => (
+                    <option key={lang.id} value={lang.id}>
+                      {lang.name} {lang.isDefault ? '(Varsayılan)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className={getClassName("formGroup")}>
                 <label>İçerik</label>
                 <textarea
                   value={editingPage ? editingPage.content : newPage.content}
@@ -1376,6 +1610,120 @@ const HeaderInner = <
                 variant="primary"
               >
                 {editingPage ? 'Güncelle' : 'Kaydet'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dil Yönetimi Modal */}
+      {languageModalOpen && (
+        <div className={getClassName("modal")}>
+          <div className={getClassName("modalContent")}>
+            <div className={getClassName("modalHeader")}>
+              <h3>{editingLanguage ? 'Dil Düzenle' : 'Yeni Dil Ekle'}</h3>
+              <button
+                className={getClassName("closeButton")}
+                onClick={() => {
+                  setLanguageModalOpen(false);
+                  setEditingLanguage(null);
+                }}
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={getClassName("modalBody")}>
+              <div className={getClassName("formGroup")}>
+                <label>Dil Adı</label>
+                <input
+                  type="text"
+                  value={editingLanguage ? editingLanguage.name : newLanguage.name}
+                  onChange={(e) => {
+                    if (editingLanguage) {
+                      setEditingLanguage({ ...editingLanguage, name: e.target.value });
+                    } else {
+                      setNewLanguage({ ...newLanguage, name: e.target.value });
+                    }
+                  }}
+                  placeholder="Türkçe"
+                  className={getClassName("input")}
+                />
+              </div>
+              
+              <div className={getClassName("formGroup")}>
+                <label>Dil Kodu</label>
+                <input
+                  type="text"
+                  value={editingLanguage ? editingLanguage.code : newLanguage.code}
+                  onChange={(e) => {
+                    if (editingLanguage) {
+                      setEditingLanguage({ ...editingLanguage, code: e.target.value });
+                    } else {
+                      setNewLanguage({ ...newLanguage, code: e.target.value });
+                    }
+                  }}
+                  placeholder="tr"
+                  className={getClassName("input")}
+                />
+              </div>
+              
+              <div className={getClassName("formGroup")}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={editingLanguage ? (editingLanguage.isDefault ?? false) : (newLanguage.isDefault ?? false)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      if (editingLanguage) {
+                        setEditingLanguage({ ...editingLanguage, isDefault: checked });
+                      } else {
+                        setNewLanguage({ ...newLanguage, isDefault: checked });
+                      }
+                    }}
+                  />
+                  Varsayılan Dil
+                </label>
+              </div>
+
+              <div className={getClassName("formGroup")}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={editingLanguage ? (editingLanguage.isActive ?? true) : (newLanguage.isActive ?? true)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      if (editingLanguage) {
+                        setEditingLanguage({ ...editingLanguage, isActive: checked });
+                      } else {
+                        setNewLanguage({ ...newLanguage, isActive: checked });
+                      }
+                    }}
+                  />
+                  Aktif
+                </label>
+              </div>
+            </div>
+            
+            <div className={getClassName("modalFooter")}>
+              <button
+                className={getClassName("cancelButton")}
+                onClick={() => {
+                  setLanguageModalOpen(false);
+                  setEditingLanguage(null);
+                }}
+                type="button"
+              >
+                İptal
+              </button>
+              <Button
+                onClick={editingLanguage ? handleUpdateLanguage : handleAddLanguage}
+                icon={<Globe size="14px" />}
+                type="button"
+                variant="primary"
+              >
+                {editingLanguage ? 'Güncelle' : 'Kaydet'}
               </Button>
             </div>
           </div>

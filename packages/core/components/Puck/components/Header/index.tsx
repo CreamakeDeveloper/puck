@@ -1336,6 +1336,29 @@ const HeaderInner = <
                     <div className={getClassName("commandList")}>
                       <div className={getClassName("commandSection")}>
                         <div className={getClassName("sectionHeader")}>
+                          <span>İşlemler</span>
+                        </div>
+                        <div
+                          className={getClassName("commandItem")}
+                          onClick={() => {
+                            setEditingLanguage(null);
+                            setLanguageModalOpen(true);
+                            setLanguageDropdownOpen(false);
+                          }}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <Plus size={16} className={getClassName("commandItemIcon")} />
+                          <div className={getClassName("commandItemText")}
+                          >
+                            <span className={getClassName("commandItemTitle")}>Yeni Dil Ekle</span>
+                            <span className={getClassName("commandItemDesc")}>Sisteme yeni bir dil tanımlayın</span>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div className={getClassName("commandSection")}>
+                        <div className={getClassName("sectionHeader")}>
                           <span>Diller</span>
                         </div>
                         {/* Tüm Diller seçeneği */}

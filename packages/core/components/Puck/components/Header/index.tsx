@@ -59,6 +59,38 @@ const HeaderInner = <
   const pageManagement = usePageManagement(languageManagement.selectedLanguageId);
   const seoManagement = useSEOManagement(headerPath);
 
+  // Yeni LanguageModal için adapter veriler
+  const availableLanguages = useMemo(
+    () => languageManagement.languages.map(l => ({ id: l.id, name: l.name, code: l.code })),
+    [languageManagement.languages]
+  );
+
+  const siteLanguages = useMemo(
+    () => languageManagement.languages.map(l => ({ langCode: l.code, isActive: l.isActive ?? true, name: l.name })),
+    [languageManagement.languages]
+  );
+
+  const siteSettings = useMemo(
+    () => ({ defaultLanguage: languageManagement.languages.find(l => l.isDefault)?.code || "tr" }),
+    [languageManagement.languages]
+  );
+
+  const onAddLanguage = useCallback(async (langCode: string) => {
+    console.warn('[LanguageModal] onAddLanguage implement edilmemiş. langCode:', langCode);
+  }, []);
+
+  const onUpdateLanguageStatus = useCallback(async (langCode: string, isActive: boolean) => {
+    console.warn('[LanguageModal] onUpdateLanguageStatus implement edilmemiş.', { langCode, isActive });
+  }, []);
+
+  const onRemoveLanguage = useCallback(async (langCode: string) => {
+    console.warn('[LanguageModal] onRemoveLanguage implement edilmemiş. langCode:', langCode);
+  }, []);
+
+  const onSetDefaultLanguage = useCallback(async (langCode: string) => {
+    console.warn('[LanguageModal] onSetDefaultLanguage implement edilmemiş. langCode:', langCode);
+  }, []);
+
   // UI state'leri
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -518,12 +550,16 @@ const HeaderInner = <
       {/* Dil Yönetimi Modal */}
       <LanguageModal
         languageModalOpen={languageManagement.languageModalOpen}
-        editingLanguage={languageManagement.editingLanguage}
-        newLanguage={languageManagement.newLanguage}
+        editingSiteLanguage={null}
+        availableLanguages={availableLanguages}
+        siteLanguages={siteLanguages}
+        siteSettings={siteSettings}
+        isLoading={false}
         onClose={handleCloseLanguageModal}
-        onSave={languageManagement.editingLanguage ? languageManagement.handleUpdateLanguage : languageManagement.handleAddLanguage}
-        onLanguageChange={languageManagement.setEditingLanguage}
-        onNewLanguageChange={languageManagement.setNewLanguage}
+        onAddLanguage={onAddLanguage}
+        onUpdateLanguageStatus={onUpdateLanguageStatus}
+        onRemoveLanguage={onRemoveLanguage}
+        onSetDefaultLanguage={onSetDefaultLanguage}
       />
 
       {/* Toast Bildirimleri */}

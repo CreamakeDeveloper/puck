@@ -1,4 +1,5 @@
 import React from "react";
+import { Settings, Code, Share2, Eye } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import styles from "../styles.module.css";
 
@@ -58,10 +59,14 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
               padding:'8px 10px', 
               borderRadius:6, 
               border: seoActiveTab==='general' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', 
-              background: seoActiveTab==='general' ? 'var(--puck-color-grey-11)' : 'transparent'
+              background: seoActiveTab==='general' ? 'var(--puck-color-grey-11)' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            Genel
+            <Settings size={14} />
+            <span className={getClassName("seoTabText")}>Genel</span>
           </button>
           <button 
             type="button" 
@@ -71,10 +76,14 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
               padding:'8px 10px', 
               borderRadius:6, 
               border: seoActiveTab==='jsonld' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', 
-              background: seoActiveTab==='jsonld' ? 'var(--puck-color-grey-11)' : 'transparent'
+              background: seoActiveTab==='jsonld' ? 'var(--puck-color-grey-11)' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            JSON-LD
+            <Code size={14} />
+            <span className={getClassName("seoTabText")}>JSON-LD</span>
           </button>
           <button 
             type="button" 
@@ -84,10 +93,14 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
               padding:'8px 10px', 
               borderRadius:6, 
               border: seoActiveTab==='opengraph' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', 
-              background: seoActiveTab==='opengraph' ? 'var(--puck-color-grey-11)' : 'transparent'
+              background: seoActiveTab==='opengraph' ? 'var(--puck-color-grey-11)' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            Open Graph
+            <Share2 size={14} />
+            <span className={getClassName("seoTabText")}>Open Graph</span>
           </button>
           <button 
             type="button" 
@@ -97,10 +110,14 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
               padding:'8px 10px', 
               borderRadius:6, 
               border: seoActiveTab==='preview' ? '1px solid var(--puck-color-grey-09)' : '1px solid transparent', 
-              background: seoActiveTab==='preview' ? 'var(--puck-color-grey-11)' : 'transparent'
+              background: seoActiveTab==='preview' ? 'var(--puck-color-grey-11)' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            Önizleme
+            <Eye size={14} />
+            <span className={getClassName("seoTabText")}>Önizleme</span>
           </button>
         </div>
       </div>

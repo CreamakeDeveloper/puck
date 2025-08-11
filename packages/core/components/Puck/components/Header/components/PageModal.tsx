@@ -74,9 +74,12 @@ export const PageModal: React.FC<PageModalProps> = ({
                   onNewPageChange({ ...newPage, slug: e.target.value });
                 }
               }}
-              placeholder="sayfa-slug"
+              placeholder="hakkimizda (boş bırakılırsa ana sayfa / olur)"
               className={getClassName("input")}
             />
+            <small style={{ color: "var(--puck-color-grey-05)", fontSize: "12px", marginTop: "4px" }}>
+              Otomatik olarak başına "/" eklenir. Boş bırakılırsa ana sayfa "/" olur.
+            </small>
           </div>
           
           <div className={getClassName("formGroup")}>
@@ -102,22 +105,7 @@ export const PageModal: React.FC<PageModalProps> = ({
             </select>
           </div>
           
-          <div className={getClassName("formGroup")}>
-            <label>İçerik</label>
-            <textarea
-              value={editingPage ? editingPage.content : newPage.content}
-              onChange={(e) => {
-                if (editingPage) {
-                  onPageChange({ ...editingPage, content: e.target.value });
-                } else {
-                  onNewPageChange({ ...newPage, content: e.target.value });
-                }
-              }}
-              placeholder="Sayfa içeriği"
-              className={getClassName("textarea")}
-              rows={6}
-            />
-          </div>
+
 
           <div className={getClassName("formGroup")}>
             <label style={{ display: "flex", alignItems: "center", gap: 8 }}>

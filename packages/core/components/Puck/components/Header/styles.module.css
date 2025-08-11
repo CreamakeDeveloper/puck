@@ -612,6 +612,159 @@
   margin-left: 12px;
 }
 
+/* SEO Tab Text Style */
+.PuckHeader-seoTabText {
+  white-space: nowrap;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 1024px) {
+  .PuckHeader-commandCenterWrapper {
+    margin-left: -100px !important;
+    max-width: 400px;
+  }
+  
+  .PuckHeader-languageButtonWrap {
+    right: -360px;
+    width: 300px;
+  }
+  
+  .PuckHeader-seoSettingsWrapper {
+    margin-left: 100px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .PuckHeader-inner {
+    padding: var(--puck-space-xs);
+  }
+  
+  .PuckHeader-commandCenter {
+    max-width: 100%;
+  }
+  
+  .PuckHeader-commandCenterWrapper {
+    margin-left: 0 !important;
+    max-width: 100%;
+  }
+  
+  .PuckHeader-languageButtonWrap {
+    position: relative;
+    right: auto;
+    top: auto;
+    width: auto;
+    margin-left: 8px;
+  }
+  
+  .PuckHeader-seoSettingsWrapper {
+    margin-left: 8px !important;
+  }
+  
+  /* Mobil'de sadece ikonları göster */
+  .PuckHeader-commandText {
+    display: none;
+  }
+  
+  .PuckHeader-commandButtonRight {
+    display: none;
+  }
+  
+  .PuckHeader-commandHint {
+    display: none;
+  }
+  
+  .PuckHeader-languageButtonWrap .PuckHeader-commandButtonRight {
+    display: none;
+  }
+  
+  .PuckHeader-seoSettingsWrapper .PuckHeader-commandButtonRight {
+    display: none;
+  }
+  
+  /* SEO tab metinlerini gizle */
+  .PuckHeader-seoTabText {
+    display: none;
+  }
+  
+  /* Dropdown'ları responsive yap */
+  .PuckHeader-commandPalette {
+    left: -50%;
+    right: auto;
+    max-width: 90vw;
+    width: 320px;
+  }
+  
+  .PuckHeader-languagePalette {
+    left: -50%;
+    right: auto;
+    max-width: 90vw;
+    width: 300px;
+  }
+  
+  /* SEO dropdown'ı responsive */
+  .PuckHeader-seoSettingsWrapper .PuckHeader-commandPalette {
+    left: -200px;
+    right: auto;
+    max-width: 90vw;
+    width: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .PuckHeader-inner {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "left middle" "left right";
+    gap: 8px;
+  }
+  
+  .PuckHeader-tools {
+    grid-area: right;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+  
+  .PuckHeader-commandCenter {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .PuckHeader-modalContent {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .PuckHeader-modalBody {
+    padding: 16px;
+  }
+  
+  .PuckHeader-modalFooter {
+    padding: 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .PuckHeader-modalFooter button {
+    width: 100%;
+  }
+  
+  /* Çok küçük ekranlarda dropdown'ları tam genişlik yap */
+  .PuckHeader-commandPalette,
+  .PuckHeader-languagePalette,
+  .PuckHeader-seoSettingsWrapper .PuckHeader-commandPalette {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    margin: 0 8px;
+  }
+  
+  /* Buttonları daha küçük yap */
+  .PuckHeader-commandButton {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+}
+
 @media (min-width: 638px) {
   .PuckHeader-menuButton {
     display: none;

@@ -23,6 +23,7 @@ import { DefaultOverride } from "../../../DefaultOverride";
 import { usePropsContext } from "../..";
 import { getClassNameFactory } from "../../../../lib";
 import styles from "./styles.module.css";
+import { Toaster } from "react-hot-toast";
 
 // Import edilen bileşenler ve hook'lar
 import { Page, Language } from "./types";
@@ -523,6 +524,33 @@ const HeaderInner = <
         onSave={languageManagement.editingLanguage ? languageManagement.handleUpdateLanguage : languageManagement.handleAddLanguage}
         onLanguageChange={languageManagement.setEditingLanguage}
         onNewLanguageChange={languageManagement.setNewLanguage}
+      />
+
+      {/* Toast Bildirimleri */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'var(--puck-color-white)',
+            color: 'var(--puck-color-black)',
+            border: '1px solid var(--puck-color-grey-09)',
+            borderRadius: '8px',
+            fontSize: '14px',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--puck-color-green-05)',
+              secondary: 'var(--puck-color-white)',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--puck-color-red-05)',
+              secondary: 'var(--puck-color-white)',
+            },
+          },
+        }}
       />
     </CustomHeader>
   );

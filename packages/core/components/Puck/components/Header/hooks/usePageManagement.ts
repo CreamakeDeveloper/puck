@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useRef } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../../store";
 import { Page, SEO } from "../types";
 import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
+import toast from "react-hot-toast";
 
 export const usePageManagement = (selectedLanguageId: string | null) => {
   const [pages, setPages] = useState<Page[]>([]);
@@ -63,16 +64,28 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
   }, [dispatch]);
 
   const handleAddPage = useCallback(async () => {
-    if (!newPage.title || !newPage.slug) return;
+    // Form validasyonu
+    if (!newPage.title.trim()) {
+      toast.error('Sayfa başlığı boş bırakılamaz!');
+      return;
+    }
+
+    // Slug otomatik düzenleme - boş ise ana sayfa için "/" yap
+    let finalSlug = newPage.slug.trim();
+    if (!finalSlug) {
+      finalSlug = '/';
+    } else if (!finalSlug.startsWith('/')) {
+      finalSlug = '/' + finalSlug;
+    }
 
     const duplicateTitle = pages.some(
       (p) => p.title.trim().toLowerCase() === newPage.title.trim().toLowerCase()
     );
     const duplicateSlug = pages.some(
-      (p) => p.slug.trim().toLowerCase() === newPage.slug.trim().toLowerCase()
+      (p) => p.slug.trim().toLowerCase() === finalSlug.toLowerCase()
     );
     if (duplicateTitle || duplicateSlug) {
-      window.alert(
+      toast.error(
         duplicateSlug
           ? 'Aynı slug ile bir sayfa zaten mevcut.'
           : 'Aynı başlık ile bir sayfa zaten mevcut.'
@@ -83,7 +96,7 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
     try {
       const result = await addPage({
         title: newPage.title,
-        slug: newPage.slug,
+        slug: finalSlug,
         content: newPage.content ?? '',
         seo: newPage.seo,
         isActive: newPage.isActive ?? true,
@@ -95,29 +108,54 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
         await loadPages();
         setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true, languageId: undefined });
         setModalOpen(false);
+        toast.success('Sayfa başarıyla eklendi!');
       }
     } catch (e: any) {
-      window.alert(e?.message || 'Sayfa eklenemedi');
+      toast.error(e?.message || 'Sayfa eklenemedi');
     }
   }, [newPage, loadPages, pages, handleSelectPage, selectedLanguageId]);
 
   const handleUpdatePage = useCallback(async () => {
     if (!editingPage) return;
     
-    const result = await updatePage(editingPage.id, editingPage);
-    if (result) {
-      await loadPages();
-      setEditingPage(null);
-      setModalOpen(false);
+    // Form validasyonu
+    if (!editingPage.title.trim()) {
+      toast.error('Sayfa başlığı boş bırakılamaz!');
+      return;
+    }
+
+    // Slug düzenleme
+    let finalSlug = editingPage.slug.trim();
+    if (!finalSlug) {
+      finalSlug = '/';
+    } else if (!finalSlug.startsWith('/')) {
+      finalSlug = '/' + finalSlug;
+    }
+
+    try {
+      const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug });
+      if (result) {
+        await loadPages();
+        setEditingPage(null);
+        setModalOpen(false);
+        toast.success('Sayfa başarıyla güncellendi!');
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Sayfa güncellenemedi');
     }
   }, [editingPage, loadPages]);
 
   const handleDeletePage = useCallback(async (id: string) => {
     if (!confirm('Bu sayfayı silmek istediğinizden emin misiniz?')) return;
     
-    const success = await deletePage(id);
-    if (success) {
-      await loadPages();
+    try {
+      const success = await deletePage(id);
+      if (success) {
+        await loadPages();
+        toast.success('Sayfa başarıyla silindi!');
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Sayfa silinemedi');
     }
   }, [loadPages]);
 
@@ -143,9 +181,27 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
         } as SEO;
       })();
 
+      // Form validasyonu
+      const title = rootProps.title ?? editingPage?.title ?? newPage?.title ?? '';
+      const slug = rootProps.slug ?? editingPage?.slug ?? newPage?.slug ?? '';
+      
+      if (!title.trim()) {
+        toast.error('Sayfa başlığı boş bırakılamaz!');
+        setIsPublishing(false);
+        return;
+      }
+
+      // Slug otomatik düzenleme
+      let finalSlug = slug.trim();
+      if (!finalSlug) {
+        finalSlug = '/';
+      } else if (!finalSlug.startsWith('/')) {
+        finalSlug = '/' + finalSlug;
+      }
+
       const payload: Omit<Page, 'id'> = {
-        title: rootProps.title ?? editingPage?.title ?? newPage?.title ?? '',
-        slug: rootProps.slug ?? editingPage?.slug ?? newPage?.slug ?? '',
+        title: title,
+        slug: finalSlug,
         content: JSON.stringify(data?.content ?? []),
         seo: mergedSeo,
         isActive:
@@ -156,18 +212,18 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
         languageId: (editingPage?.languageId ?? newPage?.languageId ?? selectedLanguageId) || undefined,
       };
 
-      const normalizedTitle = (payload.title || '').trim().toLowerCase();
-      const normalizedSlug = (payload.slug || '').trim().toLowerCase();
+      const normalizedTitle = payload.title.trim().toLowerCase();
+      const normalizedSlug = payload.slug.toLowerCase();
 
       if (!currentPageId) {
         const duplicateTitle = pages.some(
           (p) => p.title.trim().toLowerCase() === normalizedTitle
         );
         const duplicateSlug = pages.some(
-          (p) => p.slug.trim().toLowerCase() === normalizedSlug
+          (p) => p.slug.toLowerCase() === normalizedSlug
         );
         if (duplicateTitle || duplicateSlug) {
-          window.alert(
+          toast.error(
             duplicateSlug
               ? 'Aynı slug ile bir sayfa zaten mevcut.'
               : 'Aynı başlık ile bir sayfa zaten mevcut.'
@@ -180,10 +236,10 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
           (p) => p.id !== currentPageId && p.title.trim().toLowerCase() === normalizedTitle
         );
         const duplicateSlug = pages.some(
-          (p) => p.id !== currentPageId && p.slug.trim().toLowerCase() === normalizedSlug
+          (p) => p.id !== currentPageId && p.slug.toLowerCase() === normalizedSlug
         );
         if (duplicateTitle || duplicateSlug) {
-          window.alert(
+          toast.error(
             duplicateSlug
               ? 'Aynı slug ile başka bir sayfa mevcut.'
               : 'Aynı başlık ile başka bir sayfa mevcut.'
@@ -205,10 +261,12 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
       }
 
       await loadPages();
+      toast.success('Sayfa başarıyla kaydedildi!');
 
       onPublish && onPublish(data);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Yayınlama sırasında hata:', e);
+      toast.error(e?.message || 'Kaydetme sırasında hata oluştu');
     } finally {
       setIsPublishing(false);
     }

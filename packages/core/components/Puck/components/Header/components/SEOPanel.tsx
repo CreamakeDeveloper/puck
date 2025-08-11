@@ -45,12 +45,12 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
   if (!seoOpen) return null;
 
   return (
-    <div className={getClassName("commandPalette")} style={{ width: 420 }}>
+    <div className={`${getClassName("commandPalette")} ${getClassName("seoPalette")}`}>
       <div className={getClassName("commandPaletteHeader")}> 
         <div className={getClassName("sectionHeader")}>
           <span>SEO Ayarları</span>
         </div>
-        <div style={{display:'flex', gap:8, marginTop:8}}>
+        <div className={getClassName("seoTabs")}> 
           <button 
             type="button" 
             className={getClassName("commandItem")} 

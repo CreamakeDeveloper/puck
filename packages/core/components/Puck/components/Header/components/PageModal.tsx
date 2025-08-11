@@ -74,11 +74,11 @@ export const PageModal: React.FC<PageModalProps> = ({
                   onNewPageChange({ ...newPage, slug: e.target.value });
                 }
               }}
-              placeholder="hakkimizda (boş bırakılırsa ana sayfa / olur)"
+              placeholder="Sayfa Slug"
               className={getClassName("input")}
             />
             <small style={{ color: "var(--puck-color-grey-05)", fontSize: "12px", marginTop: "4px" }}>
-              Otomatik olarak başına "/" eklenir. Boş bırakılırsa ana sayfa "/" olur.
+              Sayfa slug'u otomatik olarak başına "/" eklenir. Boş bırakılırsa ana sayfa "/" olur.
             </small>
           </div>
           

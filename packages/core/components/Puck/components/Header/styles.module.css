@@ -208,7 +208,7 @@
   color: var(--puck-color-grey-05);
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: var(--puck-font-size-xs);
+  font-size: var(--puck-font-size-xxs);
   font-weight: 500;
 }
 
@@ -238,9 +238,42 @@
   flex-direction: column;
 }
 
+/* Her dropdown için farklı genişlikler */
+.PuckHeader-pagesPalette {
+  width: 100%; /* Command panel genişliği kadar */
+}
+
+.PuckHeader-languagePalette {
+  width: 320px; /* sağa yaslı, sola doğru genişlesin */
+}
+
+.PuckHeader-seoPalette {
+  width: 480px;
+}
+
 .PuckHeader-commandPaletteHeader {
   padding: 16px 16px 8px;
   border-bottom: 1px solid var(--puck-color-grey-10);
+}
+
+/* SEO dropdown üst sekme butonları sardığında görünür kalsın */
+.PuckHeader-commandPaletteHeader > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.PuckHeader-commandPaletteHeader .PuckHeader-commandItem {
+  width: auto;
+  flex: 0 1 auto;
+}
+
+/* SEO sekme satırı */
+.PuckHeader-seoTabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 .PuckHeader-searchBox {
@@ -575,15 +608,20 @@
 }
 
 .PuckHeader-cancelButton {
-  padding: 10px 20px;
+  padding: 7px 19px; /* Button--medium ile aynı */
+  min-height: 34px;  /* Button--medium min-height */
   border: 1px solid var(--puck-color-grey-08);
   background: var(--puck-color-white);
   color: var(--puck-color-grey-05);
-  border-radius: 6px;
+  border-radius: 4px; /* Button radyusu ile aynı */
   cursor: pointer;
   font-size: var(--puck-font-size-sm);
+  line-height: 1;
   transition: all 0.2s ease;
-  height: 40px;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .PuckHeader-cancelButton:hover {
@@ -736,7 +774,7 @@
     left: -200px;
     right: auto;
     max-width: 90vw;
-    width: 350px;
+    width: 420px; /* mobilde biraz daha geniş kalsın */
   }
 }
 

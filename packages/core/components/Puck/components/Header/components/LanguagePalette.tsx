@@ -28,7 +28,7 @@ export const LanguagePalette: React.FC<LanguagePaletteProps> = ({
   if (!languageDropdownOpen) return null;
 
   return (
-    <div className={`${getClassName("commandPalette")} ${getClassName("languagePalette")}`} style={{ width: 220 }}>
+    <div className={`${getClassName("commandPalette")} ${getClassName("languagePalette")}`}>
       <div className={getClassName("commandPaletteHeader")}>
         <div className={getClassName("searchBox")}>
           <Search size={16} className={getClassName("searchIcon")} />

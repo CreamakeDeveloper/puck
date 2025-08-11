@@ -34,7 +34,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   if (!dropdownOpen) return null;
 
   return (
-    <div className={getClassName("commandPalette")}>
+    <div className={`${getClassName("commandPalette")} ${getClassName("pagesPalette")}`}>
       <div className={getClassName("commandPaletteHeader")}>
         <div className={getClassName("searchBox")}>
           <Search size={16} className={getClassName("searchIcon")} />

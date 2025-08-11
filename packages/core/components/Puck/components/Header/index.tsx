@@ -274,6 +274,7 @@ const HeaderInner = <
   const commandWrapperRef = useRef<HTMLDivElement | null>(null);
   const seoWrapperRef = useRef<HTMLDivElement | null>(null);
   const languageWrapperRef = useRef<HTMLDivElement | null>(null);
+  const languageInitializedRef = useRef<boolean>(false);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
@@ -290,11 +291,15 @@ const HeaderInner = <
   const loadLanguages = useCallback(async () => {
     const languagesData = await getLanguages();
     setLanguages(languagesData);
-    
-    // Varsayılan dili seç
-    const defaultLanguage = languagesData.find(lang => lang.isDefault);
-    if (defaultLanguage && !selectedLanguageId) {
-      setSelectedLanguageId(defaultLanguage.id);
+
+    // Varsayılan dili sadece ilk yüklemede ata. Kullanıcı "Tüm Diller" (null) seçerse
+    // sonraki yüklemelerde varsayılanla ezilmesin.
+    if (!languageInitializedRef.current) {
+      const defaultLanguage = languagesData.find((lang) => lang.isDefault);
+      if (defaultLanguage && !selectedLanguageId) {
+        setSelectedLanguageId(defaultLanguage.id);
+      }
+      languageInitializedRef.current = true;
     }
   }, [selectedLanguageId]);
 

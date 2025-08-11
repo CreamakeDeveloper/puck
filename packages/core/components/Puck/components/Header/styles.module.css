@@ -244,11 +244,15 @@
 }
 
 .PuckHeader-languagePalette {
-  width: 320px; /* sağa yaslı, sola doğru genişlesin */
+  width: 360px; /* sağa yaslı, sola doğru genişlesin */
+  right: 150px;     /* sağ kenara sabitle */
+  left: auto;   /* sola doğru genişlesin */
 }
 
 .PuckHeader-seoPalette {
   width: 480px;
+  left: 0; /* sola sabitle, sağa doğru genişlesin */
+  right: auto;
 }
 
 .PuckHeader-commandPaletteHeader {
@@ -299,6 +303,7 @@
   font-size: var(--puck-font-size-sm);
   font-family: inherit;
   transition: all 0.2s ease;
+  box-sizing: border-box; /* yatay taşmayı engelle */
 }
 
 .PuckHeader-searchInput:focus {
@@ -333,6 +338,7 @@
 .PuckHeader-commandList {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* yatay scroll'u kapat */
   padding: 12px;
 }
 
@@ -763,10 +769,10 @@
   }
   
   .PuckHeader-languagePalette {
-    left: -50%;
-    right: auto;
+    left: auto;    /* sağ kenara sabitle */
+    right: 0;      /* sağdan hizalı kalsın */
     max-width: 90vw;
-    width: 300px;
+    width: 320px;  /* daha geniş */
   }
   
   /* SEO dropdown'ı responsive */
@@ -826,13 +832,20 @@
   
   /* Çok küçük ekranlarda dropdown'ları tam genişlik yap */
   .PuckHeader-commandPalette,
-  .PuckHeader-languagePalette,
   .PuckHeader-seoSettingsWrapper .PuckHeader-commandPalette {
     left: 0;
     right: 0;
     width: auto;
     max-width: none;
     margin: 0 8px;
+  }
+  /* Dil dropdown'u küçük ekranda da sağa sabit, sola doğru genişlesin */
+  .PuckHeader-languagePalette {
+    left: auto;
+    right: 0;
+    width: 90vw;
+    max-width: 360px;
+    margin: 0 8px 0 0;
   }
 }
 

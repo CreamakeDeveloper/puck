@@ -37,7 +37,7 @@ export const ConfigWithAddModule = () => {
       <div className={getClassName("sidePanel")} aria-hidden={!panelOpen}>
         <div className={getClassName("sidePanelHeader")}>
           <div className={getClassName("sidePanelTitle")}>
-            Bölüm Seç ({totalComponents})
+            Yeni Bölüm Ekle 
           </div>
           <button
             type="button"

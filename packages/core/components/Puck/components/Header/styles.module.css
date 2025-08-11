@@ -637,15 +637,35 @@
 @media (max-width: 768px) {
   .PuckHeader-inner {
     padding: var(--puck-space-xs);
+    grid-template-areas: "left middle right";
+    grid-template-columns: auto 1fr auto;
   }
   
+  /* Geri butonunda sadece ok */
+  .PuckHeader-backButton span {
+    display: none;
+  }
+  
+  /* Orta kısım: SEO, Sayfalandırma, Dil tek satırda */
   .PuckHeader-commandCenter {
     max-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
   }
   
   .PuckHeader-commandCenterWrapper {
     margin-left: 0 !important;
-    max-width: 100%;
+    max-width: none;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .PuckHeader-seoSettingsWrapper {
+    margin-left: 0 !important;
+    position: relative;
+    flex-shrink: 0;
   }
   
   .PuckHeader-languageButtonWrap {
@@ -653,11 +673,14 @@
     right: auto;
     top: auto;
     width: auto;
-    margin-left: 8px;
+    margin-left: 0;
+    flex-shrink: 0;
   }
   
-  .PuckHeader-seoSettingsWrapper {
-    margin-left: 8px !important;
+  /* Sağ tarafa menu button */
+  .PuckHeader-tools {
+    display: flex;
+    justify-content: flex-end;
   }
   
   /* Mobil'de sadece ikonları göster */
@@ -686,6 +709,13 @@
     display: none;
   }
   
+  /* Butonları küçült */
+  .PuckHeader-commandButton {
+    min-height: 36px;
+    padding: 6px 10px;
+    min-width: 40px;
+  }
+  
   /* Dropdown'ları responsive yap */
   .PuckHeader-commandPalette {
     left: -50%;
@@ -712,22 +742,31 @@
 
 @media (max-width: 480px) {
   .PuckHeader-inner {
-    grid-template-columns: auto 1fr;
-    grid-template-areas: "left middle" "left right";
-    gap: 8px;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "left middle right";
+    gap: 4px;
   }
   
   .PuckHeader-tools {
     grid-area: right;
-    justify-content: flex-start;
-    margin-top: 8px;
+    justify-content: flex-end;
   }
   
   .PuckHeader-commandCenter {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    gap: 2px;
+    overflow-x: auto;
   }
   
+  /* Çok küçük butonlar */
+  .PuckHeader-commandButton {
+    min-height: 32px;
+    padding: 4px 8px;
+    min-width: 36px;
+    flex-shrink: 0;
+  }
+  
+  /* Modal responsive */
   .PuckHeader-modalContent {
     width: 95%;
     margin: 10px;
@@ -756,12 +795,6 @@
     width: auto;
     max-width: none;
     margin: 0 8px;
-  }
-  
-  /* Buttonları daha küçük yap */
-  .PuckHeader-commandButton {
-    min-height: 36px;
-    padding: 6px 12px;
   }
 }
 

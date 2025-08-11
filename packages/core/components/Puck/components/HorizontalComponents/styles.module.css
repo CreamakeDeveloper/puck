@@ -1,0 +1,79 @@
+.HorizontalComponents {
+  display: flex;
+  flex-direction: column;
+}
+
+.HorizontalComponents-addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: var(--puck-color-azure-06);
+  color: var(--puck-color-white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--puck-font-size-xs);
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.HorizontalComponents-addButton:hover {
+  background-color: var(--puck-color-azure-05);
+}
+
+.HorizontalComponents-addButton:active {
+  background-color: var(--puck-color-azure-07);
+}
+
+.HorizontalComponents-addButton:focus-visible {
+  outline: 2px solid var(--puck-color-azure-05);
+  outline-offset: 2px;
+}
+
+.HorizontalComponents-horizontalContainer {
+  background-color: var(--puck-color-grey-11);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.HorizontalComponents-scrollableArea {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--puck-color-grey-07) var(--puck-color-grey-09);
+}
+
+.HorizontalComponents-scrollableArea::-webkit-scrollbar {
+  height: 6px;
+}
+
+.HorizontalComponents-scrollableArea::-webkit-scrollbar-track {
+  background: var(--puck-color-grey-09);
+  border-radius: 3px;
+}
+
+.HorizontalComponents-scrollableArea::-webkit-scrollbar-thumb {
+  background: var(--puck-color-grey-07);
+  border-radius: 3px;
+}
+
+.HorizontalComponents-scrollableArea::-webkit-scrollbar-thumb:hover {
+  background: var(--puck-color-grey-06);
+}
+
+.HorizontalComponents-componentsGrid {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 8px;
+  min-width: max-content;
+}
+
+.HorizontalComponents-componentCard {
+  flex-shrink: 0;
+  min-width: 120px;
+  max-width: 160px;
+}

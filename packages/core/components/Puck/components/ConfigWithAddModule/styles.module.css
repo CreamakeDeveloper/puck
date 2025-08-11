@@ -1,0 +1,79 @@
+.ConfigWithAddModule {
+  position: relative;
+}
+
+.ConfigWithAddModule-outline {
+  display: block;
+}
+
+.ConfigWithAddModule-addButtonWrapper {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
+.ConfigWithAddModule-addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #6a5cff; /* canlı mor, örneğe benzer */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--puck-font-size-xxs);
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(106, 92, 255, 0.25);
+}
+
+.ConfigWithAddModule-addButton:hover {
+  filter: brightness(1.05);
+}
+
+.ConfigWithAddModule-sidePanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  transform: translateX(-105%);
+  width: min(360px, 100%);
+  background: var(--puck-color-white);
+  border-right: 1px solid var(--puck-color-grey-09);
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.08);
+  transition: transform 220ms ease;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+}
+
+.ConfigWithAddModule-sidePanel--isOpen {
+  transform: translateX(0);
+}
+
+.ConfigWithAddModule-sidePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--puck-color-grey-09);
+}
+
+.ConfigWithAddModule-sidePanelTitle {
+  font-size: var(--puck-font-size-xs);
+  font-weight: 600;
+}
+
+.ConfigWithAddModule-closeButton {
+  background: transparent;
+  border: 0;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ConfigWithAddModule-sidePanelBody {
+  padding: 12px;
+  overflow: auto;
+}
+

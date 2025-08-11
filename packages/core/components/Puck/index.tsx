@@ -40,6 +40,7 @@ import {
 import styles from "./styles.module.css";
 import { Fields } from "./components/Fields";
 import { Components } from "./components/Components";
+import { ConfigWithAddModule } from "./components/ConfigWithAddModule";
 import { Preview } from "./components/Preview";
 import { Outline } from "./components/Outline";
 import { Canvas } from "./components/Canvas";
@@ -541,11 +542,8 @@ function PuckLayout<
                     onResize={setLeftWidth}
                     onResizeEnd={handleLeftSidebarResizeEnd}
                   >
-                    <SidebarSection title="Modüller" noBorderTop>
-                      <Components />
-                    </SidebarSection>
-                    <SidebarSection title="Yapılandırma">
-                      <Outline />
+                    <SidebarSection title="Yapılandırma" noBorderTop>
+                      <ConfigWithAddModule />
                     </SidebarSection>
                   </Sidebar>
                   <Canvas />

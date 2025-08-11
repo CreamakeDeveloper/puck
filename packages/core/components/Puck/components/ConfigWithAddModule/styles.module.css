@@ -30,12 +30,14 @@
 }
 
 .ConfigWithAddModule-sidePanel {
-  position: fixed; /* SidebarSection-content dışına taşı */
-  top: var(--puck-header-height, 0);
+  /* SidebarSection köküne göre konumlan, böylece aynı genişlik/yükseklik kapla */
+  position: absolute;
+  top: 0;
   left: 0;
+  right: 0;
   bottom: 0;
-  transform: translateX(-105%);
-  width: min(300px, 100%);
+  transform: translateX(-100%);
+  width: 100%;
   background: var(--puck-color-white);
   border-right: 1px solid var(--puck-color-grey-09);
   box-shadow: 2px 0 16px rgba(0, 0, 0, 0.08);
@@ -43,6 +45,7 @@
   z-index: 10005;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .ConfigWithAddModule--isOpen .ConfigWithAddModule-sidePanel {

@@ -14,7 +14,7 @@
      *
      * Root/html font-size is undefined (browser default)
      *
-     * 16px= 16px
+     * 1rem = 16px
      */
 
   /* Unitless font sizes
@@ -35,18 +35,16 @@
   /* Descriptive font sizes
        ======================================================================== */
 
-  --puck-font-size-xxxs: calc(16px* var(--puck-font-size-xxxs-unitless) / 16);
-  --puck-font-size-xxs: calc(16px* var(--puck-font-size-xxs-unitless) / 16);
-  --puck-font-size-xs: calc(16px* var(--puck-font-size-xs-unitless) / 16);
-  --puck-font-size-s: calc(16px* var(--puck-font-size-s-unitless) / 16);
-  --puck-font-size-m: calc(16px* var(--puck-font-size-m-unitless) / 16);
-  --puck-font-size-l: calc(16px* var(--puck-font-size-l-unitless) / 16);
-  --puck-font-size-xl: calc(16px* var(--puck-font-size-xl-unitless) / 16);
-  --puck-font-size-xxl: calc(16px* var(--puck-font-size-xxl-unitless) / 16);
-  --puck-font-size-xxxl: calc(16px* var(--puck-font-size-xxxl-unitless) / 16);
-  --puck-font-size-xxxxl: calc(
-    16px* var(--puck-font-size-xxxxl-unitless) / 16
-  );
+  --puck-font-size-xxxs: calc(var(--puck-font-size-xxxs-unitless) * 1px);
+  --puck-font-size-xxs: calc(var(--puck-font-size-xxs-unitless) * 1px);
+  --puck-font-size-xs: calc(var(--puck-font-size-xs-unitless) * 1px);
+  --puck-font-size-s: calc(var(--puck-font-size-s-unitless) * 1px);
+  --puck-font-size-m: calc(var(--puck-font-size-m-unitless) * 1px);
+  --puck-font-size-l: calc(var(--puck-font-size-l-unitless) * 1px);
+  --puck-font-size-xl: calc(var(--puck-font-size-xl-unitless) * 1px);
+  --puck-font-size-xxl: calc(var(--puck-font-size-xxl-unitless) * 1px);
+  --puck-font-size-xxxl: calc(var(--puck-font-size-xxxl-unitless) * 1px);
+  --puck-font-size-xxxxl: calc(var(--puck-font-size-xxxxl-unitless) * 1px);
 
   /* Functional font sizes
       ========================================================================= */

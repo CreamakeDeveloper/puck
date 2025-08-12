@@ -559,6 +559,7 @@ const HeaderInner = <
         editingPage={pageManagement.editingPage}
         newPage={pageManagement.newPage}
         languages={languageManagement.languages}
+        existingPages={pageManagement.pages}
         onClose={handleClosePageModal}
         onSave={pageManagement.editingPage ? pageManagement.handleUpdatePage : pageManagement.handleAddPage}
         onPageChange={pageManagement.setEditingPage}

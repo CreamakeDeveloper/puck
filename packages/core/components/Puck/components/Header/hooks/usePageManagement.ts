@@ -28,6 +28,10 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
     return pagesData;
   }, []);
 
+  const normalizeSlug = useCallback((value: string) => {
+    return value.trim().toLowerCase().replace(/^\/+/, "");
+  }, []);
+
   const handleSelectPage = useCallback(async (id: string) => {
     const selected = await getPage(id);
     if (!selected) return;
@@ -71,19 +75,15 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
       return;
     }
 
-    // Slug otomatik düzenleme - boş ise ana sayfa için "/" yap
-    let finalSlug = newPage.slug.trim();
-    if (!finalSlug) {
-      finalSlug = '/';
-    } else if (!finalSlug.startsWith('/')) {
-      finalSlug = '/' + finalSlug;
-    }
+    // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
+    const enteredSlug = newPage.slug.trim();
+    const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
 
     const duplicateTitle = pages.some(
       (p) => p.title.trim().toLowerCase() === newPage.title.trim().toLowerCase()
     );
     const duplicateSlug = pages.some(
-      (p) => p.slug.trim().toLowerCase() === finalSlug.toLowerCase()
+      (p) => normalizeSlug(p.slug) === normalizeSlug(finalSlug)
     );
     if (duplicateTitle || duplicateSlug) {
       toast.error(
@@ -125,13 +125,9 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
       return;
     }
 
-    // Slug düzenleme
-    let finalSlug = editingPage.slug.trim();
-    if (!finalSlug) {
-      finalSlug = '/';
-    } else if (!finalSlug.startsWith('/')) {
-      finalSlug = '/' + finalSlug;
-    }
+    // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
+    const enteredSlug = editingPage.slug.trim();
+    const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
 
     try {
       const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug });
@@ -208,13 +204,9 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
         return;
       }
 
-      // Slug otomatik düzenleme
-      let finalSlug = slug.trim();
-      if (!finalSlug) {
-        finalSlug = '/';
-      } else if (!finalSlug.startsWith('/')) {
-        finalSlug = '/' + finalSlug;
-      }
+      // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
+      const trimmed = slug.trim();
+      const finalSlug = trimmed === '' ? '/' : trimmed;
 
       const payload: Omit<Page, 'id'> = {
         title: title,
@@ -230,14 +222,14 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
       };
 
       const normalizedTitle = payload.title.trim().toLowerCase();
-      const normalizedSlug = payload.slug.toLowerCase();
+      const normalizedSlug = normalizeSlug(payload.slug);
 
       if (!currentPageId) {
         const duplicateTitle = pages.some(
           (p) => p.title.trim().toLowerCase() === normalizedTitle
         );
         const duplicateSlug = pages.some(
-          (p) => p.slug.toLowerCase() === normalizedSlug
+          (p) => normalizeSlug(p.slug) === normalizedSlug
         );
         if (duplicateTitle || duplicateSlug) {
           toast.error(
@@ -253,7 +245,7 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
           (p) => p.id !== currentPageId && p.title.trim().toLowerCase() === normalizedTitle
         );
         const duplicateSlug = pages.some(
-          (p) => p.id !== currentPageId && p.slug.toLowerCase() === normalizedSlug
+          (p) => p.id !== currentPageId && normalizeSlug(p.slug) === normalizedSlug
         );
         if (duplicateTitle || duplicateSlug) {
           toast.error(

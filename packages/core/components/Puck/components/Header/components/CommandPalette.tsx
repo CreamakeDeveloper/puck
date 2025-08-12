@@ -102,7 +102,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <div className={getClassName("commandItemText")}>
                   <span className={getClassName("commandItemTitle")}>{page.title}</span>
                   <span className={getClassName("commandItemDesc")}>
-                    /{page.slug}
+                    {page.slug.startsWith('/') ? page.slug : `/${page.slug}`}
                     {page.languageId && (
                       <span style={{ 
                         marginLeft: 8, 

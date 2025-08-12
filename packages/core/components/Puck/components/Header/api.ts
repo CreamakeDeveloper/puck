@@ -76,9 +76,24 @@ export const deletePage = async (id: string): Promise<boolean> => {
 // Dil API fonksiyonları
 export const getLanguages = async (): Promise<Language[]> => {
   try {
-    const response = await fetch('/api/languages');
-    if (!response.ok) throw new Error('Diller getirilemedi');
-    return response.json();
+    // Önce senin site-languages API'ni dene
+    const response = await fetch('/api/site-languages');
+    if (response.ok) {
+      const data = await response.json();
+      // Backend formatını frontend formatına çevir
+      return data.languages.map((lang: any) => ({
+        id: `${lang.code}-id`, // code'dan id oluştur
+        name: lang.name,
+        code: lang.code,
+        isDefault: lang.code === data.defaultLanguage,
+        isActive: lang.isActive
+      }));
+    }
+    
+    // Fallback: orijinal API
+    const fallbackResponse = await fetch('/api/languages');
+    if (!fallbackResponse.ok) throw new Error('Diller getirilemedi');
+    return fallbackResponse.json();
   } catch (error) {
     console.error('Dil listesi alınırken hata:', error);
     return [];

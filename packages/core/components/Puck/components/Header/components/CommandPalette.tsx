@@ -104,25 +104,30 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   <span className={getClassName("commandItemTitle")}>{page.title}</span>
                   <span className={getClassName("commandItemDesc")}>
                     {page.slug.startsWith('/') ? page.slug : `/${page.slug}`}
-                    {page.languageId && (
-                      <span style={{ 
-                        marginLeft: 8, 
-                        fontSize: 12, 
-                        color: 'var(--puck-color-grey-06)',
-                        background: 'var(--puck-color-grey-10)',
-                        padding: '2px 6px',
-                        borderRadius: 4,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4
-                      }}>
-                        {renderFlagIcon(
-                          languages.find(l => l.id === page.languageId)?.code || '',
-                          { fontSize: '10px', marginRight: 4 }
-                        )}
-                        {languages.find(l => l.id === page.languageId)?.name || page.languageId}
-                      </span>
-                    )}
+                    {/* Debug: Her zaman dil etiketini göster */}
+                    <span style={{ 
+                      marginLeft: 8, 
+                      fontSize: 12, 
+                      color: 'var(--puck-color-grey-06)',
+                      background: 'var(--puck-color-grey-10)',
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}>
+                      {page.languageId ? (
+                        <>
+                          {renderFlagIcon(
+                            languages.find(l => l.id === page.languageId)?.code || '',
+                            { fontSize: '10px', marginRight: 4 }
+                          )}
+                          {languages.find(l => l.id === page.languageId)?.name || page.languageId}
+                        </>
+                      ) : (
+                        <span style={{ fontStyle: 'italic', opacity: 0.7 }}>Dil belirtilmemiş</span>
+                      )}
+                    </span>
                   </span>
                 </div>
                 <div className={getClassName("commandItemActions")}>

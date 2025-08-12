@@ -187,6 +187,15 @@ const HeaderInner = <
   const filteredPages = useMemo(() => {
     let filtered = pageManagement.filteredPages; // Hook içinde zaten dil filtresi uygulanmış
     
+    console.log('🔍 Filtreleme Debug:', {
+      selectedLanguageId: languageManagement.selectedLanguageId,
+      allPagesCount: pageManagement.pages.length,
+      filteredPagesCount: pageManagement.filteredPages.length,
+      allPages: pageManagement.pages.map(p => ({ id: p.id, title: p.title, languageId: p.languageId })),
+      filteredPages: pageManagement.filteredPages.map(p => ({ id: p.id, title: p.title, languageId: p.languageId })),
+      languages: languageManagement.languages.map(l => ({ id: l.id, name: l.name, code: l.code }))
+    });
+    
     // Arama filtresi
     if (searchTerm) {
       filtered = filtered.filter(page => 
@@ -196,7 +205,7 @@ const HeaderInner = <
     }
     
     return filtered;
-  }, [pageManagement.filteredPages, searchTerm]);
+  }, [pageManagement.filteredPages, searchTerm, languageManagement.selectedLanguageId, pageManagement.pages, languageManagement.languages]);
 
   // Handle functions
   const handleSelectPage = useCallback((id: string) => {

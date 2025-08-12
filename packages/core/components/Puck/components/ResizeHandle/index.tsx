@@ -53,8 +53,8 @@ export const ResizeHandle: React.FC<ResizeHandleProps> = ({
     document.body.style.userSelect = "";
 
     const overlay = document.getElementById("resize-overlay");
-    if (overlay) {
-      document.body.removeChild(overlay);
+    if (overlay && overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
     }
 
     // Remove event listeners when dragging ends
@@ -91,6 +91,21 @@ export const ResizeHandle: React.FC<ResizeHandleProps> = ({
     },
     [position, handleMouseMove, handleMouseUp]
   );
+
+  // Ensure cleanup on unmount (e.g. during Fast Refresh) to avoid stale overlay or listeners
+  useEffect(() => {
+    return () => {
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      const overlay = document.getElementById("resize-overlay");
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   return (
     <div

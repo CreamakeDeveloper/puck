@@ -6,7 +6,16 @@ export const getPages = async (): Promise<Page[]> => {
   try {
     const response = await fetch('/api/pages');
     if (!response.ok) throw new Error('Sayfalar getirilemedi');
-    return response.json();
+    const pages = await response.json();
+    
+    console.log('📄 Pages API Response:', pages.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      languageId: p.languageId,
+      slug: p.slug
+    })));
+    
+    return pages;
   } catch (error) {
     console.error('Sayfa listesi alınırken hata:', error);
     return [];
@@ -26,6 +35,8 @@ export const getPage = async (id: string): Promise<Page | null> => {
 
 export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
   try {
+    console.log('📝 Adding Page:', page);
+    
     const response = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -39,7 +50,10 @@ export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
       } catch {}
       throw new Error(message);
     }
-    return response.json();
+    const result = await response.json();
+    
+    console.log('✅ Page Added:', result);
+    return result;
   } catch (error) {
     console.error('Sayfa eklenirken hata:', error);
     throw error;
@@ -76,24 +90,39 @@ export const deletePage = async (id: string): Promise<boolean> => {
 // Dil API fonksiyonları
 export const getLanguages = async (): Promise<Language[]> => {
   try {
-    // Önce senin site-languages API'ni dene
+    // Senin site-languages API'ni kullan
     const response = await fetch('/api/site-languages');
     if (response.ok) {
       const data = await response.json();
+      
+      console.log('🌍 Site Languages API Response:', data);
+      
       // Backend formatını frontend formatına çevir
-      return data.languages.map((lang: any) => ({
-        id: `${lang.code}-id`, // code'dan id oluştur
+      const languages = data.languages.map((lang: any) => ({
+        id: lang.code, // ID olarak code kullan (tr, en, de)
         name: lang.name,
         code: lang.code,
         isDefault: lang.code === data.defaultLanguage,
         isActive: lang.isActive
       }));
+      
+      console.log('🎯 Converted Languages:', languages);
+      return languages;
     }
     
-    // Fallback: orijinal API
+    // Fallback: /api/languages (ID'li format)
     const fallbackResponse = await fetch('/api/languages');
     if (!fallbackResponse.ok) throw new Error('Diller getirilemedi');
-    return fallbackResponse.json();
+    const fallbackData = await fallbackResponse.json();
+    
+    console.log('🔄 Fallback Languages API Response:', fallbackData);
+    
+    // Fallback formatı zaten uyumlu, sadece eksik alanları ekle
+    return fallbackData.map((lang: any) => ({
+      ...lang,
+      isDefault: false, // Varsayılan dil bilgisi yok
+      isActive: true    // Aktif kabul et
+    }));
   } catch (error) {
     console.error('Dil listesi alınırken hata:', error);
     return [];

@@ -6,9 +6,27 @@ export const getPages = async (): Promise<Page[]> => {
   try {
     const response = await fetch('/api/pages');
     if (!response.ok) throw new Error('Sayfalar getirilemedi');
-    const pages = await response.json();
+    const rawPages = await response.json();
     
-    console.log('📄 Pages API Response:', pages.map((p: any) => ({
+    console.log('📄 Raw Pages API Response:', rawPages.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      languageCode: p.languageCode,
+      slug: p.slug
+    })));
+    
+    // Backend formatını frontend formatına çevir
+    const pages = rawPages.map((p: any) => ({
+      id: String(p.id),
+      title: p.title,
+      slug: p.slug,
+      content: p.page?.content || p.content || '',
+      seo: p.seo,
+      isActive: p.isActive,
+      languageId: p.languageCode // languageCode -> languageId dönüşümü
+    }));
+    
+    console.log('🎯 Converted Pages:', pages.map((p: any) => ({
       id: p.id,
       title: p.title,
       languageId: p.languageId,
@@ -26,7 +44,32 @@ export const getPage = async (id: string): Promise<Page | null> => {
   try {
     const response = await fetch(`/api/pages/${id}`);
     if (!response.ok) throw new Error('Sayfa getirilemedi');
-    return response.json();
+    const rawPage = await response.json();
+    
+    console.log('📄 Raw Page API Response:', {
+      id: rawPage.id,
+      title: rawPage.title,
+      languageCode: rawPage.languageCode
+    });
+    
+    // Backend formatını frontend formatına çevir
+    const page = {
+      id: String(rawPage.id),
+      title: rawPage.title,
+      slug: rawPage.slug,
+      content: rawPage.page?.content || rawPage.content || '',
+      seo: rawPage.seo,
+      isActive: rawPage.isActive,
+      languageId: rawPage.languageCode // languageCode -> languageId dönüşümü
+    };
+    
+    console.log('🎯 Converted Page:', {
+      id: page.id,
+      title: page.title,
+      languageId: page.languageId
+    });
+    
+    return page;
   } catch (error) {
     console.error('Sayfa alınırken hata:', error);
     return null;
@@ -35,12 +78,21 @@ export const getPage = async (id: string): Promise<Page | null> => {
 
 export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
   try {
-    console.log('📝 Adding Page:', page);
+    console.log('📝 Adding Page (Frontend Format):', page);
+    
+    // Frontend formatını backend formatına çevir
+    const backendPage = {
+      ...page,
+      languageCode: page.languageId, // languageId -> languageCode dönüşümü
+      languageId: undefined // Backend alanını temizle
+    };
+    
+    console.log('🔄 Backend Format:', backendPage);
     
     const response = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(page),
+      body: JSON.stringify(backendPage),
     });
     if (!response.ok) {
       let message = 'Sayfa eklenemedi';
@@ -50,9 +102,20 @@ export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
       } catch {}
       throw new Error(message);
     }
-    const result = await response.json();
+    const rawResult = await response.json();
     
-    console.log('✅ Page Added:', result);
+    // Backend response'unu frontend formatına çevir
+    const result = {
+      id: String(rawResult.id),
+      title: rawResult.title,
+      slug: rawResult.slug,
+      content: rawResult.page?.content || rawResult.content || '',
+      seo: rawResult.seo,
+      isActive: rawResult.isActive,
+      languageId: rawResult.languageCode // languageCode -> languageId dönüşümü
+    };
+    
+    console.log('✅ Page Added (Frontend Format):', result);
     return result;
   } catch (error) {
     console.error('Sayfa eklenirken hata:', error);
@@ -62,13 +125,39 @@ export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
 
 export const updatePage = async (id: string, data: Partial<Page>): Promise<Page | null> => {
   try {
+    console.log('📝 Updating Page (Frontend Format):', { id, data });
+    
+    // Frontend formatını backend formatına çevir
+    const backendData = {
+      ...data,
+      languageCode: data.languageId, // languageId -> languageCode dönüşümü
+      languageId: undefined // Backend alanını temizle
+    };
+    
+    console.log('🔄 Backend Update Format:', backendData);
+    
     const response = await fetch(`/api/pages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(backendData),
     });
     if (!response.ok) throw new Error('Sayfa güncellenemedi');
-    return response.json();
+    
+    const rawResult = await response.json();
+    
+    // Backend response'unu frontend formatına çevir
+    const result = {
+      id: String(rawResult.id),
+      title: rawResult.title,
+      slug: rawResult.slug,
+      content: rawResult.page?.content || rawResult.content || '',
+      seo: rawResult.seo,
+      isActive: rawResult.isActive,
+      languageId: rawResult.languageCode // languageCode -> languageId dönüşümü
+    };
+    
+    console.log('✅ Page Updated (Frontend Format):', result);
+    return result;
   } catch (error) {
     console.error('Sayfa güncellenirken hata:', error);
     return null;
@@ -183,13 +272,32 @@ export const createPagePrivate = async (
   page: Omit<Page, "id">
 ): Promise<Page | null> => {
   try {
+    // Frontend formatını backend formatına çevir
+    const backendPage = {
+      ...page,
+      languageCode: page.languageId,
+      languageId: undefined
+    };
+    
     const response = await fetch("/api/private/create/page", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(page),
+      body: JSON.stringify(backendPage),
     });
     if (!response.ok) throw new Error("Özel uç: sayfa oluşturulamadı");
-    return response.json();
+    
+    const rawResult = await response.json();
+    
+    // Backend response'unu frontend formatına çevir
+    return {
+      id: String(rawResult.id),
+      title: rawResult.title,
+      slug: rawResult.slug,
+      content: rawResult.page?.content || rawResult.content || '',
+      seo: rawResult.seo,
+      isActive: rawResult.isActive,
+      languageId: rawResult.languageCode
+    };
   } catch (error) {
     console.warn("/api/private/create/page çağrısı başarısız, /api/pages kullanılacak.", error);
     return null;
@@ -201,13 +309,32 @@ export const updatePagePrivate = async (
   data: Partial<Page>
 ): Promise<Page | null> => {
   try {
+    // Frontend formatını backend formatına çevir
+    const backendData = {
+      ...data,
+      languageCode: data.languageId,
+      languageId: undefined
+    };
+    
     const response = await fetch("/api/private/update/page", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...data }),
+      body: JSON.stringify({ id, ...backendData }),
     });
     if (!response.ok) throw new Error("Özel uç: sayfa güncellenemedi");
-    return response.json();
+    
+    const rawResult = await response.json();
+    
+    // Backend response'unu frontend formatına çevir
+    return {
+      id: String(rawResult.id),
+      title: rawResult.title,
+      slug: rawResult.slug,
+      content: rawResult.page?.content || rawResult.content || '',
+      seo: rawResult.seo,
+      isActive: rawResult.isActive,
+      languageId: rawResult.languageCode
+    };
   } catch (error) {
     console.warn("/api/private/update/page çağrısı başarısız, /api/pages kullanılacak.", error);
     return null;

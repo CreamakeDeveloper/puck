@@ -6,7 +6,7 @@ import { AppStore, useAppStore, useAppStoreApi } from "../../../../store";
 
 import styles from "./styles.module.css";
 import { getClassNameFactory } from "../../../../lib";
-import { memo, ReactNode, useCallback, useMemo, useState, useEffect } from "react";
+import { memo, ReactNode, useCallback, useMemo, useState } from "react";
 import { ItemSelector } from "../../../../lib/data/get-item";
 import { useRegisterFieldsSlice } from "../../../../store/slices/fields";
 import { useShallow } from "zustand/react/shallow";
@@ -248,13 +248,7 @@ const FieldsInternal = ({ wrapFields = true }: { wrapFields?: boolean }) => {
     return result;
   }, [fieldNames, fields]);
 
-  // İlk grup yüklendiğinde varsayılan olarak aç
-  useEffect(() => {
-    const firstGroupName = groupedFields[0]?.[0];
-    if (activeGroup === null && firstGroupName) {
-      setActiveGroup(firstGroupName);
-    }
-  }, [groupedFields, activeGroup]);
+  // Varsayılan olarak hiçbir grup açık değil - kullanıcı kendisi seçecek
 
   return (
     <form

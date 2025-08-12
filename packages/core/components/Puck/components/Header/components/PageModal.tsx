@@ -30,8 +30,14 @@ export const PageModal: React.FC<PageModalProps> = ({
 }) => {
   if (!modalOpen) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={getClassName("modal")}>
+    <div className={getClassName("modal")} onClick={handleBackdropClick}>
       <div className={getClassName("modalContent")}>
         <div className={getClassName("modalHeader")}>
           <h3>{editingPage ? 'Sayfa Düzenle' : 'Yeni Sayfa Ekle'}</h3>

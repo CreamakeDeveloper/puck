@@ -134,8 +134,14 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({
 
   if (!languageModalOpen) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={getClassName("modal")}>
+    <div className={getClassName("modal")} onClick={handleBackdropClick}>
       <div className={getClassName("modalContent")}>
         <div className={getClassName("modalHeader")}>
           <h3>Dil Yönetimi</h3>

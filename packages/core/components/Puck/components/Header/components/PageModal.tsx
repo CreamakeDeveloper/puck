@@ -1,5 +1,5 @@
-import React from "react";
-import { Globe } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Globe, ChevronDown } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Button } from "../../../../Button";
 import { Page, Language } from "../types";
@@ -29,6 +29,26 @@ export const PageModal: React.FC<PageModalProps> = ({
   onPageChange,
   onNewPageChange,
 }) => {
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Dropdown dışına tıklayınca kapat
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setLanguageDropdownOpen(false);
+      }
+    };
+
+    if (languageDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [languageDropdownOpen]);
+  
   if (!modalOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -91,25 +111,115 @@ export const PageModal: React.FC<PageModalProps> = ({
           
           <div className={getClassName("formGroup")}>
             <label>Dil</label>
-            <select
-              value={editingPage ? (editingPage.languageId || '') : (newPage.languageId || '')}
-              onChange={(e) => {
-                const value = e.target.value || undefined;
-                if (editingPage) {
-                  onPageChange({ ...editingPage, languageId: value });
-                } else {
-                  onNewPageChange({ ...newPage, languageId: value });
-                }
-              }}
-              className={getClassName("input")}
-            >
-              <option value="">Dil Seçin</option>
-              {languages.map((lang) => (
-                <option key={lang.id} value={lang.id}>
-                  {lang.name} {lang.isDefault ? '(Varsayılan)' : ''}
-                </option>
-              ))}
-            </select>
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className={getClassName("input")}
+                onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  background: 'var(--puck-color-white)',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {(() => {
+                    const currentLanguageId = editingPage ? editingPage.languageId : newPage.languageId;
+                    const currentLanguage = languages.find(l => l.id === currentLanguageId);
+                    
+                    if (currentLanguage) {
+                      return (
+                        <>
+                          {renderFlagIcon(currentLanguage.code)}
+                          <span>{currentLanguage.name} {currentLanguage.isDefault ? '(Varsayılan)' : ''}</span>
+                        </>
+                      );
+                    }
+                    
+                    return <span style={{ color: 'var(--puck-color-grey-05)' }}>Dil Seçin</span>;
+                  })()}
+                </div>
+                <ChevronDown size={16} />
+              </button>
+              
+              {languageDropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: 'var(--puck-color-white)',
+                    border: '1px solid var(--puck-color-grey-09)',
+                    borderRadius: '6px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    zIndex: 1000,
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid var(--puck-color-grey-10)',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onClick={() => {
+                      if (editingPage) {
+                        onPageChange({ ...editingPage, languageId: undefined });
+                      } else {
+                        onNewPageChange({ ...newPage, languageId: undefined });
+                      }
+                      setLanguageDropdownOpen(false);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--puck-color-grey-10)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <span style={{ color: 'var(--puck-color-grey-05)' }}>Dil Seçin</span>
+                  </div>
+                  
+                  {languages.map((lang) => (
+                    <div
+                      key={lang.id}
+                      style={{
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        transition: 'background-color 0.2s'
+                      }}
+                      onClick={() => {
+                        if (editingPage) {
+                          onPageChange({ ...editingPage, languageId: lang.id });
+                        } else {
+                          onNewPageChange({ ...newPage, languageId: lang.id });
+                        }
+                        setLanguageDropdownOpen(false);
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--puck-color-grey-10)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      {renderFlagIcon(lang.code)}
+                      <span>{lang.name} {lang.isDefault ? '(Varsayılan)' : ''}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           
 

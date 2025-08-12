@@ -183,14 +183,9 @@ const HeaderInner = <
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Filtrelenmiş sayfalar (arama ve dil filtresi dahil)
+  // Filtrelenmiş sayfalar (sadece arama filtresi)
   const filteredPages = useMemo(() => {
-    let filtered = pageManagement.filteredPages;
-    
-    // Dil filtresi - sadece seçili dildeki sayfaları göster
-    if (languageManagement.selectedLanguageId) {
-      filtered = filtered.filter(page => page.languageId === languageManagement.selectedLanguageId);
-    }
+    let filtered = pageManagement.filteredPages; // Hook içinde zaten dil filtresi uygulanmış
     
     // Arama filtresi
     if (searchTerm) {
@@ -201,7 +196,7 @@ const HeaderInner = <
     }
     
     return filtered;
-  }, [pageManagement.filteredPages, searchTerm, languageManagement.selectedLanguageId]);
+  }, [pageManagement.filteredPages, searchTerm]);
 
   // Handle functions
   const handleSelectPage = useCallback((id: string) => {

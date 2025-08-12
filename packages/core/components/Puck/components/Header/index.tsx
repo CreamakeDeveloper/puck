@@ -430,7 +430,12 @@ const HeaderInner = <
             <div ref={commandWrapperRef} className={getClassName("commandCenterWrapper")}>
               <button
                 className={getClassName("commandButton")}
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                onClick={() => {
+                  setDropdownOpen(!dropdownOpen);
+                  // Diğer panelleri kapat
+                  seoManagement.setSeoOpen(false);
+                  languageManagement.setLanguageDropdownOpen(false);
+                }}
                 type="button"
               >
                 <div className={getClassName("commandButtonLeft")}>
@@ -454,7 +459,12 @@ const HeaderInner = <
               <div ref={languageWrapperRef} className={getClassName("languageButtonWrap")}>
                 <button
                   className={getClassName("commandButton")}
-                  onClick={() => languageManagement.setLanguageDropdownOpen(!languageManagement.languageDropdownOpen)}
+                  onClick={() => {
+                    languageManagement.setLanguageDropdownOpen(!languageManagement.languageDropdownOpen);
+                    // Diğer panelleri kapat
+                    setDropdownOpen(false);
+                    seoManagement.setSeoOpen(false);
+                  }}
                   type="button"
                   title="Dil Seçimi"
                   style={{ width: 'auto' }}

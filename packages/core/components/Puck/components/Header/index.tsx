@@ -382,14 +382,22 @@ const HeaderInner = <
                 <PanelRight focusable="false" />
               </IconButton>
             </div>
+
+          </div>
+          <div className={getClassName("commandCenter")}>
+            {/* SEO Butonu */}
             <div
               ref={seoWrapperRef}
               className={getClassName("seoSettingsWrapper")}
-              style={{ marginLeft: 130, position: "relative" }}
             >
               <button
                 className={getClassName("commandButton")}
-                onClick={() => seoManagement.setSeoOpen(!seoManagement.seoOpen)}
+                onClick={() => {
+                  seoManagement.setSeoOpen(!seoManagement.seoOpen);
+                  // Diğer panelleri kapat
+                  setDropdownOpen(false);
+                  languageManagement.setLanguageDropdownOpen(false);
+                }}
                 type="button"
                 title="SEO Ayarları"
               >
@@ -425,8 +433,8 @@ const HeaderInner = <
                 updateOpenGraphField={seoManagement.updateOpenGraphField}
               />
             </div>
-          </div>
-          <div className={getClassName("commandCenter")}>
+
+            {/* Sayfa Yönetimi Butonu */}
             <div ref={commandWrapperRef} className={getClassName("commandCenterWrapper")}>
               <button
                 className={getClassName("commandButton")}
@@ -455,45 +463,6 @@ const HeaderInner = <
                   />
                 </div>
               </button>
-              {/* Dil Komut Paleti Butonu */}
-              <div ref={languageWrapperRef} className={getClassName("languageButtonWrap")}>
-                <button
-                  className={getClassName("commandButton")}
-                  onClick={() => {
-                    languageManagement.setLanguageDropdownOpen(!languageManagement.languageDropdownOpen);
-                    // Diğer panelleri kapat
-                    setDropdownOpen(false);
-                    seoManagement.setSeoOpen(false);
-                  }}
-                  type="button"
-                  title="Dil Seçimi"
-                  style={{ width: 'auto' }}
-                >
-                  <div className={getClassName("commandButtonLeft")}>
-                    <Globe size={18} className={getClassName("commandIcon")} />
-                    <span className={getClassName("commandText")}>
-                      {languageManagement.languages.find(l => l.id === languageManagement.selectedLanguageId)?.name || 'Dil'}
-                    </span>
-                  </div>
-                  <div className={getClassName("commandButtonRight")}>
-                    <span className={getClassName("commandHint")}>⌘/CTRL + G</span>
-                    <ChevronDown 
-                      size={16} 
-                      className={`${getClassName("commandChevron")} ${languageManagement.languageDropdownOpen ? getClassName("commandChevron--open") : ""}`} 
-                    />
-                  </div>
-                </button>
-
-                <LanguagePalette
-                  languageDropdownOpen={languageManagement.languageDropdownOpen}
-                  languageSearchTerm={languageManagement.languageSearchTerm}
-                  setLanguageSearchTerm={languageManagement.setLanguageSearchTerm}
-                  filteredLanguages={languageManagement.filteredLanguages}
-                  selectedLanguageId={languageManagement.selectedLanguageId}
-                  onSelectLanguage={handleSelectLanguage}
-                  onAddNewLanguage={handleAddNewLanguage}
-                />
-              </div>
               
               <CommandPalette
                 dropdownOpen={dropdownOpen}
@@ -506,6 +475,45 @@ const HeaderInner = <
                 onEditPage={handleEditPage}
                 onDeletePage={pageManagement.handleDeletePage}
                 onAddNewPage={handleAddNewPage}
+              />
+            </div>
+
+            {/* Dil Seçimi Butonu */}
+            <div ref={languageWrapperRef} className={getClassName("languageButtonWrap")}>
+              <button
+                className={getClassName("commandButton")}
+                onClick={() => {
+                  languageManagement.setLanguageDropdownOpen(!languageManagement.languageDropdownOpen);
+                  // Diğer panelleri kapat
+                  setDropdownOpen(false);
+                  seoManagement.setSeoOpen(false);
+                }}
+                type="button"
+                title="Dil Seçimi"
+              >
+                <div className={getClassName("commandButtonLeft")}>
+                  <Globe size={18} className={getClassName("commandIcon")} />
+                  <span className={getClassName("commandText")}>
+                    {languageManagement.languages.find(l => l.id === languageManagement.selectedLanguageId)?.name || 'Dil'}
+                  </span>
+                </div>
+                <div className={getClassName("commandButtonRight")}>
+                  <span className={getClassName("commandHint")}>⌘/CTRL + G</span>
+                  <ChevronDown 
+                    size={16} 
+                    className={`${getClassName("commandChevron")} ${languageManagement.languageDropdownOpen ? getClassName("commandChevron--open") : ""}`} 
+                  />
+                </div>
+              </button>
+
+              <LanguagePalette
+                languageDropdownOpen={languageManagement.languageDropdownOpen}
+                languageSearchTerm={languageManagement.languageSearchTerm}
+                setLanguageSearchTerm={languageManagement.setLanguageSearchTerm}
+                filteredLanguages={languageManagement.filteredLanguages}
+                selectedLanguageId={languageManagement.selectedLanguageId}
+                onSelectLanguage={handleSelectLanguage}
+                onAddNewLanguage={handleAddNewLanguage}
               />
             </div>
           </div>

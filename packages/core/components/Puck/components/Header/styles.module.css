@@ -105,7 +105,9 @@
 .PuckHeader-commandCenter {
   display: flex;
   justify-content: center;
-  max-width: 600px;
+  align-items: center;
+  gap: 16px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
 }
@@ -113,34 +115,32 @@
 .PuckHeader-commandCenterWrapper {
   position: relative;
   width: 100%;
-  max-width: 500px;
-  margin-left: -210px !important; /* sayfalama butonunu eski haline bırak */
+  max-width: 450px;
 }
 
-/* Dil butonunu sayfalama butonunun sağına al, araya boşluk koy ve sağa yanaştır */
+/* Mobil değil normal görünümde butonlar arasında boşluk */
+.PuckHeader-seoSettingsWrapper {
+  position: relative;
+  flex: 1.5; /* SEO butonunu biraz büyüt */
+  min-width: 0;
+}
+
 .PuckHeader-languageButtonWrap {
-  position: absolute;
-  right: -480px; /* sayfalama ile araya mesafe bırak ve sağ tarafa yanaştır */
-  top: 0;
-  width: 360px;
-  /* Görünmez sarmalayıcının boş alanında tıklamaların içeride sayılmasını engelle */
-  pointer-events: none;
+  position: relative;
+  flex: 1.5; /* Dil butonunu da büyüt */
+  min-width: 0;
 }
 
-/* Çocuk bileşenlerde etkileşimi tekrar etkinleştir */
-.PuckHeader-languageButtonWrap .PuckHeader-commandButton,
+.PuckHeader-commandCenterWrapper {
+  position: relative;
+  flex: 4; /* Diğerlerinin 2 katı genişlik */
+  min-width: 0;
+}
+
+/* Masaüstünde dil dropdown'ı sağa doğru açılsın */
 .PuckHeader-languageButtonWrap .PuckHeader-commandPalette {
-  pointer-events: auto;
-}
-
-.PuckHeader-languagePalette {
   right: 0;
-  left: auto; /* paleti butonun altına, sağa hizalı aç */
-}
-
-/* Dil butonunda, sol (Dil) ile sağ (⌘/CTRL + G) arasında SEO’daki gibi ekstra iç boşluk */
-.PuckHeader-languageButtonWrap .PuckHeader-commandButtonRight {
-  margin-left: 12px;
+  left: auto;
 }
 
 .PuckHeader-commandButton {
@@ -252,8 +252,8 @@
 }
 
 .PuckHeader-languagePalette {
-  width: 360px; /* sağa yaslı, sola doğru genişlesin */
-  right: 150px;     /* sağ kenara sabitle */
+  width: 380px; /* daha da geniş */
+  right: -40px; /* daha da sola kaydır */
   left: auto;   /* sola doğru genişlesin */
 }
 
@@ -671,20 +671,24 @@
 
 /* Responsive Tasarım */
 @media (max-width: 1024px) {
+  .PuckHeader-commandCenter {
+    max-width: 800px;
+    gap: 12px;
+  }
+  
   .PuckHeader-commandCenterWrapper {
-    margin-left: -100px !important;
+    flex: 3; /* Tablet'te de büyük ama masaüstünden biraz küçük */
     max-width: 400px;
   }
   
-  .PuckHeader-languageButtonWrap {
-    right: -360px;
-    width: 300px;
-    /* Mobil kırılımına yaklaşırken de boş alan tıklamalarını içeri sayma */
-    pointer-events: none;
+  .PuckHeader-seoSettingsWrapper {
+    flex: 1.5; /* SEO butonunu tablet'te de büyüt */
+    max-width: 200px;
   }
   
-  .PuckHeader-seoSettingsWrapper {
-    margin-left: 100px !important;
+  .PuckHeader-languageButtonWrap {
+    flex: 1.5; /* Dil butonunu tablet'te de büyüt */
+    max-width: 200px;
   }
 }
 
@@ -700,47 +704,47 @@
     display: none;
   }
   
-  /* Orta kısım: SEO, Sayfalandırma, Dil tek satırda */
+  /* Orta kısım: SEO, Sayfalandırma, Dil tek satırda - sadece ikonlar */
   .PuckHeader-commandCenter {
     max-width: 100%;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     justify-content: center;
+    flex: 1;
   }
   
   .PuckHeader-commandCenterWrapper {
     margin-left: 0 !important;
     max-width: none;
     flex: 1;
-    min-width: 120px;
+    min-width: 0;
+    position: relative;
   }
   
   .PuckHeader-seoSettingsWrapper {
     margin-left: 0 !important;
     position: relative;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
   }
   
   .PuckHeader-languageButtonWrap {
     position: relative;
     right: auto;
     top: auto;
-    width: auto;
     margin-left: 0;
-    flex-shrink: 0;
-    /* Küçük ekranlarda da boş alan tıklamalarını içeri sayma */
-    pointer-events: none;
+    flex: 1;
+    min-width: 0;
+    pointer-events: auto; /* Mobilde normal etkileşim */
   }
   
-  /* Sağ tarafa menu button */
-  .PuckHeader-tools {
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  /* Mobil'de sadece ikonları göster */
+  /* Mobilde sadece ikonları göster - text'leri gizle */
   .PuckHeader-commandText {
+    display: none;
+  }
+  
+  .PuckHeader-commandPath {
     display: none;
   }
   
@@ -752,47 +756,58 @@
     display: none;
   }
   
-  .PuckHeader-languageButtonWrap .PuckHeader-commandButtonRight {
-    display: none;
-  }
-  
-  .PuckHeader-seoSettingsWrapper .PuckHeader-commandButtonRight {
-    display: none;
-  }
-  
   /* SEO tab metinlerini gizle */
   .PuckHeader-seoTabText {
     display: none;
   }
   
-  /* Butonları küçült */
+  /* Butonları minimal icon-only boyutuna ayarla */
   .PuckHeader-commandButton {
-    min-height: 36px;
-    padding: 6px 10px;
-    min-width: 40px;
+    min-height: 32px;
+    min-width: 32px;
+    width: 100%;
+    padding: 4px;
+    justify-content: center;
+    flex: 1;
+    border-radius: 6px;
   }
   
-  /* Dropdown'ları responsive yap */
-  .PuckHeader-commandPalette {
-    left: -50%;
-    right: auto;
-    max-width: 90vw;
-    width: 320px;
+  .PuckHeader-commandButtonLeft {
+    justify-content: center;
+    gap: 0;
+    flex: 1;
   }
   
+  /* Mobilde ikonları küçült */
+  .PuckHeader-commandIcon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Sağ tarafa menu button */
+  .PuckHeader-tools {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* Mobilde SEO ve Sayfa dropdown'ları tam genişlik */
+  .PuckHeader-commandPalette,
+  .PuckHeader-pagesPalette,
+  .PuckHeader-seoPalette {
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 8px !important;
+  }
+  
+  /* Dil dropdown'ı sağa hizalı kalsın mobilde */
   .PuckHeader-languagePalette {
-    left: auto;    /* sağ kenara sabitle */
-    right: 0;      /* sağdan hizalı kalsın */
-    max-width: 90vw;
-    width: 320px;  /* daha geniş */
-  }
-  
-  /* SEO dropdown'ı responsive */
-  .PuckHeader-seoSettingsWrapper .PuckHeader-commandPalette {
-    left: -200px;
-    right: auto;
-    max-width: 90vw;
-    width: 420px; /* mobilde biraz daha geniş kalsın */
+    left: auto !important;
+    right: 0 !important;
+    width: 280px !important;
+    max-width: 90vw !important;
+    margin: 0 8px 0 0 !important;
   }
 }
 
@@ -810,16 +825,32 @@
   
   .PuckHeader-commandCenter {
     flex-direction: row;
-    gap: 2px;
-    overflow-x: auto;
+    gap: 4px;
+    justify-content: center;
+    flex: 1;
   }
   
-  /* Çok küçük butonlar */
+  /* Çok küçük ekranlarda minimal icon-only butonlar */
   .PuckHeader-commandButton {
-    min-height: 32px;
-    padding: 4px 8px;
-    min-width: 36px;
-    flex-shrink: 0;
+    min-height: 28px;
+    min-width: 28px;
+    width: 100%;
+    padding: 3px;
+    justify-content: center;
+    flex: 1;
+    border-radius: 4px;
+  }
+  
+  .PuckHeader-commandButtonLeft {
+    justify-content: center;
+    gap: 0;
+    flex: 1;
+  }
+  
+  /* Çok küçük ekranlarda ikonları daha da küçült */
+  .PuckHeader-commandIcon {
+    width: 12px;
+    height: 12px;
   }
   
   /* Modal responsive */
@@ -842,22 +873,24 @@
     width: 100%;
   }
   
-  /* Çok küçük ekranlarda dropdown'ları tam genişlik yap */
-  .PuckHeader-commandPalette,
-  .PuckHeader-seoSettingsWrapper .PuckHeader-commandPalette {
-    left: 0;
-    right: 0;
-    width: auto;
-    max-width: none;
-    margin: 0 8px;
+  /* Çok küçük ekranlarda SEO ve Sayfa dropdown'ları tam genişlik */
+  .PuckHeader-pagesPalette,
+  .PuckHeader-seoPalette {
+    left: 50% !important;
+    right: unset !important;
+    width: 90vw !important;
+    max-width: 280px !important;
+    margin: 0 4px 0 0 !important;
+    transform: translateX(-50%) !important;
   }
-  /* Dil dropdown'u küçük ekranda da sağa sabit, sola doğru genişlesin */
+  
+  /* Dil dropdown'ı küçük ekranda da sağa hizalı */
   .PuckHeader-languagePalette {
-    left: auto;
-    right: 0;
-    width: 90vw;
-    max-width: 360px;
-    margin: 0 8px 0 0;
+    left: auto !important;
+    right: 0 !important;
+    width: 90vw !important;
+    max-width: 280px !important;
+    margin: 0 4px 0 0 !important;
   }
 }
 

@@ -35,6 +35,7 @@ import { LanguagePalette } from "./components/LanguagePalette";
 import { SEOPanel } from "./components/SEOPanel";
 import { PageModal } from "./components/PageModal";
 import { LanguageModal } from "./components/LanguageModal";
+import { getFlagEmoji } from "./utils/languageUtils";
 
 const getClassName = getClassNameFactory("PuckHeader", styles);
 
@@ -182,9 +183,14 @@ const HeaderInner = <
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Filtrelenmiş sayfalar (arama dahil)
+  // Filtrelenmiş sayfalar (arama ve dil filtresi dahil)
   const filteredPages = useMemo(() => {
     let filtered = pageManagement.filteredPages;
+    
+    // Dil filtresi - sadece seçili dildeki sayfaları göster
+    if (languageManagement.selectedLanguageId) {
+      filtered = filtered.filter(page => page.languageId === languageManagement.selectedLanguageId);
+    }
     
     // Arama filtresi
     if (searchTerm) {
@@ -195,7 +201,7 @@ const HeaderInner = <
     }
     
     return filtered;
-  }, [pageManagement.filteredPages, searchTerm]);
+  }, [pageManagement.filteredPages, searchTerm, languageManagement.selectedLanguageId]);
 
   // Handle functions
   const handleSelectPage = useCallback((id: string) => {
@@ -212,10 +218,17 @@ const HeaderInner = <
 
   const handleAddNewPage = useCallback(() => {
     pageManagement.setEditingPage(null);
-    pageManagement.setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true, languageId: undefined });
+    pageManagement.setNewPage({ 
+      title: '', 
+      slug: '', 
+      content: '', 
+      seo: undefined, 
+      isActive: true, 
+      languageId: languageManagement.selectedLanguageId || undefined // Seçili dili otomatik ata
+    });
     pageManagement.setModalOpen(true);
     setDropdownOpen(false);
-  }, [pageManagement.setEditingPage, pageManagement.setNewPage, pageManagement.setModalOpen]);
+  }, [pageManagement.setEditingPage, pageManagement.setNewPage, pageManagement.setModalOpen, languageManagement.selectedLanguageId]);
 
   const handleAddNewLanguage = useCallback(() => {
     languageManagement.setEditingLanguage(null);
@@ -492,7 +505,13 @@ const HeaderInner = <
                 title="Dil Seçimi"
               >
                 <div className={getClassName("commandButtonLeft")}>
-                  <Globe size={18} className={getClassName("commandIcon")} />
+                  {languageManagement.selectedLanguageId ? (
+                    <span style={{ fontSize: '18px', marginRight: '4px' }}>
+                      {getFlagEmoji(languageManagement.languages.find(l => l.id === languageManagement.selectedLanguageId)?.code || '')}
+                    </span>
+                  ) : (
+                    <Globe size={18} className={getClassName("commandIcon")} />
+                  )}
                   <span className={getClassName("commandText")}>
                     {languageManagement.languages.find(l => l.id === languageManagement.selectedLanguageId)?.name || 'Dil'}
                   </span>

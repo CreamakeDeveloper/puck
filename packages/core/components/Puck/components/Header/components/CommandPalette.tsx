@@ -2,6 +2,7 @@ import React from "react";
 import { Search, Plus, FileText, Edit, Trash } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Page, Language } from "../types";
+import { getFlagEmoji } from "../utils/languageUtils";
 import styles from "../styles.module.css";
 
 const getClassName = getClassNameFactory("PuckHeader", styles);
@@ -110,8 +111,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                         color: 'var(--puck-color-grey-06)',
                         background: 'var(--puck-color-grey-10)',
                         padding: '2px 6px',
-                        borderRadius: 4
+                        borderRadius: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4
                       }}>
+                        <span style={{ fontSize: '10px' }}>
+                          {getFlagEmoji(languages.find(l => l.id === page.languageId)?.code || '')}
+                        </span>
                         {languages.find(l => l.id === page.languageId)?.name || page.languageId}
                       </span>
                     )}

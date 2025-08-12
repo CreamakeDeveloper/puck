@@ -2,6 +2,7 @@ import React from "react";
 import { Search, Plus, Globe, FileText } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Language } from "../types";
+import { getFlagEmoji } from "../utils/languageUtils";
 import styles from "../styles.module.css";
 
 const getClassName = getClassNameFactory("PuckHeader", styles);
@@ -96,7 +97,7 @@ export const LanguagePalette: React.FC<LanguagePaletteProps> = ({
               role="button"
               tabIndex={0}
             >
-              <Globe size={16} className={getClassName("commandItemIcon")} />
+              <span style={{ fontSize: '16px', marginRight: '8px' }}>{getFlagEmoji(lang.code)}</span>
               <div className={getClassName("commandItemText")}>
                 <span className={getClassName("commandItemTitle")}>{lang.name}</span>
                 <span className={getClassName("commandItemDesc")}>{lang.code}{lang.isDefault ? ' · Varsayılan' : ''}</span>

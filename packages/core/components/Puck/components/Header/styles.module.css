@@ -123,6 +123,14 @@
   right: -480px; /* sayfalama ile araya mesafe bırak ve sağ tarafa yanaştır */
   top: 0;
   width: 360px;
+  /* Görünmez sarmalayıcının boş alanında tıklamaların içeride sayılmasını engelle */
+  pointer-events: none;
+}
+
+/* Çocuk bileşenlerde etkileşimi tekrar etkinleştir */
+.PuckHeader-languageButtonWrap .PuckHeader-commandButton,
+.PuckHeader-languageButtonWrap .PuckHeader-commandPalette {
+  pointer-events: auto;
 }
 
 .PuckHeader-languagePalette {
@@ -671,6 +679,8 @@
   .PuckHeader-languageButtonWrap {
     right: -360px;
     width: 300px;
+    /* Mobil kırılımına yaklaşırken de boş alan tıklamalarını içeri sayma */
+    pointer-events: none;
   }
   
   .PuckHeader-seoSettingsWrapper {
@@ -719,6 +729,8 @@
     width: auto;
     margin-left: 0;
     flex-shrink: 0;
+    /* Küçük ekranlarda da boş alan tıklamalarını içeri sayma */
+    pointer-events: none;
   }
   
   /* Sağ tarafa menu button */

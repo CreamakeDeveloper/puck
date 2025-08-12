@@ -25,6 +25,7 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
   const loadPages = useCallback(async () => {
     const pagesData = await getPages();
     setPages(pagesData);
+    return pagesData;
   }, []);
 
   const handleSelectPage = useCallback(async (id: string) => {
@@ -151,13 +152,29 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
     try {
       const success = await deletePage(id);
       if (success) {
-        await loadPages();
+        const pagesData = await loadPages();
+        // Silinen sayfa aktifse veya mevcut aktif sayfa artık yoksa
+        const activePages = (pagesData || [])
+          .filter((p) => p.isActive !== false)
+          .filter((p) => (selectedLanguageId ? p.languageId === selectedLanguageId : true));
+
+        const currentStillValid = !!activePages.find((p) => p.id === currentPageId);
+        const deletedWasCurrent = currentPageId === id;
+
+        if (deletedWasCurrent || !currentStillValid) {
+          const next = activePages[0];
+          if (next) {
+            await handleSelectPage(next.id);
+          } else {
+            setCurrentPageId(null);
+          }
+        }
         toast.success('Sayfa başarıyla silindi!');
       }
     } catch (e: any) {
       toast.error(e?.message || 'Sayfa silinemedi');
     }
-  }, [loadPages]);
+  }, [loadPages, selectedLanguageId, currentPageId, handleSelectPage]);
 
   const handlePublish = useCallback(async (onPublish?: any) => {
     try {
@@ -273,11 +290,11 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
   }, [appStore, currentPageId, loadPages, editingPage, newPage, selectedLanguageId, pages]);
 
   const filteredPages = useMemo(() => {
-    let filtered = pages;
+    let filtered = pages.filter((page) => page.isActive !== false);
     
     // Dil filtresi
     if (selectedLanguageId) {
-      filtered = filtered.filter(page => page.languageId === selectedLanguageId);
+      filtered = filtered.filter((page) => page.languageId === selectedLanguageId);
     }
     
     return filtered;

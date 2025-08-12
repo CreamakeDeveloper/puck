@@ -3,7 +3,7 @@ import { Globe } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Button } from "../../../../Button";
 import { Page, Language } from "../types";
-import { getFlagEmoji } from "../utils/languageUtils";
+import { renderFlagIcon, getFlagClass } from "../utils/languageUtils";
 import styles from "../styles.module.css";
 
 const getClassName = getClassNameFactory("PuckHeader", styles);
@@ -106,7 +106,7 @@ export const PageModal: React.FC<PageModalProps> = ({
               <option value="">Dil Seçin</option>
               {languages.map((lang) => (
                 <option key={lang.id} value={lang.id}>
-                  {getFlagEmoji(lang.code)} {lang.name} {lang.isDefault ? '(Varsayılan)' : ''}
+                  {lang.name} {lang.isDefault ? '(Varsayılan)' : ''}
                 </option>
               ))}
             </select>

@@ -1,3 +1,5 @@
+import React from "react";
+
 // Dil kodunu ülke koduna çeviren fonksiyon
 export function languageCodeToCountry(code: string): string {
   const lower = code.toLowerCase();
@@ -59,21 +61,14 @@ export function languageCodeToCountry(code: string): string {
   return map[lower] || lower;
 }
 
-// Bayrak emojisi döndüren fonksiyon
-export function getFlagEmoji(languageCode: string): string {
-  const countryCode = languageCodeToCountry(languageCode);
-  
-  // Bayrak emoji'leri için Unicode Regional Indicator Symbols kullanıyoruz
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  
-  return String.fromCodePoint(...codePoints);
-}
-
 // CSS class ile bayrak gösteren fonksiyon (flag-icons kütüphanesi için)
 export function getFlagClass(languageCode: string): string {
   const countryCode = languageCodeToCountry(languageCode);
   return `fi fi-${countryCode}`;
+}
+
+// React element olarak bayrak ikonu döndüren fonksiyon
+export function renderFlagIcon(languageCode: string, style?: React.CSSProperties) {
+  const flagClass = getFlagClass(languageCode);
+  return <span className={flagClass} style={{ marginRight: 8, ...style }} />;
 }

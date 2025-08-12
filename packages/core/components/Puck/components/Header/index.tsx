@@ -35,7 +35,7 @@ import { LanguagePalette } from "./components/LanguagePalette";
 import { SEOPanel } from "./components/SEOPanel";
 import { PageModal } from "./components/PageModal";
 import { LanguageModal } from "./components/LanguageModal";
-import { getFlagEmoji } from "./utils/languageUtils";
+import { renderFlagIcon } from "./utils/languageUtils";
 
 const getClassName = getClassNameFactory("PuckHeader", styles);
 
@@ -506,9 +506,10 @@ const HeaderInner = <
               >
                 <div className={getClassName("commandButtonLeft")}>
                   {languageManagement.selectedLanguageId ? (
-                    <span style={{ fontSize: '18px', marginRight: '4px' }}>
-                      {getFlagEmoji(languageManagement.languages.find(l => l.id === languageManagement.selectedLanguageId)?.code || '')}
-                    </span>
+                    renderFlagIcon(
+                      languageManagement.languages.find(l => l.id === languageManagement.selectedLanguageId)?.code || '',
+                      { fontSize: '18px', marginRight: '4px' }
+                    )
                   ) : (
                     <Globe size={18} className={getClassName("commandIcon")} />
                   )}

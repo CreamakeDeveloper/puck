@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Globe, ChevronDown } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Button } from "../../../../Button";
@@ -30,6 +31,7 @@ export const PageModal: React.FC<PageModalProps> = ({
   onNewPageChange,
 }) => {
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Dropdown dışına tıklayınca kapat
@@ -47,6 +49,18 @@ export const PageModal: React.FC<PageModalProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, [languageDropdownOpen]);
+
+  // Dropdown pozisyonunu hesapla
+  useEffect(() => {
+    if (languageDropdownOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
   }, [languageDropdownOpen]);
   
   if (!modalOpen) return null;
@@ -146,18 +160,18 @@ export const PageModal: React.FC<PageModalProps> = ({
                 <ChevronDown size={16} />
               </button>
               
-              {languageDropdownOpen && (
+              {languageDropdownOpen && createPortal(
                 <div
                   style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
+                    position: 'fixed',
+                    top: dropdownPosition.top,
+                    left: dropdownPosition.left,
+                    width: dropdownPosition.width,
                     background: 'var(--puck-color-white)',
                     border: '1px solid var(--puck-color-grey-09)',
                     borderRadius: '6px',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    zIndex: 1000,
+                    zIndex: 9999,
                     maxHeight: '200px',
                     overflowY: 'auto'
                   }}
@@ -217,7 +231,8 @@ export const PageModal: React.FC<PageModalProps> = ({
                       <span>{lang.name} {lang.isDefault ? '(Varsayılan)' : ''}</span>
                     </div>
                   ))}
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           </div>

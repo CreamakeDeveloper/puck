@@ -37,8 +37,14 @@ export const PageModal: React.FC<PageModalProps> = ({
   // Dropdown dışına tıklayınca kapat
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setLanguageDropdownOpen(false);
+      const target = event.target as Node;
+      // Dropdown ref'i ve portal içindeki dropdown elementi kontrol et
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        // Portal içindeki dropdown elementini de kontrol et
+        const dropdownPortal = document.querySelector('[data-dropdown-portal]');
+        if (!dropdownPortal || !dropdownPortal.contains(target)) {
+          setLanguageDropdownOpen(false);
+        }
       }
     };
 
@@ -67,6 +73,11 @@ export const PageModal: React.FC<PageModalProps> = ({
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
+      // Dropdown açıksa önce onu kapat
+      if (languageDropdownOpen) {
+        setLanguageDropdownOpen(false);
+        return;
+      }
       onClose();
     }
   };
@@ -162,6 +173,7 @@ export const PageModal: React.FC<PageModalProps> = ({
               
               {languageDropdownOpen && createPortal(
                 <div
+                  data-dropdown-portal
                   style={{
                     position: 'fixed',
                     top: dropdownPosition.top,
@@ -183,7 +195,8 @@ export const PageModal: React.FC<PageModalProps> = ({
                       borderBottom: '1px solid var(--puck-color-grey-10)',
                       transition: 'background-color 0.2s'
                     }}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (editingPage) {
                         onPageChange({ ...editingPage, languageId: undefined });
                       } else {
@@ -212,7 +225,8 @@ export const PageModal: React.FC<PageModalProps> = ({
                         gap: 8,
                         transition: 'background-color 0.2s'
                       }}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (editingPage) {
                           onPageChange({ ...editingPage, languageId: lang.id });
                         } else {

@@ -1,12 +1,12 @@
 import { DropZoneEditPure, DropZonePure } from "../../../DropZone";
 import { rootDroppableId } from "../../../../lib/root-droppable-id";
 import { RefObject, useCallback, useEffect, useRef, useMemo } from "react";
-import { useAppStore } from "../../../../store";
+import { useAppStore, useAppStoreApi } from "../../../../store";
 import AutoFrame, { autoFrameContext } from "../../../AutoFrame";
 import styles from "./styles.module.css";
 import { getClassNameFactory } from "../../../../lib";
 import { DefaultRootRenderProps } from "../../../../types";
-import { Render } from "../../../Render";
+import { Render, renderContext } from "../../../Render";
 import { BubbledPointerEvent } from "../../../../lib/bubble-pointer-event";
 import { useSlots } from "../../../../lib/use-slots";
 
@@ -75,9 +75,13 @@ export const Preview = ({ id = "puck-preview" }: { id?: string }) => {
   const renderData = useAppStore((s) =>
     s.state.ui.previewMode === "edit" ? null : s.state.data
   );
+  const appStoreApi = useAppStoreApi();
 
   const Page = useCallback<React.FC<PageProps>>(
     (pageProps) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const data = appStoreApi.getState().state.data;
+      
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const propsWithSlots = useSlots(
         config,
@@ -85,16 +89,24 @@ export const Preview = ({ id = "puck-preview" }: { id?: string }) => {
         DropZoneEditPure
       );
 
+      const contextValue = useMemo(() => ({
+        config,
+        data,
+        metadata,
+      }), [data]);
+
       return config.root?.render ? (
-        config.root?.render({
-          id: "puck-root",
-          ...propsWithSlots,
-        })
+        <renderContext.Provider value={contextValue}>
+          {config.root?.render({
+            id: "puck-root",
+            ...propsWithSlots,
+          })}
+        </renderContext.Provider>
       ) : (
         <>{propsWithSlots.children}</>
       );
     },
-    [config]
+    [config, metadata, appStoreApi]
   );
 
   const Frame = useMemo(() => overrides.iframe, [overrides]);

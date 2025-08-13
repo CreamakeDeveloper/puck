@@ -1,0 +1,11 @@
+.HeaderFooterFields {
+  /* Genel header/footer field stil tanımları */
+}
+
+.HeaderFooterFields-field {
+  margin-bottom: 16px;
+}
+
+.HeaderFooterFields-field:last-child {
+  margin-bottom: 0;
+}

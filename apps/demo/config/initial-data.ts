@@ -2,6 +2,121 @@ import { UserData } from "./types";
 
 export const initialData: Record<string, UserData> = {
   "/": {
+    header: [
+      {
+        language: "tr",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Ana Sayfa", href: "/" },
+            { label: "Fiyatlandırma", href: "/pricing" },
+            { label: "Hakkımızda", href: "/about" },
+          ],
+        },
+      },
+      {
+        language: "en",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Home", href: "/" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "About", href: "/about" },
+          ],
+        },
+      },
+      {
+        language: "fr",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Accueil", href: "/" },
+            { label: "Prix", href: "/pricing" },
+            { label: "À propos", href: "/about" },
+          ],
+        },
+      },
+    ],
+    footer: [
+      {
+        language: "tr",
+        props: {
+          sections: [
+            {
+              title: "Bölüm",
+              links: [
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+              ],
+            },
+            {
+              title: "Bölüm",
+              links: [
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Chris Villa tarafından yapıldı",
+        },
+      },
+      {
+        language: "en",
+        props: {
+          sections: [
+            {
+              title: "Section",
+              links: [
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+              ],
+            },
+            {
+              title: "Section",
+              links: [
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Made by Chris Villa",
+        },
+      },
+      {
+        language: "fr",
+        props: {
+          sections: [
+            {
+              title: "Section",
+              links: [
+                { label: "Étiquette", href: "#" },
+                { label: "Étiquette", href: "#" },
+                { label: "Étiquette", href: "#" },
+                { label: "Étiquette", href: "#" },
+              ],
+            },
+            {
+              title: "Section",
+              links: [
+                { label: "Étiquette", href: "#" },
+                { label: "Étiquette", href: "#" },
+                { label: "Étiquette", href: "#" },
+                { label: "Étiquette", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Fait par Chris Villa",
+        },
+      },
+    ],
     content: [
       {
         type: "Hero",
@@ -402,10 +517,122 @@ export const initialData: Record<string, UserData> = {
     zones: {},
   },
   "/pricing": {
+    header: [
+      {
+        language: "tr",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Ana Sayfa", href: "/" },
+            { label: "Fiyatlandırma", href: "/pricing" },
+            { label: "Hakkımızda", href: "/about" },
+          ],
+        },
+      },
+      {
+        language: "en",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Home", href: "/" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "About", href: "/about" },
+          ],
+        },
+      },
+    ],
+    footer: [
+      {
+        language: "tr",
+        props: {
+          sections: [
+            {
+              title: "Bölüm",
+              links: [
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Chris Villa tarafından yapıldı",
+        },
+      },
+      {
+        language: "en",
+        props: {
+          sections: [
+            {
+              title: "Section",
+              links: [
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Made by Chris Villa",
+        },
+      },
+    ],
     content: [],
     root: { props: { title: "Pricing" } },
   },
   "/about": {
+    header: [
+      {
+        language: "tr",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Ana Sayfa", href: "/" },
+            { label: "Fiyatlandırma", href: "/pricing" },
+            { label: "Hakkımızda", href: "/about" },
+          ],
+        },
+      },
+      {
+        language: "en",
+        props: {
+          logo: "LOGO",
+          navigation: [
+            { label: "Home", href: "/" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "About", href: "/about" },
+          ],
+        },
+      },
+    ],
+    footer: [
+      {
+        language: "tr",
+        props: {
+          sections: [
+            {
+              title: "Bölüm",
+              links: [
+                { label: "Etiket", href: "#" },
+                { label: "Etiket", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Chris Villa tarafından yapıldı",
+        },
+      },
+      {
+        language: "en",
+        props: {
+          sections: [
+            {
+              title: "Section",
+              links: [
+                { label: "Label", href: "#" },
+                { label: "Label", href: "#" },
+              ],
+            },
+          ],
+          copyright: "Made by Chris Villa",
+        },
+      },
+    ],
     content: [],
     root: { props: { title: "About Us" } },
   },

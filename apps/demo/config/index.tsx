@@ -46,6 +46,54 @@ export const conf: UserConfig = {
     Text,
     Space,
   },
+  header: {
+    label: "Header",
+    fields: {
+      language: {
+        type: "select",
+        options: [
+          { label: "Türkçe", value: "tr" },
+          { label: "English", value: "en" },
+          { label: "Français", value: "fr" },
+        ],
+      },
+      logo: { type: "text" },
+      navigation: {
+        type: "array",
+        arrayFields: {
+          label: { type: "text" },
+          href: { type: "text" },
+        },
+      },
+    },
+  },
+  footer: {
+    label: "Footer",
+    fields: {
+      language: {
+        type: "select",
+        options: [
+          { label: "Türkçe", value: "tr" },
+          { label: "English", value: "en" },
+          { label: "Français", value: "fr" },
+        ],
+      },
+      sections: {
+        type: "array",
+        arrayFields: {
+          title: { type: "text" },
+          links: {
+            type: "array",
+            arrayFields: {
+              label: { type: "text" },
+              href: { type: "text" },
+            },
+          },
+        },
+      },
+      copyright: { type: "text" },
+    },
+  },
 };
 
 export const componentKey = Buffer.from(

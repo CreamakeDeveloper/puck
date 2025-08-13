@@ -67,6 +67,7 @@ import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { useSidebarResize } from "../../lib/use-sidebar-resize";
 import { FieldTransforms } from "../../types/API/FieldTransforms";
+import { HeaderFooterFields } from "../HeaderFooterFields";
 
 const getClassName = getClassNameFactory("Puck", styles);
 const getLayoutClassName = getClassNameFactory("PuckLayout", styles);
@@ -555,6 +556,8 @@ function PuckLayout<
                     onResize={setRightWidth}
                     onResizeEnd={handleRightSidebarResizeEnd}
                   >
+                    <HeaderFooterFields type="header" />
+                    <HeaderFooterFields type="footer" />
                     <FieldSideBar />
                   </Sidebar>
                 </div>

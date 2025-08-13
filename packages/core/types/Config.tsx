@@ -104,4 +104,12 @@ export type Config<
     >;
   };
   root?: RootConfig<RootProps>;
+  header?: {
+    fields?: Fields<any>;
+    label?: string;
+  };
+  footer?: {
+    fields?: Fields<any>;
+    label?: string;
+  };
 };

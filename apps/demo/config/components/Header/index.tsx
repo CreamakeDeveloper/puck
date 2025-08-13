@@ -30,14 +30,26 @@ const NavItem = ({ label, href }: { label: string; href: string }) => {
   );
 };
 
-const Header = ({ editMode }: { editMode: boolean }) => (
+const Header = ({ 
+  editMode, 
+  logo = "LOGO", 
+  navigation = [] 
+}: { 
+  editMode: boolean; 
+  logo?: string; 
+  navigation?: Array<{ label: string; href: string }>;
+}) => (
   <div className={getClassName()}>
     <header className={getClassName("inner")}>
-      <div className={getClassName("logo")}>LOGO</div>
+      <div className={getClassName("logo")}>{logo}</div>
       <nav className={getClassName("items")}>
-        <NavItem label="Home" href={`${editMode ? "" : "/"}`} />
-        <NavItem label="Pricing" href={editMode ? "" : "/pricing"} />
-        <NavItem label="About" href={editMode ? "" : "/about"} />
+        {navigation.map((item, index) => (
+          <NavItem 
+            key={index}
+            label={item.label} 
+            href={editMode ? "" : item.href} 
+          />
+        ))}
       </nav>
     </header>
   </div>

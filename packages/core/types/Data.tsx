@@ -65,6 +65,11 @@ export type Content<
   }
 > = ComponentDataMap<PropsMap>[];
 
+export type HeaderFooterItem<Props = any> = {
+  language: string;
+  props: Props;
+};
+
 export type Data<
   AllProps extends DefaultAllProps = DefaultAllProps,
   RootProps extends DefaultComponentProps = DefaultRootFieldProps
@@ -72,6 +77,8 @@ export type Data<
   root: WithDeepSlots<RootData<RootProps>, Content<AllProps>>;
   content: Content<AllProps>;
   zones?: Record<string, Content<AllProps>>;
+  header?: HeaderFooterItem[];
+  footer?: HeaderFooterItem[];
 };
 
 export type Metadata = { [key: string]: any };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Plus, Globe, FileText } from "lucide-react";
+import { Search, Globe, FileText } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Language } from "../types";
 import { renderFlagIcon } from "../utils/languageUtils";
@@ -14,7 +14,6 @@ interface LanguagePaletteProps {
   filteredLanguages: Language[];
   selectedLanguageId: string | null;
   onSelectLanguage: (id: string | null) => void;
-  onAddNewLanguage: () => void;
 }
 
 export const LanguagePalette: React.FC<LanguagePaletteProps> = ({
@@ -24,7 +23,6 @@ export const LanguagePalette: React.FC<LanguagePaletteProps> = ({
   filteredLanguages,
   selectedLanguageId,
   onSelectLanguage,
-  onAddNewLanguage,
 }) => {
   if (!languageDropdownOpen) return null;
 
@@ -54,24 +52,6 @@ export const LanguagePalette: React.FC<LanguagePaletteProps> = ({
       </div>
 
       <div className={getClassName("commandList")}>
-        <div className={getClassName("commandSection")}>
-          <div className={getClassName("sectionHeader")}>
-            <span>İşlemler</span>
-          </div>
-          <div
-            className={getClassName("commandItem")}
-            onClick={onAddNewLanguage}
-            role="button"
-            tabIndex={0}
-          >
-            <Plus size={16} className={getClassName("commandItemIcon")} />
-            <div className={getClassName("commandItemText")}>
-              <span className={getClassName("commandItemTitle")}>Yeni Dil Ekle</span>
-              <span className={getClassName("commandItemDesc")}>Sisteme yeni bir dil tanımlayın</span>
-            </div>
-          </div>
-        </div>
-
         <div className={getClassName("commandSection")}>
           <div className={getClassName("sectionHeader")}>
             <span>Diller</span>

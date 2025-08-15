@@ -28,6 +28,29 @@ export const ResizeHandle: React.FC<ResizeHandleProps> = ({
   const startX = useRef(0);
   const startWidth = useRef(0);
 
+  // Component unmount olurken cleanup yap
+  useEffect(() => {
+    return () => {
+      // Component unmount olurken overlay'i temizle
+      const overlay = document.getElementById("resize-overlay");
+      if (overlay && overlay.parentNode) {
+        try {
+          overlay.parentNode.removeChild(overlay);
+        } catch (error) {
+          // Hata yok say
+        }
+      }
+      
+      // Event listener'ları temizle
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      
+      // Body stillerini sıfırla
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, []);
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isDragging.current) return;
@@ -53,8 +76,13 @@ export const ResizeHandle: React.FC<ResizeHandleProps> = ({
     document.body.style.userSelect = "";
 
     const overlay = document.getElementById("resize-overlay");
-    if (overlay) {
-      document.body.removeChild(overlay);
+    if (overlay && overlay.parentNode) {
+      try {
+        overlay.parentNode.removeChild(overlay);
+      } catch (error) {
+        // Element zaten kaldırılmış olabilir, hata yok say
+        console.warn('Resize overlay kaldırılamadı:', error);
+      }
     }
 
     // Remove event listeners when dragging ends
@@ -78,10 +106,25 @@ export const ResizeHandle: React.FC<ResizeHandleProps> = ({
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
 
+      // Önce mevcut overlay'i temizle
+      const existingOverlay = document.getElementById("resize-overlay");
+      if (existingOverlay && existingOverlay.parentNode) {
+        try {
+          existingOverlay.parentNode.removeChild(existingOverlay);
+        } catch (error) {
+          console.warn('Mevcut resize overlay kaldırılamadı:', error);
+        }
+      }
+
       const overlay = document.createElement("div");
       overlay.id = "resize-overlay";
       overlay.setAttribute("data-resize-overlay", "");
-      document.body.appendChild(overlay);
+      
+      try {
+        document.body.appendChild(overlay);
+      } catch (error) {
+        console.warn('Resize overlay eklenemedi:', error);
+      }
 
       // Add event listeners only when dragging starts
       document.addEventListener("mousemove", handleMouseMove);

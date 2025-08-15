@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { Globe, ChevronDown } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Button } from "../../../../Button";
@@ -31,20 +30,14 @@ export const PageModal: React.FC<PageModalProps> = ({
   onNewPageChange,
 }) => {
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Dropdown dışına tıklayınca kapat
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      // Dropdown ref'i ve portal içindeki dropdown elementi kontrol et
       if (dropdownRef.current && !dropdownRef.current.contains(target)) {
-        // Portal içindeki dropdown elementini de kontrol et
-        const dropdownPortal = document.querySelector('[data-dropdown-portal]');
-        if (!dropdownPortal || !dropdownPortal.contains(target)) {
-          setLanguageDropdownOpen(false);
-        }
+        setLanguageDropdownOpen(false);
       }
     };
 
@@ -55,18 +48,6 @@ export const PageModal: React.FC<PageModalProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [languageDropdownOpen]);
-
-  // Dropdown pozisyonunu hesapla
-  useEffect(() => {
-    if (languageDropdownOpen && dropdownRef.current) {
-      const rect = dropdownRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: rect.width
-      });
-    }
   }, [languageDropdownOpen]);
   
   if (!modalOpen) return null;
@@ -171,14 +152,14 @@ export const PageModal: React.FC<PageModalProps> = ({
                 <ChevronDown size={16} />
               </button>
               
-              {languageDropdownOpen && createPortal(
+              {languageDropdownOpen && (
                 <div
                   data-dropdown-portal
                   style={{
-                    position: 'fixed',
-                    top: dropdownPosition.top,
-                    left: dropdownPosition.left,
-                    width: dropdownPosition.width,
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    width: '100%',
                     background: 'var(--puck-color-white)',
                     border: '1px solid var(--puck-color-grey-09)',
                     borderRadius: '6px',
@@ -245,8 +226,7 @@ export const PageModal: React.FC<PageModalProps> = ({
                       <span>{lang.name} {lang.isDefault ? '(Varsayılan)' : ''}</span>
                     </div>
                   ))}
-                </div>,
-                document.body
+                </div>
               )}
             </div>
           </div>

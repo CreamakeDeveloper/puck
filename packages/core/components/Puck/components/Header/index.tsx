@@ -114,9 +114,13 @@ const HeaderInner = <
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
 
+      // Ref'lerin hala mevcut olduğundan emin ol
+      if (!commandWrapperRef.current || !seoWrapperRef.current || !languageWrapperRef.current) {
+        return;
+      }
+
       if (
         dropdownOpen &&
-        commandWrapperRef.current &&
         !commandWrapperRef.current.contains(target)
       ) {
         setDropdownOpen(false);
@@ -124,7 +128,6 @@ const HeaderInner = <
 
       if (
         seoManagement.seoOpen &&
-        seoWrapperRef.current &&
         !seoWrapperRef.current.contains(target)
       ) {
         seoManagement.setSeoOpen(false);
@@ -132,7 +135,6 @@ const HeaderInner = <
 
       if (
         languageManagement.languageDropdownOpen &&
-        languageWrapperRef.current &&
         !languageWrapperRef.current.contains(target)
       ) {
         languageManagement.setLanguageDropdownOpen(false);
@@ -140,7 +142,9 @@ const HeaderInner = <
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [dropdownOpen, seoManagement.seoOpen, languageManagement.languageDropdownOpen]);
 
   // Klavye kısayolları: Ctrl+K -> Sayfalama, Ctrl+L -> SEO, Ctrl+G -> Dil
@@ -187,14 +191,7 @@ const HeaderInner = <
   const filteredPages = useMemo(() => {
     let filtered = pageManagement.filteredPages; // Hook içinde zaten dil filtresi uygulanmış
     
-    console.log('🔍 Filtreleme Debug:', {
-      selectedLanguageId: languageManagement.selectedLanguageId,
-      allPagesCount: pageManagement.pages.length,
-      filteredPagesCount: pageManagement.filteredPages.length,
-      allPages: pageManagement.pages.map(p => ({ id: p.id, title: p.title, languageId: p.languageId })),
-      filteredPages: pageManagement.filteredPages.map(p => ({ id: p.id, title: p.title, languageId: p.languageId })),
-      languages: languageManagement.languages.map(l => ({ id: l.id, name: l.name, code: l.code }))
-    });
+
     
     // Arama filtresi
     if (searchTerm) {
@@ -205,7 +202,7 @@ const HeaderInner = <
     }
     
     return filtered;
-  }, [pageManagement.filteredPages, searchTerm, languageManagement.selectedLanguageId, pageManagement.pages, languageManagement.languages]);
+  }, [pageManagement.filteredPages, searchTerm, languageManagement.selectedLanguageId]);
 
   // Handle functions
   const handleSelectPage = useCallback((id: string) => {
@@ -342,6 +339,25 @@ const HeaderInner = <
     [dispatch, leftSideBarVisible, rightSideBarVisible]
   );
 
+  // Stable callback functions
+  const handleDropdownToggle = useCallback(() => {
+    setDropdownOpen(!dropdownOpen);
+    seoManagement.setSeoOpen(false);
+    languageManagement.setLanguageDropdownOpen(false);
+  }, [dropdownOpen, seoManagement.setSeoOpen, languageManagement.setLanguageDropdownOpen]);
+
+  const handleSeoToggle = useCallback(() => {
+    seoManagement.setSeoOpen(!seoManagement.seoOpen);
+    setDropdownOpen(false);
+    languageManagement.setLanguageDropdownOpen(false);
+  }, [seoManagement.seoOpen, seoManagement.setSeoOpen, setDropdownOpen, languageManagement.setLanguageDropdownOpen]);
+
+  const handleLanguageToggle = useCallback(() => {
+    languageManagement.setLanguageDropdownOpen(!languageManagement.languageDropdownOpen);
+    setDropdownOpen(false);
+    seoManagement.setSeoOpen(false);
+  }, [languageManagement.languageDropdownOpen, languageManagement.setLanguageDropdownOpen, setDropdownOpen, seoManagement.setSeoOpen]);
+
 
 
   return (
@@ -409,12 +425,7 @@ const HeaderInner = <
             >
               <button
                 className={getClassName("commandButton")}
-                onClick={() => {
-                  seoManagement.setSeoOpen(!seoManagement.seoOpen);
-                  // Diğer panelleri kapat
-                  setDropdownOpen(false);
-                  languageManagement.setLanguageDropdownOpen(false);
-                }}
+                onClick={handleSeoToggle}
                 type="button"
                 title="SEO Ayarları"
               >
@@ -455,12 +466,7 @@ const HeaderInner = <
             <div ref={commandWrapperRef} className={getClassName("commandCenterWrapper")}>
               <button
                 className={getClassName("commandButton")}
-                onClick={() => {
-                  setDropdownOpen(!dropdownOpen);
-                  // Diğer panelleri kapat
-                  seoManagement.setSeoOpen(false);
-                  languageManagement.setLanguageDropdownOpen(false);
-                }}
+                onClick={handleDropdownToggle}
                 type="button"
               >
                 <div className={getClassName("commandButtonLeft")}>
@@ -499,12 +505,7 @@ const HeaderInner = <
             <div ref={languageWrapperRef} className={getClassName("languageButtonWrap")}>
               <button
                 className={getClassName("commandButton")}
-                onClick={() => {
-                  languageManagement.setLanguageDropdownOpen(!languageManagement.languageDropdownOpen);
-                  // Diğer panelleri kapat
-                  setDropdownOpen(false);
-                  seoManagement.setSeoOpen(false);
-                }}
+                onClick={handleLanguageToggle}
                 type="button"
                 title="Dil Seçimi"
               >

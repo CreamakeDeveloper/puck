@@ -57,7 +57,7 @@ const HeaderInner = <
   
   // Custom hook'ları kullan
   const languageManagement = useLanguageManagement();
-  const pageManagement = usePageManagement(languageManagement.selectedLanguageId);
+  const pageManagement = usePageManagement(languageManagement.selectedLanguageId, headerPath);
   const seoManagement = useSEOManagement(headerPath);
 
   // Yeni LanguageModal için adapter veriler

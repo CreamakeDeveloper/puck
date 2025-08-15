@@ -1,10 +1,10 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../../store";
 import { Page, SEO } from "../types";
 import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
 import toast from "react-hot-toast";
 
-export const usePageManagement = (selectedLanguageId: string | null) => {
+export const usePageManagement = (selectedLanguageId: string | null, headerPath?: string) => {
   const [pages, setPages] = useState<Page[]>([]);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
@@ -291,6 +291,23 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
     
     return filtered;
   }, [pages, selectedLanguageId]);
+
+  // Sayfa yüklendiğinde headerPath'e göre otomatik sayfa seçimi
+  useEffect(() => {
+    if (headerPath && !currentPageId && pages.length > 0) {
+      const normalizedHeaderPath = headerPath.replace(/^\/+/, '').replace(/\/+$/, '') || '/';
+      const matchingPage = pages.find(page => {
+        const normalizedPageSlug = page.slug.replace(/^\/+/, '').replace(/\/+$/, '') || '/';
+        return normalizedPageSlug === normalizedHeaderPath;
+      });
+      
+      if (matchingPage) {
+        setCurrentPageId(matchingPage.id);
+        // Sayfa içeriğini de yükle
+        handleSelectPage(matchingPage.id);
+      }
+    }
+  }, [headerPath, currentPageId, pages]);
 
   return {
     pages,

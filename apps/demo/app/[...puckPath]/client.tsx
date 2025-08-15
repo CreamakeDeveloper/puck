@@ -35,7 +35,7 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
           config={config}
           data={data}
           onBack={() => {
-            window.history.back();
+            window.location.href = '/admin/themes'; // Admin themes sayfasına yönlendir
           }}
           backButtonText="Geri Dön"
           backButtonIcon={ArrowLeft}

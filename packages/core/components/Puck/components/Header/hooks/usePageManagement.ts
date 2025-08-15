@@ -1,20 +1,34 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../../store";
-import { Page, SEO } from "../types";
-import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
+import { Page, SEO, ThemeHeader, ThemeFooter } from "../types";
+import {
+  getPages, getPage, addPage, updatePage, deletePage,
+  createPagePrivate, updatePagePrivate,
+  getThemeHeaders, getThemeHeader, addThemeHeader, updateThemeHeader, deleteThemeHeader,
+  getThemeFooters, getThemeFooter, addThemeFooter, updateThemeFooter, deleteThemeFooter
+} from "../api";
 import toast from "react-hot-toast";
 
-export const usePageManagement = (selectedLanguageId: string | null) => {
-  const [pages, setPages] = useState<Page[]>([]);
-  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
-  const [editingPage, setEditingPage] = useState<Page | null>(null);
-  const [newPage, setNewPage] = useState<Omit<Page, 'id'>>({
-    title: '',
-    slug: '',
-    content: '',
+type Mode = "page" | "header" | "footer";
+
+export const usePageManagement = (
+  selectedLanguageId: string | null,
+  options?: { mode?: Mode; themeId?: string }
+) => {
+  const mode = options?.mode || "page";
+  const themeId = options?.themeId || null;
+
+  const [items, setItems] = useState<(Page | ThemeHeader | ThemeFooter)[]>([]);
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [newItem, setNewItem] = useState<any>({
+    title: "",
+    slug: "",
+    content: "",
     seo: undefined,
     isActive: true,
     languageId: undefined,
+    themeId: themeId || undefined
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -22,34 +36,76 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
   const dispatch = useAppStore((s) => s.dispatch);
   const appStore = useAppStoreApi();
 
-  const loadPages = useCallback(async () => {
-    const pagesData = await getPages();
-    setPages(pagesData);
-    return pagesData;
-  }, []);
+  const api = useMemo(() => {
+    if (mode === "header") {
+      return {
+        getAll: () => {
+          if (!themeId) throw new Error("Theme ID gerekli");
+          return getThemeHeaders(themeId);
+        },
+        getOne: getThemeHeader,
+        add: addThemeHeader,
+        update: updateThemeHeader,
+        delete: deleteThemeHeader
+      };
+    }
+    if (mode === "footer") {
+      return {
+        getAll: () => {
+          if (!themeId) throw new Error("Theme ID gerekli");
+          return getThemeFooters(themeId);
+        },
+        getOne: getThemeFooter,
+        add: addThemeFooter,
+        update: updateThemeFooter,
+        delete: deleteThemeFooter
+      };
+    }
+    // default: page
+    return {
+      getAll: getPages,
+      getOne: getPage,
+      add: addPage,
+      update: updatePage,
+      delete: deletePage
+    };
+  }, [mode, themeId]);
+  
+  /** Liste yükleme */
+  const loadItems = useCallback(async () => {
+    if ((mode === "header" || mode === "footer") && !themeId) {
+      toast.error("Theme ID gerekli");
+      return [];
+    }
+    const data = await api.getAll();
+    setItems(data);
+    return data;
+  }, [api, mode, themeId]);
 
+  /** Slug normalize */
   const normalizeSlug = useCallback((value: string) => {
     return value.trim().toLowerCase().replace(/^\/+/, "");
   }, []);
 
-  const handleSelectPage = useCallback(async (id: string) => {
-    const selected = await getPage(id);
+  /** Seçim */
+  const handleSelect = useCallback(async (id: string) => {
+    const selected = await api.getOne(id);
     if (!selected) return;
 
     const safeParseContent = (value: unknown) => {
       if (!value) return [] as any[];
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         try {
           return JSON.parse(value);
         } catch {
-          return [] as any[];
+          return [];
         }
       }
       return value as any[];
     };
 
     dispatch({
-      type: 'setData',
+      type: "setData",
       data: (prevData: any) => ({
         ...prevData,
         content: safeParseContent(selected.content),
@@ -57,126 +113,101 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
           ...prevData?.root,
           props: {
             ...prevData?.root?.props,
-            title: selected.title,
-            slug: selected.slug,
-            seo: selected.seo ?? prevData?.root?.props?.seo,
-          },
-        },
-      }),
-    });
-
-    setCurrentPageId(id);
-  }, [dispatch]);
-
-  const handleAddPage = useCallback(async () => {
-    // Form validasyonu
-    if (!newPage.title.trim()) {
-      toast.error('Sayfa başlığı boş bırakılamaz!');
-      return;
-    }
-
-    // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
-    const enteredSlug = newPage.slug.trim();
-    const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
-
-    const duplicateTitle = pages.some(
-      (p) => p.title.trim().toLowerCase() === newPage.title.trim().toLowerCase()
-    );
-    const duplicateSlug = pages.some(
-      (p) => normalizeSlug(p.slug) === normalizeSlug(finalSlug)
-    );
-    if (duplicateTitle || duplicateSlug) {
-      toast.error(
-        duplicateSlug
-          ? 'Aynı slug ile bir sayfa zaten mevcut.'
-          : 'Aynı başlık ile bir sayfa zaten mevcut.'
-      );
-      return;
-    }
-
-    try {
-      const result = await addPage({
-        title: newPage.title,
-        slug: finalSlug,
-        content: newPage.content ?? '',
-        seo: newPage.seo,
-        isActive: newPage.isActive ?? true,
-        languageId: newPage.languageId || selectedLanguageId || undefined,
-      });
-      if (result) {
-        setCurrentPageId(result.id);
-        await handleSelectPage(result.id);
-        await loadPages();
-        setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true, languageId: undefined });
-        setModalOpen(false);
-        toast.success('Sayfa başarıyla eklendi!');
-      }
-    } catch (e: any) {
-      toast.error(e?.message || 'Sayfa eklenemedi');
-    }
-  }, [newPage, loadPages, pages, handleSelectPage, selectedLanguageId]);
-
-  const handleUpdatePage = useCallback(async () => {
-    if (!editingPage) return;
-    
-    // Form validasyonu
-    if (!editingPage.title.trim()) {
-      toast.error('Sayfa başlığı boş bırakılamaz!');
-      return;
-    }
-
-    // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
-    const enteredSlug = editingPage.slug.trim();
-    const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
-
-    try {
-      const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug });
-      if (result) {
-        await loadPages();
-        setEditingPage(null);
-        setModalOpen(false);
-        toast.success('Sayfa başarıyla güncellendi!');
-      }
-    } catch (e: any) {
-      toast.error(e?.message || 'Sayfa güncellenemedi');
-    }
-  }, [editingPage, loadPages]);
-
-  const handleDeletePage = useCallback(async (id: string) => {
-    if (!confirm('Bu sayfayı silmek istediğinizden emin misiniz?')) return;
-    
-    try {
-      const success = await deletePage(id);
-      if (success) {
-        const pagesData = await loadPages();
-        // Silinen sayfa aktifse veya mevcut aktif sayfa artık yoksa
-        const activePages = (pagesData || [])
-          .filter((p) => p.isActive !== false)
-          .filter((p) => (selectedLanguageId ? p.languageId === selectedLanguageId : true));
-
-        const currentStillValid = !!activePages.find((p) => p.id === currentPageId);
-        const deletedWasCurrent = currentPageId === id;
-
-        if (deletedWasCurrent || !currentStillValid) {
-          const next = activePages[0];
-          if (next) {
-            await handleSelectPage(next.id);
-          } else {
-            setCurrentPageId(null);
+            title: (selected as Page).title ?? prevData?.root?.props?.title,
+            slug: (selected as Page).slug ?? prevData?.root?.props?.slug,
+            seo: selected.seo ?? prevData?.root?.props?.seo
           }
         }
-        toast.success('Sayfa başarıyla silindi!');
+      })
+    });
+
+    setCurrentId(id);
+  }, [api, dispatch]);
+
+  /** Ekleme */
+  const handleAdd = useCallback(async () => {
+    if (mode === "page" && !newItem.title.trim()) {
+      toast.error("Sayfa başlığı boş bırakılamaz!");
+      return;
+    }
+
+    try {
+      const result = await api.add({
+        ...newItem,
+        themeId: themeId || undefined,
+        languageId: mode === "page" ? (newItem.languageId || selectedLanguageId) : undefined
+      });
+      if (result) {
+        setCurrentId(result.id);
+        await handleSelect(result.id);
+        await loadItems();
+        setNewItem({
+          title: "",
+          slug: "",
+          content: "",
+          seo: undefined,
+          isActive: true,
+          languageId: undefined,
+          themeId: themeId || undefined
+        });
+        setModalOpen(false);
+        toast.success(`${mode} başarıyla eklendi!`);
       }
     } catch (e: any) {
-      toast.error(e?.message || 'Sayfa silinemedi');
+      toast.error(e?.message || `${mode} eklenemedi`);
     }
-  }, [loadPages, selectedLanguageId, currentPageId, handleSelectPage]);
+  }, [api, mode, newItem, loadItems, handleSelect, selectedLanguageId, themeId]);
 
+  /** Güncelleme */
+  const handleUpdate = useCallback(async () => {
+    if (!editingItem) return;
+
+    if (mode === "page" && !editingItem.title.trim()) {
+      toast.error("Sayfa başlığı boş bırakılamaz!");
+      return;
+    }
+
+    try {
+      const result = await api.update(editingItem.id, { ...editingItem });
+      if (result) {
+        await loadItems();
+        setEditingItem(null);
+        setModalOpen(false);
+        toast.success(`${mode} başarıyla güncellendi!`);
+      }
+    } catch (e: any) {
+      toast.error(e?.message || `${mode} güncellenemedi`);
+    }
+  }, [api, mode, editingItem, loadItems]);
+
+  /** Silme */
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm(`Bu ${mode} silinsin mi?`)) return;
+    try {
+      const success = await api.delete(id);
+      if (success) {
+        const data = await loadItems();
+        const currentStillValid = !!data.find((p: any) => p.id === currentId);
+        if (!currentStillValid) {
+          const next = data[0];
+          if (next) {
+            await handleSelect(next.id);
+          } else {
+            setCurrentId(null);
+          }
+        }
+        toast.success(`${mode} başarıyla silindi!`);
+      }
+    } catch (e: any) {
+      toast.error(e?.message || `${mode} silinemedi`);
+    }
+  }, [api, mode, currentId, handleSelect, loadItems]);
+
+  /** Yayınlama */
   const handlePublish = useCallback(async (onPublish?: any) => {
     try {
       setIsPublishing(true);
       const data = appStore.getState().state.data as any;
-
       const rootProps = (data?.root?.props || {}) as {
         title?: string;
         slug?: string;
@@ -184,131 +215,80 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
         isActive?: boolean;
       };
 
-      const mergedSeo: SEO | undefined = (() => {
-        const anySeo = rootProps.seo || editingPage?.seo || newPage?.seo;
-        if (!anySeo) return undefined;
-        return {
-          ...(editingPage?.seo || {}),
-          ...(newPage?.seo || {}),
-          ...(rootProps.seo || {}),
-        } as SEO;
-      })();
-
-      // Form validasyonu
-      const title = rootProps.title ?? editingPage?.title ?? newPage?.title ?? '';
-      const slug = rootProps.slug ?? editingPage?.slug ?? newPage?.slug ?? '';
-      
-      if (!title.trim()) {
-        toast.error('Sayfa başlığı boş bırakılamaz!');
-        setIsPublishing(false);
-        return;
-      }
-
-      // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
-      const trimmed = slug.trim();
-      const finalSlug = trimmed === '' ? '/' : trimmed;
-
-      const payload: Omit<Page, 'id'> = {
-        title: title,
-        slug: finalSlug,
-        content: JSON.stringify(data?.content ?? []),
-        seo: mergedSeo,
-        isActive:
-          rootProps.isActive ??
-          editingPage?.isActive ??
-          newPage?.isActive ??
-          true,
-        languageId: (editingPage?.languageId ?? newPage?.languageId ?? selectedLanguageId) || undefined,
+      const mergedSeo: SEO | undefined = {
+        ...(editingItem?.seo || {}),
+        ...(newItem?.seo || {}),
+        ...(rootProps.seo || {})
       };
 
-      const normalizedTitle = payload.title.trim().toLowerCase();
-      const normalizedSlug = normalizeSlug(payload.slug);
+      let payload: any = {
+        content: JSON.stringify(data?.content ?? []),
+        seo: mergedSeo
+      };
 
-      if (!currentPageId) {
-        const duplicateTitle = pages.some(
-          (p) => p.title.trim().toLowerCase() === normalizedTitle
-        );
-        const duplicateSlug = pages.some(
-          (p) => normalizeSlug(p.slug) === normalizedSlug
-        );
-        if (duplicateTitle || duplicateSlug) {
-          toast.error(
-            duplicateSlug
-              ? 'Aynı slug ile bir sayfa zaten mevcut.'
-              : 'Aynı başlık ile bir sayfa zaten mevcut.'
-          );
-          setIsPublishing(false);
-          return;
-        }
+      if (mode === "page") {
+        payload = {
+          ...payload,
+          title: rootProps.title ?? editingItem?.title ?? newItem?.title,
+          slug: rootProps.slug ?? editingItem?.slug ?? newItem?.slug,
+          isActive: rootProps.isActive ?? editingItem?.isActive ?? newItem?.isActive ?? true,
+          languageId: editingItem?.languageId ?? newItem?.languageId ?? selectedLanguageId
+        };
       } else {
-        const duplicateTitle = pages.some(
-          (p) => p.id !== currentPageId && p.title.trim().toLowerCase() === normalizedTitle
-        );
-        const duplicateSlug = pages.some(
-          (p) => p.id !== currentPageId && normalizeSlug(p.slug) === normalizedSlug
-        );
-        if (duplicateTitle || duplicateSlug) {
-          toast.error(
-            duplicateSlug
-              ? 'Aynı slug ile başka bir sayfa mevcut.'
-              : 'Aynı başlık ile başka bir sayfa mevcut.'
-          );
-          setIsPublishing(false);
-          return;
-        }
+        payload.themeId = themeId;
       }
 
-      if (currentPageId) {
-        const updated = (await updatePagePrivate(currentPageId, payload))
-          || (await updatePage(currentPageId, payload));
-        if (!updated) throw new Error('Sayfa güncellenemedi');
+      if (currentId) {
+        await api.update(currentId, payload);
       } else {
-        const created = (await createPagePrivate(payload))
-          || (await addPage(payload));
-        if (!created) throw new Error('Sayfa oluşturulamadı');
-        setCurrentPageId(created.id);
+        const created = await api.add(payload);
+        setCurrentId(created.id);
       }
 
-      await loadPages();
-      toast.success('Sayfa başarıyla kaydedildi!');
-
+      await loadItems();
+      toast.success(`${mode} başarıyla kaydedildi!`);
       onPublish && onPublish(data);
     } catch (e: any) {
-      console.error('Yayınlama sırasında hata:', e);
-      toast.error(e?.message || 'Kaydetme sırasında hata oluştu');
+      toast.error(e?.message || `${mode} kaydedilemedi`);
     } finally {
       setIsPublishing(false);
     }
-  }, [appStore, currentPageId, loadPages, editingPage, newPage, selectedLanguageId, pages]);
+  }, [api, mode, appStore, currentId, loadItems, editingItem, newItem, selectedLanguageId, themeId]);
 
-  const filteredPages = useMemo(() => {
-    let filtered = pages.filter((page) => page.isActive !== false);
-    
-    // Dil filtresi
-    if (selectedLanguageId) {
-      filtered = filtered.filter((page) => page.languageId === selectedLanguageId);
+  const filteredItems = useMemo(() => {
+    let filtered = items;
+    if (mode === "page") {
+      filtered = filtered.filter((page: any) => page.isActive !== false);
+      if (selectedLanguageId) {
+        filtered = filtered.filter((page: any) => page.languageId === selectedLanguageId);
+      }
     }
-    
     return filtered;
-  }, [pages, selectedLanguageId]);
+  }, [items, mode, selectedLanguageId]);
 
   return {
-    pages,
-    filteredPages,
-    currentPageId,
-    editingPage,
-    newPage,
-    modalOpen,
-    isPublishing,
-    loadPages,
-    handleSelectPage,
-    handleAddPage,
-    handleUpdatePage,
-    handleDeletePage,
-    handlePublish,
-    setEditingPage,
-    setNewPage,
-    setModalOpen,
-    setCurrentPageId,
-  };
+  // Eski API ile uyumlu alanlar
+  pages: items as Page[],
+  filteredPages: filteredItems as Page[],
+  currentPageId: currentId,
+  editingPage: editingItem,
+  newPage: newItem,
+  modalOpen,
+  isPublishing,
+
+  // Eski isimlere denk gelen fonksiyonlar
+  loadPages: loadItems,
+  handleSelectPage: handleSelect,
+  handleAddPage: handleAdd,
+  handleUpdatePage: handleUpdate,
+  handleDeletePage: handleDelete,
+  handlePublish,
+
+  // State setter’lar
+  setEditingPage: setEditingItem,
+  setNewPage: setNewItem,
+  setModalOpen,
+  setCurrentPageId: setCurrentId,
+};
+
 };

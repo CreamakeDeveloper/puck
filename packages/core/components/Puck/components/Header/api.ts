@@ -176,6 +176,92 @@ export const deletePage = async (id: string): Promise<boolean> => {
   }
 };
 
+// Header listesi
+export const getThemeHeaders = async (themeId: string) => {
+  const res = await fetch(`/api/themes/${themeId}/headers`);
+  if (!res.ok) throw new Error("Header listesi alınamadı");
+  return await res.json();
+};
+
+// Header ekleme
+export const addThemeHeader = async (data: any) => {
+  const res = await fetch(`/api/themes/${data.themeId}/headers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Header eklenemedi");
+  return await res.json();
+};
+
+// Header silme
+export const deleteThemeHeader = async (id: string) => {
+  const res = await fetch(`/api/theme-headers/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Header silinemedi");
+  return true;
+};
+
+// Footer listesi
+export const getThemeFooters = async (themeId: string) => {
+  const res = await fetch(`/api/themes/${themeId}/footers`);
+  if (!res.ok) throw new Error("Footer listesi alınamadı");
+  return await res.json();
+};
+
+// Footer ekleme
+export const addThemeFooter = async (data: any) => {
+  const res = await fetch(`/api/themes/${data.themeId}/footers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Footer eklenemedi");
+  return await res.json();
+};
+
+// Footer silme
+export const deleteThemeFooter = async (id: string) => {
+  const res = await fetch(`/api/theme-footers/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Footer silinemedi");
+  return true;
+};
+
+// Tek bir header getir
+export const getThemeHeader = async (id: string) => {
+  const res = await fetch(`/api/theme-headers/${id}`);
+  if (!res.ok) throw new Error("Header alınamadı");
+  return await res.json();
+};
+
+// Tek bir header güncelle
+export const updateThemeHeader = async (id: string, data: any) => {
+  const res = await fetch(`/api/theme-headers/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Header güncellenemedi");
+  return await res.json();
+};
+
+// Tek bir footer getir
+export const getThemeFooter = async (id: string) => {
+  const res = await fetch(`/api/theme-footers/${id}`);
+  if (!res.ok) throw new Error("Footer alınamadı");
+  return await res.json();
+};
+
+// Tek bir footer güncelle
+export const updateThemeFooter = async (id: string, data: any) => {
+  const res = await fetch(`/api/theme-footers/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Footer güncellenemedi");
+  return await res.json();
+};
+
 // Dil API fonksiyonları
 export const getLanguages = async (): Promise<Language[]> => {
   try {

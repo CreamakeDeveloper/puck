@@ -537,7 +537,6 @@ const HeaderInner = <
                 filteredLanguages={languageManagement.filteredLanguages}
                 selectedLanguageId={languageManagement.selectedLanguageId}
                 onSelectLanguage={handleSelectLanguage}
-                onAddNewLanguage={handleAddNewLanguage}
               />
             </div>
           </div>

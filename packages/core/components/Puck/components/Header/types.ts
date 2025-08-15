@@ -1,5 +1,3 @@
-// Header bileşeni için tip tanımları
-
 export type SEO = {
   title?: string;
   description?: string;
@@ -32,4 +30,22 @@ export type Page = {
   seo?: SEO;
   isActive?: boolean;
   languageId?: string;
+};
+
+export type ThemeHeader = {
+  id: string;
+  title: string;
+  content: string;
+  seo?: SEO;
+  isActive?: boolean;
+  themeId: string;
+};
+
+export type ThemeFooter = {
+  id: string;
+  title: string;
+  content: string;
+  seo?: SEO;
+  isActive?: boolean;
+  themeId: string;
 };

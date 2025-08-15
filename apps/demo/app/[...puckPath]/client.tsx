@@ -22,6 +22,11 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
 
   useEffect(() => {
     setIsClient(true);
+    
+    return () => {
+      // Cleanup: component unmount olurken state'i temizle
+      setIsClient(false);
+    };
   }, []);
 
   if (!isClient) return null;
@@ -35,7 +40,14 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
           config={config}
           data={data}
           onBack={() => {
-            window.location.href = '/admin/themes'; // Admin themes sayfasına yönlendir
+            try {
+              // Component unmount olmadan önce yönlendirme yap
+              if (typeof window !== 'undefined') {
+                window.location.href = '/admin/themes';
+              }
+            } catch (error) {
+              console.error('Yönlendirme hatası:', error);
+            }
           }}
           backButtonText="Geri Dön"
           backButtonIcon={ArrowLeft}

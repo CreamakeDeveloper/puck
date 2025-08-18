@@ -156,18 +156,17 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
                 <option value="nofollow">nofollow</option>
               </select>
             </div>
+            <div className={getClassName("formGroup")}>
+              <label>Canonical (opsiyonel)</label>
+              <input
+                type="text"
+                value={seoCanonical}
+                onChange={(e) => updateSeoField('canonical', e.target.value)}
+                className={getClassName("input")}
+              />
+            </div>
           </>
         )}
-
-        <div className={getClassName("formGroup")}>
-          <label>Canonical (opsiyonel)</label>
-          <input
-            type="text"
-            value={seoCanonical}
-            onChange={(e) => updateSeoField('canonical', e.target.value)}
-            className={getClassName("input")}
-          />
-        </div>
 
         {seoActiveTab === 'jsonld' && (
           <div className={getClassName("formGroup")}>

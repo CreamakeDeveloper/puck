@@ -477,7 +477,7 @@
 }
 
 .PuckHeader-commandActionButton--duplicate:hover {
-  background: var(--puck-color-blue-05);
+  background: #fac101;
   color: white;
 }
 

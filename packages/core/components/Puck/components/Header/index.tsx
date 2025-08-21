@@ -105,9 +105,9 @@ const HeaderInner = <
 
   // İlk yükleme
   useEffect(() => {
-    pageManagement.loadPages();
+    // Sadece dilleri yükle, sayfalar usePageManagement hook'unda otomatik yüklenecek
     languageManagement.loadLanguages();
-  }, []);
+  }, [languageManagement.loadLanguages]);
 
   // Click outside handler
   useEffect(() => {
@@ -342,6 +342,14 @@ const HeaderInner = <
     [dispatch, leftSideBarVisible, rightSideBarVisible]
   );
 
+  // Seçili sayfanın adını bul
+  const currentPageTitle = useMemo(() => {
+    if (pageManagement.currentPageId) {
+      const currentPage = pageManagement.pages.find(p => p.id === pageManagement.currentPageId);
+      return currentPage?.title;
+    }
+    return null;
+  }, [pageManagement.currentPageId, pageManagement.pages]);
 
 
   return (
@@ -466,7 +474,7 @@ const HeaderInner = <
                 <div className={getClassName("commandButtonLeft")}>
                   <FileText size={18} className={getClassName("commandIcon")} />
                   <span className={getClassName("commandText")}>
-                    {headerTitle || rootTitle || "Sayfa Yönetimi"}
+                    {currentPageTitle || headerTitle || rootTitle || "Sayfa Yönetimi"}
                   </span>
                   {headerPath && (
                     <code className={getClassName("commandPath")}>{headerPath}</code>
@@ -537,7 +545,6 @@ const HeaderInner = <
                 filteredLanguages={languageManagement.filteredLanguages}
                 selectedLanguageId={languageManagement.selectedLanguageId}
                 onSelectLanguage={handleSelectLanguage}
-                onAddNewLanguage={handleAddNewLanguage}
               />
             </div>
           </div>

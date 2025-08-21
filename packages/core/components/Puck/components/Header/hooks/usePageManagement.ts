@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../../store";
 import { Page, SEO } from "../types";
 import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
@@ -25,8 +25,143 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
   const loadPages = useCallback(async () => {
     const pagesData = await getPages();
     setPages(pagesData);
+    
+    // İlk yükleme sırasında varsayılan olarak ilk aktif sayfayı seç
+    if (pagesData.length > 0 && !currentPageId) {
+      // İlk aktif sayfayı bul
+      const firstActivePage = pagesData.find(page => page.isActive !== false);
+      
+      if (firstActivePage) {
+        setCurrentPageId(firstActivePage.id);
+        // İlk sayfayı otomatik olarak yükle
+        const safeParseContent = (value: unknown) => {
+          if (!value) return [] as any[];
+          if (typeof value === 'string') {
+            try {
+              return JSON.parse(value);
+            } catch {
+              return [] as any[];
+            }
+          }
+          return value as any[];
+        };
+
+        dispatch({
+          type: 'setData',
+          data: (prevData: any) => ({
+            ...prevData,
+            content: safeParseContent(firstActivePage.content),
+            root: {
+              ...prevData?.root,
+              props: {
+                ...prevData?.root?.props,
+                title: firstActivePage.title,
+                slug: firstActivePage.slug,
+                seo: firstActivePage.seo ?? prevData?.root?.props?.seo,
+              },
+            },
+          }),
+        });
+      }
+    }
+    
     return pagesData;
-  }, []);
+  }, [currentPageId, dispatch]);
+
+  // Hook ilk yüklendiğinde sayfaları yükle
+  useEffect(() => {
+    loadPages();
+  }, [loadPages]);
+
+  // Dil değiştiğinde sayfa listesini yeniden yükle ve currentPageId'yi güncelle
+  useEffect(() => {
+    if (selectedLanguageId) {
+      const loadPagesForLanguage = async () => {
+        const pagesData = await getPages();
+        setPages(pagesData);
+        
+        // Seçili dildeki ilk aktif sayfayı bul
+        const firstActivePageInLanguage = pagesData.find(
+          page => page.isActive !== false && page.languageId === selectedLanguageId
+        );
+        
+        if (firstActivePageInLanguage) {
+          // Eğer mevcut sayfa farklı dildeyse, yeni dildeki ilk sayfayı seç
+          if (currentPageId) {
+            const currentPage = pagesData.find(p => p.id === currentPageId);
+            if (!currentPage || currentPage.languageId !== selectedLanguageId) {
+              setCurrentPageId(firstActivePageInLanguage.id);
+              // Sayfa verilerini yükle
+              const safeParseContent = (value: unknown) => {
+                if (!value) return [] as any[];
+                if (typeof value === 'string') {
+                  try {
+                    return JSON.parse(value);
+                  } catch {
+                    return [] as any[];
+                  }
+                }
+                return value as any[];
+              };
+
+              dispatch({
+                type: 'setData',
+                data: (prevData: any) => ({
+                  ...prevData,
+                  content: safeParseContent(firstActivePageInLanguage.content),
+                  root: {
+                    ...prevData?.root,
+                    props: {
+                      ...prevData?.root?.props,
+                      title: firstActivePageInLanguage.title,
+                      slug: firstActivePageInLanguage.slug,
+                      seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo,
+                    },
+                  },
+                }),
+              });
+            }
+          } else {
+            setCurrentPageId(firstActivePageInLanguage.id);
+            // Sayfa verilerini yükle
+            const safeParseContent = (value: unknown) => {
+              if (!value) return [] as any[];
+              if (typeof value === 'string') {
+                try {
+                  return JSON.parse(value);
+                } catch {
+                  return [] as any[];
+                }
+              }
+              return value as any[];
+            };
+
+            dispatch({
+              type: 'setData',
+              data: (prevData: any) => ({
+                ...prevData,
+                content: safeParseContent(firstActivePageInLanguage.content),
+                root: {
+                  ...prevData?.root,
+                  props: {
+                    ...prevData?.root?.props,
+                    title: firstActivePageInLanguage.title,
+                    slug: firstActivePageInLanguage.slug,
+                    seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo,
+                  },
+                },
+              }),
+            });
+          }
+        } else {
+          // Seçili dilde sayfa yoksa currentPageId'yi temizle
+          setCurrentPageId(null);
+        }
+      };
+      
+      loadPagesForLanguage();
+    }
+  }, [selectedLanguageId, currentPageId, dispatch]);
 
   const normalizeSlug = useCallback((value: string) => {
     return value.trim().toLowerCase().replace(/^\/+/, "");

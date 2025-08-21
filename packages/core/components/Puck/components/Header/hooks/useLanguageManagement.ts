@@ -25,12 +25,12 @@ export const useLanguageManagement = () => {
     // sonraki yüklemelerde varsayılanla ezilmesin.
     if (!languageInitializedRef.current) {
       const defaultLanguage = languagesData.find((lang) => lang.isDefault);
-      if (defaultLanguage && !selectedLanguageId) {
+      if (defaultLanguage) {
         setSelectedLanguageId(defaultLanguage.id);
       }
       languageInitializedRef.current = true;
     }
-  }, [selectedLanguageId]);
+  }, []);
 
   const handleAddLanguage = useCallback(async () => {
     if (!newLanguage.name || !newLanguage.code) return;

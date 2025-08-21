@@ -307,6 +307,48 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
     }
   }, [loadPages, selectedLanguageId, currentPageId, handleSelectPage]);
 
+  const handleDuplicatePage = useCallback(async (id: string) => {
+    const pageToDuplicate = pages.find(p => p.id === id);
+    if (!pageToDuplicate) return;
+    
+    try {
+      // Kopyalanacak sayfanın verilerini hazırla
+      const duplicatedPage = {
+        title: `${pageToDuplicate.title} (Kopya)`,
+        slug: `${pageToDuplicate.slug}-kopya`,
+        content: pageToDuplicate.content,
+        seo: pageToDuplicate.seo,
+        isActive: pageToDuplicate.isActive,
+        languageId: pageToDuplicate.languageId,
+      };
+      
+      // Slug benzersizliğini kontrol et
+      const duplicateSlug = pages.some(
+        (p) => normalizeSlug(p.slug) === normalizeSlug(duplicatedPage.slug)
+      );
+      
+      if (duplicateSlug) {
+        // Benzersiz slug bul
+        let counter = 1;
+        let newSlug = duplicatedPage.slug;
+        while (pages.some(p => normalizeSlug(p.slug) === normalizeSlug(newSlug))) {
+          newSlug = `${pageToDuplicate.slug}-kopya-${counter}`;
+          counter++;
+        }
+        duplicatedPage.slug = newSlug;
+      }
+      
+      // Sayfayı ekle
+      const result = await addPage(duplicatedPage);
+      if (result) {
+        await loadPages();
+        toast.success('Sayfa başarıyla kopyalandı!');
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Sayfa kopyalanamadı');
+    }
+  }, [pages, addPage, loadPages, normalizeSlug]);
+
   const handlePublish = useCallback(async (onPublish?: any) => {
     try {
       setIsPublishing(true);
@@ -440,6 +482,7 @@ export const usePageManagement = (selectedLanguageId: string | null) => {
     handleAddPage,
     handleUpdatePage,
     handleDeletePage,
+    handleDuplicatePage,
     handlePublish,
     setEditingPage,
     setNewPage,

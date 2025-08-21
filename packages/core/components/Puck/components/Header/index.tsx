@@ -499,6 +499,7 @@ const HeaderInner = <
                 onSelectPage={handleSelectPage}
                 onEditPage={handleEditPage}
                 onDeletePage={pageManagement.handleDeletePage}
+                onDuplicatePage={pageManagement.handleDuplicatePage}
                 onAddNewPage={handleAddNewPage}
               />
             </div>

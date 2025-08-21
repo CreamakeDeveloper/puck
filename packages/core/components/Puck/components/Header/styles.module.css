@@ -476,6 +476,11 @@
   color: white;
 }
 
+.PuckHeader-commandActionButton--duplicate:hover {
+  background: var(--puck-color-blue-05);
+  color: white;
+}
+
 .PuckHeader-emptyState,
 .PuckHeader-emptySearchState {
   display: flex;

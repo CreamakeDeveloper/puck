@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Plus, FileText, Edit, Trash } from "lucide-react";
+import { Search, Plus, FileText, Edit, Trash, Copy } from "lucide-react";
 import { getClassNameFactory } from "../../../../../lib";
 import { Page, Language } from "../types";
 import { renderFlagIcon } from "../utils/languageUtils";
@@ -17,6 +17,7 @@ interface CommandPaletteProps {
   onSelectPage: (id: string) => void;
   onEditPage: (page: Page) => void;
   onDeletePage: (id: string) => void;
+  onDuplicatePage: (id: string) => void;
   onAddNewPage: () => void;
 }
 
@@ -30,6 +31,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onSelectPage,
   onEditPage,
   onDeletePage,
+  onDuplicatePage,
   onAddNewPage,
 }) => {
   if (!dropdownOpen) return null;
@@ -141,6 +143,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     title="Düzenle"
                   >
                     <Edit size={14} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDuplicatePage(page.id);
+                    }}
+                    className={`${getClassName("commandActionButton")} ${getClassName("commandActionButton--duplicate")}`}
+                    type="button"
+                    title="Kopyala"
+                  >
+                    <Copy size={14} />
                   </button>
                   <button
                     onClick={(e) => {

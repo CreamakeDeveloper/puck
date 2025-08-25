@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import { Language } from "../types";
 import { getLanguages, addLanguage, updateLanguage, deleteLanguage } from "../api";
 
-export const useLanguageManagement = () => {
+export const useLanguageManagement = (siteId?: string) => {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(null);
   const [editingLanguage, setEditingLanguage] = useState<Language | null>(null);
@@ -18,7 +18,7 @@ export const useLanguageManagement = () => {
   const languageInitializedRef = useRef<boolean>(false);
 
   const loadLanguages = useCallback(async () => {
-    const languagesData = await getLanguages();
+    const languagesData = await getLanguages(siteId);
     setLanguages(languagesData);
 
     // Varsayılan dili sadece ilk yüklemede ata. Kullanıcı "Tüm Diller" (null) seçerse
@@ -30,7 +30,7 @@ export const useLanguageManagement = () => {
       }
       languageInitializedRef.current = true;
     }
-  }, []);
+  }, [siteId]);
 
   const handleAddLanguage = useCallback(async () => {
     if (!newLanguage.name || !newLanguage.code) return;
@@ -51,7 +51,7 @@ export const useLanguageManagement = () => {
     }
 
     try {
-      const result = await addLanguage(newLanguage);
+      const result = await addLanguage(newLanguage, siteId);
       if (result) {
         await loadLanguages();
         setNewLanguage({ name: '', code: '', isDefault: false, isActive: true });
@@ -60,23 +60,23 @@ export const useLanguageManagement = () => {
     } catch (e: any) {
       window.alert(e?.message || 'Dil eklenemedi');
     }
-  }, [newLanguage, loadLanguages, languages]);
+  }, [newLanguage, loadLanguages, languages, siteId]);
 
   const handleUpdateLanguage = useCallback(async () => {
     if (!editingLanguage) return;
     
-    const result = await updateLanguage(editingLanguage.id, editingLanguage);
+    const result = await updateLanguage(editingLanguage.id, editingLanguage, siteId);
     if (result) {
       await loadLanguages();
       setEditingLanguage(null);
       setLanguageModalOpen(false);
     }
-  }, [editingLanguage, loadLanguages]);
+  }, [editingLanguage, loadLanguages, siteId]);
 
   const handleDeleteLanguage = useCallback(async (id: string) => {
     if (!confirm('Bu dili silmek istediğinizden emin misiniz?')) return;
     
-    const success = await deleteLanguage(id);
+    const success = await deleteLanguage(id, siteId);
     if (success) {
       await loadLanguages();
     }

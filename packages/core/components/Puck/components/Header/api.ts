@@ -1,128 +1,20 @@
 // API fonksiyonları
 import { Page, Language } from './types';
 
-// Site ID'yi almak için yardımcı fonksiyon
-let cachedSiteId: string | null = null;
-
-export const getSiteId = async (): Promise<string> => {
-  if (cachedSiteId !== null) {
-    return cachedSiteId;
-  }
-
-  try {
-    console.log('🔍 Site ID aranıyor...');
-
-    // Önce site-config API'sini dene
-    try {
-      const configResponse = await fetch('/api/site-config');
-      if (configResponse.ok) {
-        const config = await configResponse.json();
-        console.log('📋 Site Config Response:', config);
-        if (config.siteId) {
-          cachedSiteId = config.siteId;
-          console.log('✅ Site ID bulundu (config):', config.siteId);
-          return config.siteId;
-        }
-      } else {
-        console.log('⚠️ /api/site-config mevcut değil:', configResponse.status);
-      }
-    } catch (err) {
-      console.log('⚠️ /api/site-config hatası:', err);
-    }
-
-    // Fallback: current-site API'sini dene
-    try {
-      const currentSiteResponse = await fetch('/api/current-site');
-      if (currentSiteResponse.ok) {
-        const site = await currentSiteResponse.json();
-        console.log('🏠 Current Site Response:', site);
-        if (site.id) {
-          cachedSiteId = site.id;
-          console.log('✅ Site ID bulundu (current-site):', site.id);
-          return site.id;
-        }
-      } else {
-        console.log('⚠️ /api/current-site mevcut değil:', currentSiteResponse.status);
-      }
-    } catch (err) {
-      console.log('⚠️ /api/current-site hatası:', err);
-    }
-
-    // Üçüncü fallback: user-theme'den site ID'yi çıkar
-    try {
-      const themeResponse = await fetch('/api/private/themes/user-theme/1');
-      if (themeResponse.ok) {
-        const themeData = await themeResponse.json();
-        console.log('🎨 Theme Response:', themeData);
-        if (themeData.siteId) {
-          cachedSiteId = themeData.siteId;
-          console.log('✅ Site ID bulundu (theme):', themeData.siteId);
-          return themeData.siteId;
-        }
-      }
-    } catch (err) {
-      console.log('⚠️ Theme API hatası:', err);
-    }
-
-    // Dördüncü fallback: window.location'dan al
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      const pathname = window.location.pathname;
-      console.log('🌐 Window location:', { hostname, pathname });
-      
-      // Subdomain'den site ID'yi çıkar
-      if (hostname.includes('.')) {
-        const subdomain = hostname.split('.')[0];
-        if (subdomain && subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127') {
-          cachedSiteId = subdomain;
-          console.log('✅ Site ID bulundu (subdomain):', subdomain);
-          return subdomain;
-        }
-      }
-      
-      // Path'den site ID'yi çıkar (admin veya edit path'i varsa)
-      const pathParts = pathname.split('/').filter(Boolean);
-      if (pathParts.length > 0) {
-        // admin, edit, puck gibi path'leri geç
-        const skipPaths = ['admin', 'edit', 'puck', 'dashboard'];
-        const siteIdCandidate = pathParts.find(part => !skipPaths.includes(part.toLowerCase()));
-        if (siteIdCandidate && siteIdCandidate.length > 2) {
-          cachedSiteId = siteIdCandidate;
-          console.log('✅ Site ID bulundu (path):', siteIdCandidate);
-          return siteIdCandidate;
-        }
-      }
-    }
-
-    // Son fallback: Hardcoded site ID (geçici çözüm)
-    // TODO: Bu değeri backend'inizin gerçek site ID'si ile değiştirin
-    const hardcodedSiteId = '1'; // Varsayılan site ID
-    cachedSiteId = hardcodedSiteId;
-    console.log('🔧 Varsayılan Site ID kullanılıyor:', hardcodedSiteId);
-    return hardcodedSiteId;
-  } catch (error) {
-    console.error('❌ Site ID alınırken genel hata:', error);
-    cachedSiteId = '1';
+// Site ID validation helper
+const validateSiteId = (siteId?: string): string => {
+  if (!siteId) {
+    console.warn('⚠️ Site ID bulunamadı, varsayılan kullanılıyor: 1');
     return '1';
   }
-};
-
-// Site ID'yi temizle (test için)
-export const clearSiteIdCache = () => {
-  cachedSiteId = null;
-};
-
-// Site ID'yi manuel olarak ayarla (geliştirme için)
-export const setSiteId = (siteId: string) => {
-  cachedSiteId = siteId;
-  console.log('🔧 Site ID manuel olarak ayarlandı:', siteId);
+  return siteId;
 };
 
 // Sayfa API fonksiyonları
-export const getPages = async (): Promise<Page[]> => {
+export const getPages = async (siteId?: string): Promise<Page[]> => {
   try {
-    const siteId = await getSiteId();
-    const response = await fetch(`/api/pages?siteId=${siteId}`);
+    const validSiteId = validateSiteId(siteId);
+    const response = await fetch(`/api/pages?siteId=${validSiteId}`);
     if (!response.ok) throw new Error('Sayfalar getirilemedi');
     const rawPages = await response.json();
     
@@ -158,10 +50,10 @@ export const getPages = async (): Promise<Page[]> => {
   }
 };
 
-export const getPage = async (id: string): Promise<Page | null> => {
+export const getPage = async (id: string, siteId?: string): Promise<Page | null> => {
   try {
-    const siteId = await getSiteId();
-    const response = await fetch(`/api/pages/${id}?siteId=${siteId}`);
+    const validSiteId = validateSiteId(siteId);
+    const response = await fetch(`/api/pages/${id}?siteId=${validSiteId}`);
     if (!response.ok) throw new Error('Sayfa getirilemedi');
     const rawPage = await response.json();
     
@@ -195,23 +87,23 @@ export const getPage = async (id: string): Promise<Page | null> => {
   }
 };
 
-export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
+export const addPage = async (page: Omit<Page, 'id'>, siteId?: string): Promise<Page | null> => {
   try {
     console.log('📝 Adding Page (Frontend Format):', page);
     
-    const siteId = await getSiteId();
+    const validSiteId = validateSiteId(siteId);
     
     // Frontend formatını backend formatına çevir
     const backendPage = {
       ...page,
       languageCode: page.languageId, // languageId -> languageCode dönüşümü
       languageId: undefined, // Backend alanını temizle
-      siteId // Site ID ekle
+      siteId: validSiteId // Site ID ekle
     };
     
     console.log('🔄 Backend Format:', backendPage);
     
-    const response = await fetch(`/api/pages?siteId=${siteId}`, {
+    const response = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(backendPage),
@@ -245,23 +137,23 @@ export const addPage = async (page: Omit<Page, 'id'>): Promise<Page | null> => {
   }
 };
 
-export const updatePage = async (id: string, data: Partial<Page>): Promise<Page | null> => {
+export const updatePage = async (id: string, data: Partial<Page>, siteId?: string): Promise<Page | null> => {
   try {
     console.log('📝 Updating Page (Frontend Format):', { id, data });
     
-    const siteId = await getSiteId();
+    const validSiteId = validateSiteId(siteId);
     
     // Frontend formatını backend formatına çevir
     const backendData = {
       ...data,
       languageCode: data.languageId, // languageId -> languageCode dönüşümü
       languageId: undefined, // Backend alanını temizle
-      siteId // Site ID ekle
+      siteId: validSiteId // Site ID ekle
     };
     
     console.log('🔄 Backend Update Format:', backendData);
     
-    const response = await fetch(`/api/pages/${id}?siteId=${siteId}`, {
+    const response = await fetch(`/api/pages/${id}?siteId=${validSiteId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(backendData),
@@ -289,10 +181,10 @@ export const updatePage = async (id: string, data: Partial<Page>): Promise<Page 
   }
 };
 
-export const deletePage = async (id: string): Promise<boolean> => {
+export const deletePage = async (id: string, siteId?: string): Promise<boolean> => {
   try {
-    const siteId = await getSiteId();
-    const response = await fetch(`/api/pages/${id}?siteId=${siteId}`, {
+    const validSiteId = validateSiteId(siteId);
+    const response = await fetch(`/api/pages/${id}?siteId=${validSiteId}`, {
       method: 'DELETE',
     });
     return response.ok;
@@ -303,12 +195,12 @@ export const deletePage = async (id: string): Promise<boolean> => {
 };
 
 // Dil API fonksiyonları
-export const getLanguages = async (): Promise<Language[]> => {
+export const getLanguages = async (siteId?: string): Promise<Language[]> => {
   try {
-    const siteId = await getSiteId();
+    const validSiteId = validateSiteId(siteId);
     
     // Senin site-languages API'ni kullan
-    const response = await fetch(`/api/site-languages?siteId=${siteId}`);
+    const response = await fetch(`/api/site-languages?siteId=${validSiteId}`);
     if (response.ok) {
       const data = await response.json();
       
@@ -328,7 +220,7 @@ export const getLanguages = async (): Promise<Language[]> => {
     }
     
     // Fallback: /api/languages (ID'li format)
-    const fallbackResponse = await fetch(`/api/languages?siteId=${siteId}`);
+    const fallbackResponse = await fetch(`/api/languages?siteId=${validSiteId}`);
     if (!fallbackResponse.ok) throw new Error('Diller getirilemedi');
     const fallbackData = await fallbackResponse.json();
     
@@ -346,13 +238,13 @@ export const getLanguages = async (): Promise<Language[]> => {
   }
 };
 
-export const addLanguage = async (language: Omit<Language, 'id'>): Promise<Language | null> => {
+export const addLanguage = async (language: Omit<Language, 'id'>, siteId?: string): Promise<Language | null> => {
   try {
-    const siteId = await getSiteId();
-    const response = await fetch(`/api/languages?siteId=${siteId}`, {
+    const validSiteId = validateSiteId(siteId);
+    const response = await fetch('/api/languages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...language, siteId }),
+      body: JSON.stringify({ ...language, siteId: validSiteId }),
     });
     if (!response.ok) {
       let message = 'Dil eklenemedi';
@@ -369,13 +261,13 @@ export const addLanguage = async (language: Omit<Language, 'id'>): Promise<Langu
   }
 };
 
-export const updateLanguage = async (id: string, data: Partial<Language>): Promise<Language | null> => {
+export const updateLanguage = async (id: string, data: Partial<Language>, siteId?: string): Promise<Language | null> => {
   try {
-    const siteId = await getSiteId();
-    const response = await fetch(`/api/languages/${id}?siteId=${siteId}`, {
+    const validSiteId = validateSiteId(siteId);
+    const response = await fetch(`/api/languages/${id}?siteId=${validSiteId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, siteId }),
+      body: JSON.stringify({ ...data, siteId: validSiteId }),
     });
     if (!response.ok) throw new Error('Dil güncellenemedi');
     return response.json();
@@ -385,10 +277,10 @@ export const updateLanguage = async (id: string, data: Partial<Language>): Promi
   }
 };
 
-export const deleteLanguage = async (id: string): Promise<boolean> => {
+export const deleteLanguage = async (id: string, siteId?: string): Promise<boolean> => {
   try {
-    const siteId = await getSiteId();
-    const response = await fetch(`/api/languages/${id}?siteId=${siteId}`, {
+    const validSiteId = validateSiteId(siteId);
+    const response = await fetch(`/api/languages/${id}?siteId=${validSiteId}`, {
       method: 'DELETE',
     });
     return response.ok;
@@ -400,20 +292,21 @@ export const deleteLanguage = async (id: string): Promise<boolean> => {
 
 // Özel admin uçları (varsa) için yardımcılar
 export const createPagePrivate = async (
-  page: Omit<Page, "id">
+  page: Omit<Page, "id">,
+  siteId?: string
 ): Promise<Page | null> => {
   try {
-    const siteId = await getSiteId();
+    const validSiteId = validateSiteId(siteId);
     
     // Frontend formatını backend formatına çevir
     const backendPage = {
       ...page,
       languageCode: page.languageId,
       languageId: undefined,
-      siteId
+      siteId: validSiteId
     };
     
-    const response = await fetch(`/api/private/create/page?siteId=${siteId}`, {
+    const response = await fetch("/api/private/create/page", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(backendPage),
@@ -440,20 +333,21 @@ export const createPagePrivate = async (
 
 export const updatePagePrivate = async (
   id: string,
-  data: Partial<Page>
+  data: Partial<Page>,
+  siteId?: string
 ): Promise<Page | null> => {
   try {
-    const siteId = await getSiteId();
+    const validSiteId = validateSiteId(siteId);
     
     // Frontend formatını backend formatına çevir
     const backendData = {
       ...data,
       languageCode: data.languageId,
       languageId: undefined,
-      siteId
+      siteId: validSiteId
     };
     
-    const response = await fetch(`/api/private/update/page?siteId=${siteId}`, {
+    const response = await fetch("/api/private/update/page", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, ...backendData }),

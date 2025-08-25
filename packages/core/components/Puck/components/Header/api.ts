@@ -10,61 +10,112 @@ export const getSiteId = async (): Promise<string> => {
   }
 
   try {
+    console.log('🔍 Site ID aranıyor...');
+
     // Önce site-config API'sini dene
-    const configResponse = await fetch('/api/site-config');
-    if (configResponse.ok) {
-      const config = await configResponse.json();
-      if (config.siteId) {
-        cachedSiteId = config.siteId;
-        return config.siteId;
+    try {
+      const configResponse = await fetch('/api/site-config');
+      if (configResponse.ok) {
+        const config = await configResponse.json();
+        console.log('📋 Site Config Response:', config);
+        if (config.siteId) {
+          cachedSiteId = config.siteId;
+          console.log('✅ Site ID bulundu (config):', config.siteId);
+          return config.siteId;
+        }
+      } else {
+        console.log('⚠️ /api/site-config mevcut değil:', configResponse.status);
       }
+    } catch (err) {
+      console.log('⚠️ /api/site-config hatası:', err);
     }
 
     // Fallback: current-site API'sini dene
-    const currentSiteResponse = await fetch('/api/current-site');
-    if (currentSiteResponse.ok) {
-      const site = await currentSiteResponse.json();
-      if (site.id) {
-        cachedSiteId = site.id;
-        return site.id;
+    try {
+      const currentSiteResponse = await fetch('/api/current-site');
+      if (currentSiteResponse.ok) {
+        const site = await currentSiteResponse.json();
+        console.log('🏠 Current Site Response:', site);
+        if (site.id) {
+          cachedSiteId = site.id;
+          console.log('✅ Site ID bulundu (current-site):', site.id);
+          return site.id;
+        }
+      } else {
+        console.log('⚠️ /api/current-site mevcut değil:', currentSiteResponse.status);
       }
+    } catch (err) {
+      console.log('⚠️ /api/current-site hatası:', err);
     }
 
-    // Son fallback: window.location'dan al
+    // Üçüncü fallback: user-theme'den site ID'yi çıkar
+    try {
+      const themeResponse = await fetch('/api/private/themes/user-theme/1');
+      if (themeResponse.ok) {
+        const themeData = await themeResponse.json();
+        console.log('🎨 Theme Response:', themeData);
+        if (themeData.siteId) {
+          cachedSiteId = themeData.siteId;
+          console.log('✅ Site ID bulundu (theme):', themeData.siteId);
+          return themeData.siteId;
+        }
+      }
+    } catch (err) {
+      console.log('⚠️ Theme API hatası:', err);
+    }
+
+    // Dördüncü fallback: window.location'dan al
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
       const pathname = window.location.pathname;
+      console.log('🌐 Window location:', { hostname, pathname });
       
       // Subdomain'den site ID'yi çıkar
       if (hostname.includes('.')) {
         const subdomain = hostname.split('.')[0];
-        if (subdomain && subdomain !== 'www' && subdomain !== 'localhost') {
+        if (subdomain && subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127') {
           cachedSiteId = subdomain;
-          return cachedSiteId;
+          console.log('✅ Site ID bulundu (subdomain):', subdomain);
+          return subdomain;
         }
       }
       
-      // Path'den site ID'yi çıkar
+      // Path'den site ID'yi çıkar (admin veya edit path'i varsa)
       const pathParts = pathname.split('/').filter(Boolean);
       if (pathParts.length > 0) {
-        cachedSiteId = pathParts[0];
-        return cachedSiteId;
+        // admin, edit, puck gibi path'leri geç
+        const skipPaths = ['admin', 'edit', 'puck', 'dashboard'];
+        const siteIdCandidate = pathParts.find(part => !skipPaths.includes(part.toLowerCase()));
+        if (siteIdCandidate && siteIdCandidate.length > 2) {
+          cachedSiteId = siteIdCandidate;
+          console.log('✅ Site ID bulundu (path):', siteIdCandidate);
+          return siteIdCandidate;
+        }
       }
     }
 
-    // Varsayılan site ID
-    cachedSiteId = 'default';
-    return cachedSiteId;
+    // Son fallback: Hardcoded site ID (geçici çözüm)
+    // TODO: Bu değeri backend'inizin gerçek site ID'si ile değiştirin
+    const hardcodedSiteId = '1'; // Varsayılan site ID
+    cachedSiteId = hardcodedSiteId;
+    console.log('🔧 Varsayılan Site ID kullanılıyor:', hardcodedSiteId);
+    return hardcodedSiteId;
   } catch (error) {
-    console.warn('Site ID alınamadı, varsayılan kullanılıyor:', error);
-    cachedSiteId = 'default';
-    return cachedSiteId;
+    console.error('❌ Site ID alınırken genel hata:', error);
+    cachedSiteId = '1';
+    return '1';
   }
 };
 
 // Site ID'yi temizle (test için)
 export const clearSiteIdCache = () => {
   cachedSiteId = null;
+};
+
+// Site ID'yi manuel olarak ayarla (geliştirme için)
+export const setSiteId = (siteId: string) => {
+  cachedSiteId = siteId;
+  console.log('🔧 Site ID manuel olarak ayarlandı:', siteId);
 };
 
 // Sayfa API fonksiyonları

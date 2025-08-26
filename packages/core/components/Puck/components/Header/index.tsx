@@ -54,11 +54,12 @@ const HeaderInner = <
     backButtonText = "Geri Dön",
     backButtonIcon = ArrowLeft,
     siteId,
+    themeId,
   } = usePropsContext();
   
   // Custom hook'ları kullan
-  const languageManagement = useLanguageManagement(siteId);
-  const pageManagement = usePageManagement(languageManagement.selectedLanguageId, siteId);
+  const languageManagement = useLanguageManagement(siteId, themeId);
+  const pageManagement = usePageManagement(languageManagement.selectedLanguageId, siteId, themeId);
   const seoManagement = useSEOManagement(headerPath);
 
   // Yeni LanguageModal için adapter veriler

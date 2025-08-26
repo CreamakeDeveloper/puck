@@ -123,6 +123,7 @@ type PuckProps<
   backButtonText?: string;
   backButtonIcon?: React.ComponentType<{ size?: number | string }>;
   siteId?: string; // Site ID for API calls
+  themeId?: string; // Theme ID for API calls
 };
 
 const propsContext = createContext<Partial<PuckProps>>({});

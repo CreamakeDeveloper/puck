@@ -382,6 +382,8 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
         data={data}
         iframe={{ enabled: false }}
         headerPath={path}
+        siteId="1"
+        themeId="1"
         permissions={{
           lockable: true,
         }}

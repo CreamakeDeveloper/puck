@@ -4,7 +4,7 @@ import { Page, SEO } from "../types";
 import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
 import toast from "react-hot-toast";
 
-export const usePageManagement = (selectedLanguageId: string | null, siteId?: string) => {
+export const usePageManagement = (selectedLanguageId: string | null, siteId?: string, themeId?: string) => {
   const [pages, setPages] = useState<Page[]>([]);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
@@ -23,7 +23,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   const appStore = useAppStoreApi();
 
   const loadPages = useCallback(async () => {
-    const pagesData = await getPages(siteId);
+    const pagesData = await getPages(siteId, themeId);
     setPages(pagesData);
     
     // İlk yükleme sırasında varsayılan olarak ilk aktif sayfayı seç
@@ -66,7 +66,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     }
     
     return pagesData;
-  }, [currentPageId, dispatch, siteId]);
+  }, [currentPageId, dispatch, siteId, themeId]);
 
   // Hook ilk yüklendiğinde sayfaları yükle
   useEffect(() => {
@@ -77,7 +77,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   useEffect(() => {
     if (selectedLanguageId) {
       const loadPagesForLanguage = async () => {
-        const pagesData = await getPages(siteId);
+        const pagesData = await getPages(siteId, themeId);
         setPages(pagesData);
         
         // Seçili dildeki ilk aktif sayfayı bul
@@ -161,14 +161,14 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       
       loadPagesForLanguage();
     }
-  }, [selectedLanguageId, currentPageId, dispatch, siteId]);
+  }, [selectedLanguageId, currentPageId, dispatch, siteId, themeId]);
 
   const normalizeSlug = useCallback((value: string) => {
     return value.trim().toLowerCase().replace(/^\/+/, "");
   }, []);
 
   const handleSelectPage = useCallback(async (id: string) => {
-    const selected = await getPage(id, siteId);
+    const selected = await getPage(id, siteId, themeId);
     if (!selected) return;
 
     const safeParseContent = (value: unknown) => {
@@ -237,7 +237,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
         seo: newPage.seo,
         isActive: newPage.isActive ?? true,
         languageId: newPage.languageId || selectedLanguageId || undefined,
-      }, siteId);
+      }, siteId, themeId);
       if (result) {
         setCurrentPageId(result.id);
         await handleSelectPage(result.id);
@@ -249,7 +249,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     } catch (e: any) {
       toast.error(e?.message || 'Sayfa eklenemedi');
     }
-  }, [newPage, loadPages, pages, handleSelectPage, selectedLanguageId, siteId]);
+  }, [newPage, loadPages, pages, handleSelectPage, selectedLanguageId, siteId, themeId]);
 
   const handleUpdatePage = useCallback(async () => {
     if (!editingPage) return;
@@ -265,7 +265,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
 
     try {
-      const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug }, siteId);
+      const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug }, siteId, themeId);
       if (result) {
         await loadPages();
         setEditingPage(null);
@@ -275,13 +275,13 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     } catch (e: any) {
       toast.error(e?.message || 'Sayfa güncellenemedi');
     }
-  }, [editingPage, loadPages, siteId]);
+  }, [editingPage, loadPages, siteId, themeId]);
 
   const handleDeletePage = useCallback(async (id: string) => {
     if (!confirm('Bu sayfayı silmek istediğinizden emin misiniz?')) return;
     
     try {
-      const success = await deletePage(id, siteId);
+      const success = await deletePage(id, siteId, themeId);
       if (success) {
         const pagesData = await loadPages();
         // Silinen sayfa aktifse veya mevcut aktif sayfa artık yoksa
@@ -305,7 +305,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     } catch (e: any) {
       toast.error(e?.message || 'Sayfa silinemedi');
     }
-  }, [loadPages, selectedLanguageId, currentPageId, handleSelectPage, siteId]);
+  }, [loadPages, selectedLanguageId, currentPageId, handleSelectPage, siteId, themeId]);
 
   const handleDuplicatePage = useCallback(async (id: string) => {
     const pageToDuplicate = pages.find(p => p.id === id);
@@ -339,7 +339,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       }
       
       // Sayfayı ekle
-      const result = await addPage(duplicatedPage, siteId);
+      const result = await addPage(duplicatedPage, siteId, themeId);
       if (result) {
         await loadPages();
         toast.success('Sayfa başarıyla kopyalandı!');
@@ -347,7 +347,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     } catch (e: any) {
       toast.error(e?.message || 'Sayfa kopyalanamadı');
     }
-  }, [pages, addPage, loadPages, normalizeSlug, siteId]);
+  }, [pages, addPage, loadPages, normalizeSlug, siteId, themeId]);
 
   const handlePublish = useCallback(async (onPublish?: any) => {
     try {
@@ -436,12 +436,12 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       }
 
       if (currentPageId) {
-        const updated = (await updatePagePrivate(currentPageId, payload, siteId))
-          || (await updatePage(currentPageId, payload, siteId));
+        const updated = (await updatePagePrivate(currentPageId, payload, siteId, themeId))
+          || (await updatePage(currentPageId, payload, siteId, themeId));
         if (!updated) throw new Error('Sayfa güncellenemedi');
       } else {
-        const created = (await createPagePrivate(payload, siteId))
-          || (await addPage(payload, siteId));
+        const created = (await createPagePrivate(payload, siteId, themeId))
+          || (await addPage(payload, siteId, themeId));
         if (!created) throw new Error('Sayfa oluşturulamadı');
         setCurrentPageId(created.id);
       }
@@ -456,7 +456,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     } finally {
       setIsPublishing(false);
     }
-  }, [appStore, currentPageId, loadPages, editingPage, newPage, selectedLanguageId, pages, siteId]);
+  }, [appStore, currentPageId, loadPages, editingPage, newPage, selectedLanguageId, pages, siteId, themeId]);
 
   const filteredPages = useMemo(() => {
     let filtered = pages.filter((page) => page.isActive !== false);

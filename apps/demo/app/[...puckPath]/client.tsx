@@ -52,6 +52,9 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
           }}
           plugins={[headingAnalyzer]}
           headerPath={path}
+          siteId="1"
+          themeId="1"
+          isAdmin={true}
           iframe={{
             enabled: params.get("disableIframe") === "true" ? false : true,
           }}

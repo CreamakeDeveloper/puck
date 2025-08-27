@@ -384,6 +384,7 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
         headerPath={path}
         siteId="1"
         themeId="1"
+        isAdmin={true}
         permissions={{
           lockable: true,
         }}

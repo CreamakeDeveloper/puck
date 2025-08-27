@@ -4,7 +4,7 @@ import { Page, SEO } from "../types";
 import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
 import toast from "react-hot-toast";
 
-export const usePageManagement = (selectedLanguageId: string | null, siteId?: string, themeId?: string) => {
+export const usePageManagement = (selectedLanguageId: string | null, siteId?: string, themeId?: string, isAdmin?: boolean) => {
   const [pages, setPages] = useState<Page[]>([]);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
@@ -23,7 +23,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   const appStore = useAppStoreApi();
 
   const loadPages = useCallback(async () => {
-    const pagesData = await getPages(siteId, themeId);
+    const pagesData = await getPages(siteId, themeId, isAdmin);
     setPages(pagesData);
     
     // İlk yükleme sırasında varsayılan olarak ilk aktif sayfayı seç
@@ -66,7 +66,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     }
     
     return pagesData;
-  }, [currentPageId, dispatch, siteId, themeId]);
+  }, [currentPageId, dispatch, siteId, themeId, isAdmin]);
 
   // Hook ilk yüklendiğinde sayfaları yükle
   useEffect(() => {
@@ -77,7 +77,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   useEffect(() => {
     if (selectedLanguageId) {
       const loadPagesForLanguage = async () => {
-        const pagesData = await getPages(siteId, themeId);
+        const pagesData = await getPages(siteId, themeId, isAdmin);
         setPages(pagesData);
         
         // Seçili dildeki ilk aktif sayfayı bul
@@ -168,7 +168,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   }, []);
 
   const handleSelectPage = useCallback(async (id: string) => {
-    const selected = await getPage(id, siteId, themeId);
+          const selected = await getPage(id, siteId, themeId, isAdmin);
     if (!selected) return;
 
     const safeParseContent = (value: unknown) => {
@@ -265,7 +265,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
 
     try {
-      const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug }, siteId, themeId);
+      const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug }, siteId, themeId, isAdmin);
       if (result) {
         await loadPages();
         setEditingPage(null);
@@ -281,7 +281,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
     if (!confirm('Bu sayfayı silmek istediğinizden emin misiniz?')) return;
     
     try {
-      const success = await deletePage(id, siteId, themeId);
+      const success = await deletePage(id, siteId, themeId, isAdmin);
       if (success) {
         const pagesData = await loadPages();
         // Silinen sayfa aktifse veya mevcut aktif sayfa artık yoksa
@@ -339,7 +339,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       }
       
       // Sayfayı ekle
-      const result = await addPage(duplicatedPage, siteId, themeId);
+      const result = await addPage(duplicatedPage, siteId, themeId, isAdmin);
       if (result) {
         await loadPages();
         toast.success('Sayfa başarıyla kopyalandı!');
@@ -436,12 +436,12 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       }
 
       if (currentPageId) {
-        const updated = (await updatePagePrivate(currentPageId, payload, siteId, themeId))
-          || (await updatePage(currentPageId, payload, siteId, themeId));
+                  const updated = (await updatePagePrivate(currentPageId, payload, siteId, themeId, isAdmin))
+          || (await updatePage(currentPageId, payload, siteId, themeId, isAdmin));
         if (!updated) throw new Error('Sayfa güncellenemedi');
       } else {
-        const created = (await createPagePrivate(payload, siteId, themeId))
-          || (await addPage(payload, siteId, themeId));
+                  const created = (await createPagePrivate(payload, siteId, themeId, isAdmin))
+          || (await addPage(payload, siteId, themeId, isAdmin));
         if (!created) throw new Error('Sayfa oluşturulamadı');
         setCurrentPageId(created.id);
       }

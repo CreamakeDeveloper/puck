@@ -6,8 +6,10 @@ import config from "../../config";
 import { useDemoData } from "../../lib/use-demo-data";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Eye } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
 export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
+  const router = useRouter();
   const metadata = {
     example: "Hello, world",
   };
@@ -35,7 +37,13 @@ export function Client({ path, isEdit }: { path: string; isEdit: boolean }) {
           config={config}
           data={data}
           onBack={() => {
-            window.history.back();
+            try {
+              router.back();
+            } catch (error) {
+              console.error('Navigation error:', error);
+              // Fallback olarak ana sayfaya git
+              router.push('/');
+            }
           }}
           backButtonText="Geri Dön"
           backButtonIcon={ArrowLeft}

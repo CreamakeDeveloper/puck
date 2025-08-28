@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useAppStore, useAppStoreApi } from "../../../../../store";
 import { Page, SEO } from "../types";
-import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate } from "../api";
+import { getPages, getPage, addPage, updatePage, deletePage, createPagePrivate, updatePagePrivate, duplicatePage } from "../api";
 import toast from "react-hot-toast";
 
 export const usePageManagement = (selectedLanguageId: string | null, siteId?: string, themeId?: string, isAdmin?: boolean) => {
@@ -460,49 +460,25 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   }, [loadPages, selectedLanguageId, currentPageId, handleSelectPage, siteId, themeId]);
 
   const handleDuplicatePage = useCallback(async (id: string) => {
-    const pageToDuplicate = pages.find(p => p.id === id);
-    if (!pageToDuplicate) return;
-    
     try {
-      // Kopyalanacak sayfanın verilerini hazırla
-      const duplicatedPage = {
-        title: `${pageToDuplicate.title} (Kopya)`,
-        slug: pageToDuplicate.slug.startsWith('/') ? `${pageToDuplicate.slug}-kopya` : `/${pageToDuplicate.slug}-kopya`,
-        content: pageToDuplicate.content,
-        seo: pageToDuplicate.seo,
-        isActive: pageToDuplicate.isActive,
-        languageId: pageToDuplicate.languageId,
-      };
+      console.log('🔄 Duplicating page with ID:', id);
       
-      // Sayfa listesini güncel tut
-      const currentPages = await loadPages();
+      // Yeni duplicatePage API'sini kullan
+      const result = await duplicatePage(id, siteId, themeId, isAdmin);
       
-      // Slug benzersizliğini kontrol et
-      const duplicateSlug = currentPages.some(
-        (p) => normalizeSlug(p.slug) === normalizeSlug(duplicatedPage.slug)
-      );
-      
-      if (duplicateSlug) {
-        // Benzersiz slug bul
-        let counter = 1;
-        let newSlug = duplicatedPage.slug;
-        while (currentPages.some(p => normalizeSlug(p.slug) === normalizeSlug(newSlug))) {
-          newSlug = `${pageToDuplicate.slug.startsWith('/') ? pageToDuplicate.slug : `/${pageToDuplicate.slug}`}-kopya-${counter}`;
-          counter++;
-        }
-        duplicatedPage.slug = newSlug;
-      }
-      
-      // Sayfayı ekle
-      const result = await addPage(duplicatedPage, siteId, themeId, isAdmin);
       if (result) {
+        // Sayfa listesini yenile
         await loadPages();
         toast.success('Sayfa başarıyla kopyalandı!');
+        console.log('✅ Page duplicated successfully:', result);
+      } else {
+        throw new Error('Sayfa kopyalanamadı');
       }
     } catch (e: any) {
+      console.error('❌ Page duplication failed:', e);
       toast.error(e?.message || 'Sayfa kopyalanamadı');
     }
-  }, [pages, addPage, loadPages, normalizeSlug, siteId, themeId]);
+  }, [duplicatePage, loadPages, siteId, themeId, isAdmin]);
 
   const handlePublish = useCallback(async (onPublish?: any) => {
     try {

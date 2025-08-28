@@ -167,6 +167,60 @@ export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?:
   }
 };
 
+export const duplicatePage = async (id: string, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Page | null> => {
+  try {
+    console.log('📋 Duplicating Page:', { id, siteId, themeId, isAdmin });
+    
+    const validSiteId = validateSiteId(siteId);
+    const validThemeId = validateThemeId(themeId);
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
+    
+    const response = await fetch(`/api/pages/${id}/duplicate?${queryParams}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        siteId: validSiteId, 
+        themeId: validThemeId,
+        ...(isAdmin && { isAdmin: true })
+      }),
+    });
+    
+    if (!response.ok) {
+      let message = 'Sayfa kopyalanamadı';
+      try {
+        const err = await response.json();
+        message = err?.message || err?.error || message;
+      } catch {}
+      throw new Error(message);
+    }
+    
+    const rawResult = await response.json();
+    
+    console.log('📋 Raw Duplicate Response:', rawResult);
+    
+    // Backend response'unu frontend formatına çevir
+    const result = {
+      id: String(rawResult.id),
+      title: rawResult.title,
+      slug: rawResult.slug,
+      content: rawResult.page?.content || rawResult.content || '',
+      seo: rawResult.seo,
+      isActive: rawResult.isActive,
+      languageId: rawResult.languageCode // languageCode -> languageId dönüşümü
+    };
+    
+    console.log('✅ Page Duplicated (Frontend Format):', result);
+    return result;
+  } catch (error) {
+    console.error('Sayfa kopyalanırken hata:', error);
+    throw error;
+  }
+};
+
 export const updatePage = async (id: string, data: Partial<Page>, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Page | null> => {
   try {
     console.log('📝 Updating Page (Frontend Format):', { id, data });

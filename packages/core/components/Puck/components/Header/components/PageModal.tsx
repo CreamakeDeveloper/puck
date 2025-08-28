@@ -34,6 +34,77 @@ export const PageModal: React.FC<PageModalProps> = ({
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
   
+  // Başlıktan slug oluşturma fonksiyonu - "/" ile başlayacak şekilde
+  const generateSlug = (title: string): string => {
+    if (!title.trim()) return '/';
+    
+    const slug = title
+      .toLowerCase()
+      .trim()
+      // Türkçe karakterleri değiştir
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      // Özel karakterleri ve boşlukları tire ile değiştir
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    
+    // "/" ile başlayacak şekilde döndür
+    return slug ? `/${slug}` : '/';
+  };
+
+  // Başlık değiştiğinde slug'ı otomatik güncelle
+  const handleTitleChange = (title: string) => {
+    if (editingPage) {
+      onPageChange({ ...editingPage, title });
+      // Yeni sayfa eklerken slug'ı otomatik güncelle
+      if (!editingPage.id) {
+        const newSlug = generateSlug(title);
+        onPageChange({ ...editingPage, title, slug: newSlug });
+      }
+    } else {
+      onNewPageChange({ ...newPage, title });
+      // Yeni sayfa eklerken slug'ı otomatik güncelle
+      const newSlug = generateSlug(title);
+      onNewPageChange({ ...newPage, title, slug: newSlug });
+    }
+  };
+
+  // Slug manuel olarak değiştirildiğinde "/" ile başlamasını sağla
+  const handleSlugChange = (slug: string) => {
+    // "/" ile başlamıyorsa ekle
+    let normalizedSlug = slug;
+    if (!normalizedSlug.startsWith('/')) {
+      normalizedSlug = `/${normalizedSlug}`;
+    }
+    
+    // Boş slug ise "/" yap
+    if (normalizedSlug === '/') {
+      normalizedSlug = '/';
+    }
+    
+    if (editingPage) {
+      onPageChange({ ...editingPage, slug: normalizedSlug });
+    } else {
+      onNewPageChange({ ...newPage, slug: normalizedSlug });
+    }
+  };
+
+  // Modal açıldığında slug'ı "/" ile başlat
+  useEffect(() => {
+    if (modalOpen && !editingPage) {
+      // Yeni sayfa için slug'ı "/" ile başlat
+      if (!newPage.slug || newPage.slug === '') {
+        onNewPageChange({ ...newPage, slug: '/' });
+      }
+    }
+  }, [modalOpen, editingPage, newPage, onNewPageChange]);
+  
   // Dropdown dışına tıklayınca kapat
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -102,13 +173,7 @@ export const PageModal: React.FC<PageModalProps> = ({
             <input
               type="text"
               value={editingPage ? editingPage.title : newPage.title}
-              onChange={(e) => {
-                if (editingPage) {
-                  onPageChange({ ...editingPage, title: e.target.value });
-                } else {
-                  onNewPageChange({ ...newPage, title: e.target.value });
-                }
-              }}
+              onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Sayfa başlığı"
               className={getClassName("input")}
             />
@@ -119,18 +184,12 @@ export const PageModal: React.FC<PageModalProps> = ({
             <input
               type="text"
               value={editingPage ? editingPage.slug : newPage.slug}
-              onChange={(e) => {
-                if (editingPage) {
-                  onPageChange({ ...editingPage, slug: e.target.value });
-                } else {
-                  onNewPageChange({ ...newPage, slug: e.target.value });
-                }
-              }}
-              placeholder="Sayfa Slug"
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder="/sayfa-slug"
               className={getClassName("input")}
             />
             <small style={{ color: "var(--puck-color-grey-05)", fontSize: "12px", marginTop: "4px" }}>
-              Örnek: hakkimizda veya /hakkimizda. Boşsa "/" (ana sayfa).
+              Slug "/" ile başlamalıdır. Örnek: /hakkimizda. Boşsa "/" (ana sayfa).
             </small>
           </div>
           

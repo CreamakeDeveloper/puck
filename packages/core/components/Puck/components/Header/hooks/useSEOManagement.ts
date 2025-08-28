@@ -4,6 +4,7 @@ import { useAppStore } from "../../../../../store";
 export const useSEOManagement = (headerPath?: any) => {
   const [seoOpen, setSeoOpen] = useState(false);
   const [seoActiveTab, setSeoActiveTab] = useState<'general' | 'jsonld' | 'opengraph' | 'preview'>('general');
+  const [canonicalManuallyCleared, setCanonicalManuallyCleared] = useState(false);
 
   const dispatch = useAppStore((s) => s.dispatch);
 
@@ -31,7 +32,7 @@ export const useSEOManagement = (headerPath?: any) => {
   );
 
   const seoRobots = useAppStore((s) => 
-    ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.robots as string) ?? "index"
+    ((s.state.indexes.nodes["root"]?.data as any)?.props?.seo?.robots as string) ?? "index,follow"
   );
 
   const seoJsonLd = useAppStore((s) => 
@@ -60,6 +61,11 @@ export const useSEOManagement = (headerPath?: any) => {
 
   // SEO form güncellemesi için yardımcı fonksiyonlar
   const updateSeoField = useCallback((field: string, value: string) => {
+    // Canonical alanı silindiğinde flag'i true yap
+    if (field === 'canonical' && value === '') {
+      setCanonicalManuallyCleared(true);
+    }
+    
     dispatch({
       type: 'setData',
       data: (prev: any) => ({
@@ -106,7 +112,8 @@ export const useSEOManagement = (headerPath?: any) => {
     const currentPath = (headerPath && headerPath.toString()) || (rootSlug ? `/${rootSlug}` : (hasWindow ? window.location.pathname : ""));
     const computedCanonical = origin && currentPath ? `${origin}${currentPath.startsWith("/") ? "" : "/"}${currentPath}` : "";
 
-    if (!seoCanonical && computedCanonical) {
+    // Canonical alanı sadece manuel olarak silinmemişse otomatik doldur
+    if (!seoCanonical && computedCanonical && !canonicalManuallyCleared) {
       updateSeoField('canonical', computedCanonical);
     }
 
@@ -154,7 +161,7 @@ export const useSEOManagement = (headerPath?: any) => {
         }),
       });
     }
-  }, [seoOpen, headerPath, rootSlug, seoCanonical, seoOgUrl, seoJsonLd, seoOgType, seoOgTitle, seoOgDescription, rootTitle, seoTitle, seoDescription, updateSeoField, updateOpenGraphField, dispatch]);
+  }, [seoOpen, headerPath, rootSlug, seoCanonical, seoOgUrl, seoJsonLd, seoOgType, seoOgTitle, seoOgDescription, rootTitle, seoTitle, seoDescription, updateSeoField, updateOpenGraphField, dispatch, canonicalManuallyCleared]);
 
   return {
     seoOpen,

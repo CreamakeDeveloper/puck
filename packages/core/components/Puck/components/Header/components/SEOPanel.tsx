@@ -145,16 +145,139 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
             </div>
             <div className={getClassName("formGroup")}>
               <label>Robots</label>
-              <select
-                value={seoRobots}
-                onChange={(e) => updateSeoField('robots', e.target.value)}
-                className={getClassName("input")}
-              >
-                <option value="index">index</option>
-                <option value="noindex">noindex</option>
-                <option value="follow">follow</option>
-                <option value="nofollow">nofollow</option>
-              </select>
+              <div style={{
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '12px', 
+                marginTop: '8px'
+              }}>
+                <label style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  fontSize: '14px',
+                  padding: '8px',
+                  border: '1px solid var(--puck-color-grey-09)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  backgroundColor: seoRobots.split(',').some(r => r.trim() === 'index') ? 'var(--puck-color-grey-11)' : 'transparent'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={seoRobots.split(',').some(r => r.trim() === 'index')}
+                    onChange={(e) => {
+                      let newRobots = seoRobots.split(',').filter(r => r.trim() !== 'index' && r.trim() !== 'noindex');
+                      if (e.target.checked) {
+                        newRobots.push('index');
+                      }
+                      updateSeoField('robots', newRobots.filter(r => r.trim() !== '').join(','));
+                    }}
+                    style={{
+                      margin: 0,
+                      accentColor: '#fac101'
+                    }}
+                  />
+                  <span>Index</span>
+                </label>
+                
+                <label style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  fontSize: '14px',
+                  padding: '8px',
+                  border: '1px solid var(--puck-color-grey-09)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  backgroundColor: seoRobots.split(',').some(r => r.trim() === 'noindex') ? 'var(--puck-color-grey-11)' : 'transparent'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={seoRobots.split(',').some(r => r.trim() === 'noindex')}
+                    onChange={(e) => {
+                      let newRobots = seoRobots.split(',').filter(r => r.trim() !== 'index' && r.trim() !== 'noindex');
+                      if (e.target.checked) {
+                        newRobots.push('noindex');
+                      }
+                      updateSeoField('robots', newRobots.filter(r => r.trim() !== '').join(','));
+                    }}
+                    style={{
+                      margin: 0,
+                      accentColor: '#fac101'
+                    }}
+                  />
+                  <span>No Index</span>
+                </label>
+                
+                <label style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  fontSize: '14px',
+                  padding: '8px',
+                  border: '1px solid var(--puck-color-grey-09)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  backgroundColor: seoRobots.split(',').some(r => r.trim() === 'follow') ? 'var(--puck-color-grey-11)' : 'transparent'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={seoRobots.split(',').some(r => r.trim() === 'follow')}
+                    onChange={(e) => {
+                      let newRobots = seoRobots.split(',').filter(r => r.trim() !== 'follow' && r.trim() !== 'nofollow');
+                      if (e.target.checked) {
+                        newRobots.push('follow');
+                      }
+                      updateSeoField('robots', newRobots.filter(r => r.trim() !== '').join(','));
+                    }}
+                    style={{
+                      margin: 0,
+                      accentColor: '#fac101'
+                    }}
+                  />
+                  <span>Follow</span>
+                </label>
+                
+                <label style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  fontSize: '14px',
+                  padding: '8px',
+                  border: '1px solid var(--puck-color-grey-09)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  backgroundColor: seoRobots.split(',').some(r => r.trim() === 'nofollow') ? 'var(--puck-color-grey-11)' : 'transparent'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={seoRobots.split(',').some(r => r.trim() === 'nofollow')}
+                    onChange={(e) => {
+                      let newRobots = seoRobots.split(',').filter(r => r.trim() !== 'follow' && r.trim() !== 'nofollow');
+                      if (e.target.checked) {
+                        newRobots.push('nofollow');
+                      }
+                      updateSeoField('robots', newRobots.filter(r => r.trim() !== '').join(','));
+                    }}
+                    style={{
+                      margin: 0,
+                      accentColor: '#fac101'
+                    }}
+                  />
+                  <span>No Follow</span>
+                </label>
+              </div>
+              <div style={{
+                marginTop: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--puck-color-grey-11)',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                color: 'var(--puck-color-grey-03)'
+              }}>
+                <strong>Robots:</strong> {seoRobots || 'Hiçbir seçim yapılmadı'}
+              </div>
             </div>
             <div className={getClassName("formGroup")}>
               <label>Canonical (opsiyonel)</label>

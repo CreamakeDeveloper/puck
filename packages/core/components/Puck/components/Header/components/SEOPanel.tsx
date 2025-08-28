@@ -286,7 +286,11 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
                 value={seoCanonical}
                 onChange={(e) => updateSeoField('canonical', e.target.value)}
                 className={getClassName("input")}
+                placeholder="https://www.ornek.com/sayfa-url"
               />
+              <small style={{ color: "var(--puck-color-grey-05)", fontSize: "12px", marginTop: "4px" }}>
+                Bu alan boş bırakılabilir. Doldurulmazsa sayfa URL'i otomatik kullanılır.
+              </small>
             </div>
           </>
         )}
@@ -350,7 +354,11 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
                 value={seoOgUrl}
                 onChange={(e) => updateOpenGraphField('url', e.target.value)}
                 className={getClassName("input")}
+                placeholder="https://www.ornek.com/sayfa-url"
               />
+              <small style={{ color: "var(--puck-color-grey-05)", fontSize: "12px", marginTop: "4px" }}>
+                Bu alan boş bırakılabilir. Doldurulmazsa sayfa URL'i otomatik kullanılır.
+              </small>
             </div>
           </>
         )}

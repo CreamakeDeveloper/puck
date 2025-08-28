@@ -118,9 +118,10 @@ export const useSEOManagement = (headerPath?: any) => {
     }
 
     const effectiveCanonical = seoCanonical || computedCanonical;
-    if (!seoOgUrl && effectiveCanonical) {
-      updateOpenGraphField('url', effectiveCanonical);
-    }
+    // Open Graph URL alanını otomatik doldurma - bu alan opsiyonel olarak boş kalmalı
+    // if (!seoOgUrl && effectiveCanonical) {
+    //   updateOpenGraphField('url', effectiveCanonical);
+    // }
 
     const effectiveTitle = seoTitle || rootTitle || "";
 
@@ -136,8 +137,8 @@ export const useSEOManagement = (headerPath?: any) => {
       updateSeoField('jsonLd', JSON.stringify(jsonLdObj, null, 2));
     }
 
-    // Open Graph varsayılanları (eksik olanları doldur)
-    if (!seoOgUrl || !seoOgType || !seoOgTitle || !seoOgDescription) {
+    // Open Graph varsayılanları (eksik olanları doldur, URL hariç)
+    if (!seoOgType || !seoOgTitle || !seoOgDescription) {
       dispatch({
         type: 'setData',
         data: (prev: any) => ({
@@ -150,7 +151,8 @@ export const useSEOManagement = (headerPath?: any) => {
                 ...prev?.root?.props?.seo,
                 openGraph: {
                   ...(prev?.root?.props?.seo?.openGraph ?? {}),
-                  url: (prev?.root?.props?.seo?.openGraph?.url ?? effectiveCanonical) ?? undefined,
+                  // URL alanını otomatik doldurma - opsiyonel olarak boş kalmalı
+                  // url: (prev?.root?.props?.seo?.openGraph?.url ?? effectiveCanonical) ?? undefined,
                   type: prev?.root?.props?.seo?.openGraph?.type ?? 'website',
                   title: prev?.root?.props?.seo?.openGraph?.title ?? effectiveTitle,
                   description: prev?.root?.props?.seo?.openGraph?.description ?? seoDescription ?? '',

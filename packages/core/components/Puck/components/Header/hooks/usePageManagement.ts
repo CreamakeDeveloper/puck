@@ -10,7 +10,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [newPage, setNewPage] = useState<Omit<Page, 'id'>>({
     title: '',
-    slug: '',
+    slug: '/',
     content: '',
     seo: undefined,
     isActive: true,
@@ -53,19 +53,42 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
 
           dispatch({
             type: 'setData',
-            data: (prevData: any) => ({
-              ...prevData,
-              content: safeParseContent(firstActivePage.content),
-              root: {
-                ...prevData?.root,
-                props: {
-                  ...prevData?.root?.props,
-                  title: firstActivePage.title,
-                  slug: firstActivePage.slug,
-                  seo: firstActivePage.seo ?? prevData?.root?.props?.seo,
-                },
-              },
-            }),
+            data: (prevData: any) => {
+              // Ana sayfa için root props'u tamamen koru
+              const isRootPage = firstActivePage.slug === '/' || firstActivePage.slug === '';
+              
+              if (isRootPage) {
+                return {
+                  ...prevData,
+                  content: safeParseContent(firstActivePage.content),
+                  root: {
+                    ...prevData?.root,
+                    props: {
+                      ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                      title: firstActivePage.title, // Başlığı güncelle
+                      slug: firstActivePage.slug, // Slug'ı güncelle
+                      seo: firstActivePage.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                      // Diğer mevcut root props'lar korunuyor
+                    },
+                  },
+                };
+              } else {
+                return {
+                  ...prevData,
+                  content: safeParseContent(firstActivePage.content),
+                  root: {
+                    ...prevData?.root,
+                    props: {
+                      ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                      title: firstActivePage.title, // Başlığı güncelle
+                      slug: firstActivePage.slug, // Slug'ı güncelle
+                      seo: firstActivePage.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                      // Diğer mevcut root props'lar korunuyor
+                    },
+                  },
+                };
+              }
+            },
           });
         }
       }
@@ -122,19 +145,42 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
 
               dispatch({
                 type: 'setData',
-                data: (prevData: any) => ({
-                  ...prevData,
-                  content: safeParseContent(firstActivePageInLanguage.content),
-                  root: {
-                    ...prevData?.root,
-                    props: {
-                      ...prevData?.root?.props,
-                      title: firstActivePageInLanguage.title,
-                      slug: firstActivePageInLanguage.slug,
-                      seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo,
-                    },
-                  },
-                }),
+                data: (prevData: any) => {
+                  // Ana sayfa için root props'u tamamen koru
+                  const isRootPage = firstActivePageInLanguage.slug === '/' || firstActivePageInLanguage.slug === '';
+                  
+                  if (isRootPage) {
+                    return {
+                      ...prevData,
+                      content: safeParseContent(firstActivePageInLanguage.content),
+                      root: {
+                        ...prevData?.root,
+                        props: {
+                          ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                          title: firstActivePageInLanguage.title, // Başlığı güncelle
+                          slug: firstActivePageInLanguage.slug, // Slug'ı güncelle
+                          seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                          // Diğer mevcut root props'lar korunuyor
+                        },
+                      },
+                    };
+                  } else {
+                    return {
+                      ...prevData,
+                      content: safeParseContent(firstActivePageInLanguage.content),
+                      root: {
+                        ...prevData?.root,
+                        props: {
+                          ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                          title: firstActivePageInLanguage.title, // Başlığı güncelle
+                          slug: firstActivePageInLanguage.slug, // Slug'ı güncelle
+                          seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                          // Diğer mevcut root props'lar korunuyor
+                        },
+                      },
+                    };
+                  }
+                },
               });
             }
           } else {
@@ -154,19 +200,42 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
 
             dispatch({
               type: 'setData',
-              data: (prevData: any) => ({
-                ...prevData,
-                content: safeParseContent(firstActivePageInLanguage.content),
-                root: {
-                  ...prevData?.root,
-                  props: {
-                    ...prevData?.root?.props,
-                    title: firstActivePageInLanguage.title,
-                    slug: firstActivePageInLanguage.slug,
-                    seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo,
-                  },
-                },
-              }),
+              data: (prevData: any) => {
+                // Ana sayfa için root props'u tamamen koru
+                const isRootPage = firstActivePageInLanguage.slug === '/' || firstActivePageInLanguage.slug === '';
+                
+                if (isRootPage) {
+                  return {
+                    ...prevData,
+                    content: safeParseContent(firstActivePageInLanguage.content),
+                    root: {
+                      ...prevData?.root,
+                      props: {
+                        ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                        title: firstActivePageInLanguage.title, // Başlığı güncelle
+                        slug: firstActivePageInLanguage.slug, // Slug'ı güncelle
+                        seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                        // Diğer mevcut root props'lar korunuyor
+                      },
+                    },
+                  };
+                } else {
+                  return {
+                    ...prevData,
+                    content: safeParseContent(firstActivePageInLanguage.content),
+                    root: {
+                      ...prevData?.root,
+                      props: {
+                        ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                        title: firstActivePageInLanguage.title, // Başlığı güncelle
+                        slug: firstActivePageInLanguage.slug, // Slug'ı güncelle
+                        seo: firstActivePageInLanguage.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                        // Diğer mevcut root props'lar korunuyor
+                      },
+                    },
+                  };
+                }
+              },
             });
           }
         } else {
@@ -180,11 +249,20 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
   }, [selectedLanguageId, dispatch, siteId, themeId]);
 
   const normalizeSlug = useCallback((value: string) => {
-    return value.trim().toLowerCase().replace(/^\/+/, "");
+    // "/" ile başlamasını sağla
+    let normalized = value.trim();
+    if (!normalized.startsWith('/')) {
+      normalized = `/${normalized}`;
+    }
+    // Boş slug ise "/" yap
+    if (normalized === '/') {
+      return '/';
+    }
+    return normalized.toLowerCase();
   }, []);
 
   const handleSelectPage = useCallback(async (id: string) => {
-          const selected = await getPage(id, siteId, themeId, isAdmin);
+    const selected = await getPage(id, siteId, themeId, isAdmin);
     if (!selected) return;
 
     const safeParseContent = (value: unknown) => {
@@ -199,25 +277,50 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       return value as any[];
     };
 
+    // Ana sayfa (slug = "/") için özel kontrol
+    const isRootPage = selected.slug === '/' || selected.slug === '';
+
     dispatch({
       type: 'setData',
-      data: (prevData: any) => ({
-        ...prevData,
-        content: safeParseContent(selected.content),
-        root: {
-          ...prevData?.root,
-          props: {
-            ...prevData?.root?.props,
-            title: selected.title,
-            slug: selected.slug,
-            seo: selected.seo ?? prevData?.root?.props?.seo,
-          },
-        },
-      }),
+      data: (prevData: any) => {
+        // Ana sayfa için root props'u tamamen koru, sadece gerekli alanları güncelle
+        if (isRootPage) {
+          return {
+            ...prevData,
+            content: safeParseContent(selected.content),
+            root: {
+              ...prevData?.root,
+              props: {
+                ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                title: selected.title, // Başlığı güncelle
+                slug: selected.slug, // Slug'ı güncelle
+                seo: selected.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                // Diğer mevcut root props'lar korunuyor
+              },
+            },
+          };
+        } else {
+          // Normal sayfalar için standart güncelleme
+          return {
+            ...prevData,
+            content: safeParseContent(selected.content),
+            root: {
+              ...prevData?.root,
+              props: {
+                ...prevData?.root?.props, // Mevcut tüm props'ları koru
+                title: selected.title, // Başlığı güncelle
+                slug: selected.slug, // Slug'ı güncelle
+                seo: selected.seo ?? prevData?.root?.props?.seo, // SEO'yu güncelle
+                // Diğer mevcut root props'lar korunuyor
+              },
+            },
+          };
+        }
+      },
     });
 
     setCurrentPageId(id);
-  }, [dispatch, siteId]);
+  }, [dispatch, siteId, themeId, isAdmin]);
 
   const handleAddPage = useCallback(async () => {
     // Form validasyonu
@@ -226,9 +329,13 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       return;
     }
 
-    // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
-    const enteredSlug = newPage.slug.trim();
-    const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
+    // Slug'ı normalize et - "/" ile başlamasını sağla
+    let finalSlug = newPage.slug.trim();
+    if (!finalSlug || finalSlug === '') {
+      finalSlug = '/';
+    } else if (!finalSlug.startsWith('/')) {
+      finalSlug = `/${finalSlug}`;
+    }
 
     // Sayfa listesini güncel tut
     const currentPages = await loadPages();
@@ -250,7 +357,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
 
     try {
       const result = await addPage({
-        title: newPage.title,
+        title: newPage.title.trim(),
         slug: finalSlug,
         content: newPage.content ?? '',
         seo: newPage.seo,
@@ -261,7 +368,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
         setCurrentPageId(result.id);
         await handleSelectPage(result.id);
         await loadPages();
-        setNewPage({ title: '', slug: '', content: '', seo: undefined, isActive: true, languageId: undefined });
+        setNewPage({ title: '', slug: '/', content: '', seo: undefined, isActive: true, languageId: undefined });
         setModalOpen(false);
         toast.success('Sayfa başarıyla eklendi!');
       }
@@ -279,9 +386,13 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       return;
     }
 
-    // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
-    const enteredSlug = editingPage.slug.trim();
-    const finalSlug = enteredSlug === '' ? '/' : enteredSlug;
+    // Slug'ı normalize et - "/" ile başlamasını sağla
+    let finalSlug = editingPage.slug.trim();
+    if (!finalSlug || finalSlug === '') {
+      finalSlug = '/';
+    } else if (!finalSlug.startsWith('/')) {
+      finalSlug = `/${finalSlug}`;
+    }
 
     try {
       const result = await updatePage(editingPage.id, { ...editingPage, slug: finalSlug }, siteId, themeId, isAdmin);
@@ -356,7 +467,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
       // Kopyalanacak sayfanın verilerini hazırla
       const duplicatedPage = {
         title: `${pageToDuplicate.title} (Kopya)`,
-        slug: `${pageToDuplicate.slug}-kopya`,
+        slug: pageToDuplicate.slug.startsWith('/') ? `${pageToDuplicate.slug}-kopya` : `/${pageToDuplicate.slug}-kopya`,
         content: pageToDuplicate.content,
         seo: pageToDuplicate.seo,
         isActive: pageToDuplicate.isActive,
@@ -376,7 +487,7 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
         let counter = 1;
         let newSlug = duplicatedPage.slug;
         while (currentPages.some(p => normalizeSlug(p.slug) === normalizeSlug(newSlug))) {
-          newSlug = `${pageToDuplicate.slug}-kopya-${counter}`;
+          newSlug = `${pageToDuplicate.slug.startsWith('/') ? pageToDuplicate.slug : `/${pageToDuplicate.slug}`}-kopya-${counter}`;
           counter++;
         }
         duplicatedPage.slug = newSlug;
@@ -425,12 +536,16 @@ export const usePageManagement = (selectedLanguageId: string | null, siteId?: st
         return;
       }
 
-      // Kullanıcı yazdıysa olduğu gibi, boşsa ana sayfa "/" kabul edilir
-      const trimmed = slug.trim();
-      const finalSlug = trimmed === '' ? '/' : trimmed;
+      // Slug'ı normalize et - "/" ile başlamasını sağla
+      let finalSlug = slug.trim();
+      if (!finalSlug || finalSlug === '') {
+        finalSlug = '/';
+      } else if (!finalSlug.startsWith('/')) {
+        finalSlug = `/${finalSlug}`;
+      }
 
       const payload: Omit<Page, 'id'> = {
-        title: title,
+        title: title.trim(),
         slug: finalSlug,
         content: JSON.stringify(data?.content ?? []),
         seo: mergedSeo,

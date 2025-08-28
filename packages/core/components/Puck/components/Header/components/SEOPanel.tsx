@@ -85,7 +85,7 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
             <Code size={14} />
             <span className={getClassName("seoTabText")}>JSON-LD</span>
           </button>
-          <button 
+          {/* <button 
             type="button" 
             className={getClassName("commandItem")} 
             onClick={() => setSeoActiveTab('opengraph')} 
@@ -101,7 +101,7 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
           >
             <Share2 size={14} />
             <span className={getClassName("seoTabText")}>Open Graph</span>
-          </button>
+          </button> */}
           <button 
             type="button" 
             className={getClassName("commandItem")} 
@@ -181,6 +181,7 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
           </div>
         )}
 
+        {/*
         {seoActiveTab === 'opengraph' && (
           <>
             <div className={getClassName("formGroup")}>
@@ -231,6 +232,7 @@ export const SEOPanel: React.FC<SEOPanelProps> = ({
             </div>
           </>
         )}
+        */}
 
         {seoActiveTab === 'preview' && (
           <div className={getClassName("formGroup")}>

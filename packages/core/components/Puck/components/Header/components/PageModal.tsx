@@ -32,14 +32,13 @@ export const PageModal: React.FC<PageModalProps> = ({
 }) => {
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const [autoSlug, setAutoSlug] = useState(true); // Slug otomatik güncelleme için flag
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // Başlıktan slug oluşturma fonksiyonu
+  // Başlıktan slug oluşturma fonksiyonu - "/" ile başlayacak şekilde
   const generateSlug = (title: string): string => {
-    if (!title.trim()) return '';
+    if (!title.trim()) return '/';
     
-    return title
+    const slug = title
       .toLowerCase()
       .trim()
       // Türkçe karakterleri değiştir
@@ -54,44 +53,57 @@ export const PageModal: React.FC<PageModalProps> = ({
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
+    
+    // "/" ile başlayacak şekilde döndür
+    return slug ? `/${slug}` : '/';
   };
 
   // Başlık değiştiğinde slug'ı otomatik güncelle
   const handleTitleChange = (title: string) => {
     if (editingPage) {
       onPageChange({ ...editingPage, title });
-      // Sadece yeni sayfa eklerken ve autoSlug true ise slug'ı güncelle
-      if (autoSlug) {
+      // Yeni sayfa eklerken slug'ı otomatik güncelle
+      if (!editingPage.id) {
         const newSlug = generateSlug(title);
         onPageChange({ ...editingPage, title, slug: newSlug });
       }
     } else {
       onNewPageChange({ ...newPage, title });
-      // Sadece yeni sayfa eklerken ve autoSlug true ise slug'ı güncelle
-      if (autoSlug) {
-        const newSlug = generateSlug(title);
-        onNewPageChange({ ...newPage, title, slug: newSlug });
+      // Yeni sayfa eklerken slug'ı otomatik güncelle
+      const newSlug = generateSlug(title);
+      onNewPageChange({ ...newPage, title, slug: newSlug });
+    }
+  };
+
+  // Slug manuel olarak değiştirildiğinde "/" ile başlamasını sağla
+  const handleSlugChange = (slug: string) => {
+    // "/" ile başlamıyorsa ekle
+    let normalizedSlug = slug;
+    if (!normalizedSlug.startsWith('/')) {
+      normalizedSlug = `/${normalizedSlug}`;
+    }
+    
+    // Boş slug ise "/" yap
+    if (normalizedSlug === '/') {
+      normalizedSlug = '/';
+    }
+    
+    if (editingPage) {
+      onPageChange({ ...editingPage, slug: normalizedSlug });
+    } else {
+      onNewPageChange({ ...newPage, slug: normalizedSlug });
+    }
+  };
+
+  // Modal açıldığında slug'ı "/" ile başlat
+  useEffect(() => {
+    if (modalOpen && !editingPage) {
+      // Yeni sayfa için slug'ı "/" ile başlat
+      if (!newPage.slug || newPage.slug === '') {
+        onNewPageChange({ ...newPage, slug: '/' });
       }
     }
-  };
-
-  // Slug manuel olarak değiştirildiğinde autoSlug'ı false yap
-  const handleSlugChange = (slug: string) => {
-    if (editingPage) {
-      onPageChange({ ...editingPage, slug });
-    } else {
-      onNewPageChange({ ...newPage, slug });
-    }
-    // Manuel değişiklik yapıldığında otomatik güncellemeyi kapat
-    setAutoSlug(false);
-  };
-
-  // Modal açıldığında autoSlug'ı true yap
-  useEffect(() => {
-    if (modalOpen) {
-      setAutoSlug(true);
-    }
-  }, [modalOpen]);
+  }, [modalOpen, editingPage, newPage, onNewPageChange]);
   
   // Dropdown dışına tıklayınca kapat
   useEffect(() => {
@@ -173,36 +185,11 @@ export const PageModal: React.FC<PageModalProps> = ({
               type="text"
               value={editingPage ? editingPage.slug : newPage.slug}
               onChange={(e) => handleSlugChange(e.target.value)}
-              placeholder="Sayfa Slug"
+              placeholder="/sayfa-slug"
               className={getClassName("input")}
             />
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              marginTop: '4px' 
-            }}>
-              <input
-                type="checkbox"
-                checked={autoSlug}
-                onChange={(e) => setAutoSlug(e.target.checked)}
-                id="autoSlug"
-                style={{ margin: 0 }}
-              />
-              <label 
-                htmlFor="autoSlug" 
-                style={{ 
-                  fontSize: '12px', 
-                  color: 'var(--puck-color-grey-05)',
-                  cursor: 'pointer',
-                  margin: 0
-                }}
-              >
-                Başlığa göre otomatik slug oluştur
-              </label>
-            </div>
             <small style={{ color: "var(--puck-color-grey-05)", fontSize: "12px", marginTop: "4px" }}>
-              Örnek: hakkimizda veya /hakkimizda. Boşsa "/" (ana sayfa).
+              Slug "/" ile başlamalıdır. Örnek: /hakkimizda. Boşsa "/" (ana sayfa).
             </small>
           </div>
           

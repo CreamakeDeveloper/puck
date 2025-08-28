@@ -210,13 +210,41 @@ export const deletePage = async (id: string, siteId?: string, themeId?: string):
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
     const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    
+    console.log('🗑️ Deleting page:', { id, siteId: validSiteId, themeId: validThemeId });
+    
+    // Ana sayfa silme işlemi
     const response = await fetch(`/api/pages/${id}?${queryParams}`, {
       method: 'DELETE',
     });
-    return response.ok;
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Page deletion failed:', response.status, errorText);
+      throw new Error(`Sayfa silinemedi: ${response.status} ${errorText}`);
+    }
+    
+    // page_meta tablosundan da silme işlemi (eğer ayrı endpoint varsa)
+    try {
+      const metaResponse = await fetch(`/api/pages/${id}/meta?${queryParams}`, {
+        method: 'DELETE',
+      });
+      
+      if (metaResponse.ok) {
+        console.log('✅ Page meta deleted successfully');
+      } else {
+        console.warn('⚠️ Page meta deletion failed, but page was deleted:', metaResponse.status);
+      }
+    } catch (metaError) {
+      console.warn('⚠️ Page meta deletion endpoint not available or failed:', metaError);
+      // Meta silme başarısız olsa bile ana sayfa silindiği için işlem başarılı sayılır
+    }
+    
+    console.log('✅ Page deleted successfully');
+    return true;
   } catch (error) {
-    console.error('Sayfa silinirken hata:', error);
-    return false;
+    console.error('❌ Sayfa silinirken hata:', error);
+    throw error; // Hatayı yukarı fırlat
   }
 };
 

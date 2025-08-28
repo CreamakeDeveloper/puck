@@ -124,6 +124,7 @@ type PuckProps<
   backButtonIcon?: React.ComponentType<{ size?: number | string }>;
   siteId?: string; // Site ID for API calls
   themeId?: string; // Theme ID for API calls
+  isAdmin?: boolean; // Admin yetkisi kontrolü
 };
 
 const propsContext = createContext<Partial<PuckProps>>({});

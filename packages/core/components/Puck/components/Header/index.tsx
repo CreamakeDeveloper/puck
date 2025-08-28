@@ -55,11 +55,12 @@ const HeaderInner = <
     backButtonIcon = ArrowLeft,
     siteId,
     themeId,
+    isAdmin,
   } = usePropsContext();
   
   // Custom hook'ları kullan
-  const languageManagement = useLanguageManagement(siteId, themeId);
-  const pageManagement = usePageManagement(languageManagement.selectedLanguageId, siteId, themeId);
+  const languageManagement = useLanguageManagement(siteId, themeId, isAdmin);
+  const pageManagement = usePageManagement(languageManagement.selectedLanguageId, siteId, themeId, isAdmin);
   const seoManagement = useSEOManagement(headerPath);
 
   // Yeni LanguageModal için adapter veriler

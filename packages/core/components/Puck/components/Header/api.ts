@@ -26,11 +26,15 @@ const buildQueryParams = (params: Record<string, string>): string => {
 };
 
 // Sayfa API fonksiyonları
-export const getPages = async (siteId?: string, themeId?: string): Promise<Page[]> => {
+export const getPages = async (siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Page[]> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
-    const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const response = await fetch(`/api/pages?${queryParams}`);
     if (!response.ok) throw new Error('Sayfalar getirilemedi');
     const rawPages = await response.json();
@@ -67,11 +71,15 @@ export const getPages = async (siteId?: string, themeId?: string): Promise<Page[
   }
 };
 
-export const getPage = async (id: string, siteId?: string, themeId?: string): Promise<Page | null> => {
+export const getPage = async (id: string, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Page | null> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
-    const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const response = await fetch(`/api/pages/${id}?${queryParams}`);
     if (!response.ok) throw new Error('Sayfa getirilemedi');
     const rawPage = await response.json();
@@ -106,7 +114,7 @@ export const getPage = async (id: string, siteId?: string, themeId?: string): Pr
   }
 };
 
-export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?: string): Promise<Page | null> => {
+export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Page | null> => {
   try {
     console.log('📝 Adding Page (Frontend Format):', page);
     
@@ -119,7 +127,8 @@ export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?:
       languageCode: page.languageId, // languageId -> languageCode dönüşümü
       languageId: undefined, // Backend alanını temizle
       siteId: validSiteId, // Site ID ekle
-      themeId: validThemeId // Theme ID ekle
+      themeId: validThemeId, // Theme ID ekle
+      ...(isAdmin && { isAdmin: true }) // Admin yetkisi ekle
     };
     
     console.log('🔄 Backend Format:', backendPage);
@@ -158,7 +167,7 @@ export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?:
   }
 };
 
-export const updatePage = async (id: string, data: Partial<Page>, siteId?: string, themeId?: string): Promise<Page | null> => {
+export const updatePage = async (id: string, data: Partial<Page>, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Page | null> => {
   try {
     console.log('📝 Updating Page (Frontend Format):', { id, data });
     
@@ -176,11 +185,18 @@ export const updatePage = async (id: string, data: Partial<Page>, siteId?: strin
     
     console.log('🔄 Backend Update Format:', backendData);
     
-    const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const response = await fetch(`/api/pages/${id}?${queryParams}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(backendData),
+      body: JSON.stringify({
+        ...backendData,
+        ...(isAdmin && { isAdmin: true })
+      }),
     });
     if (!response.ok) throw new Error('Sayfa güncellenemedi');
     
@@ -205,7 +221,7 @@ export const updatePage = async (id: string, data: Partial<Page>, siteId?: strin
   }
 };
 
-export const deletePage = async (id: string, siteId?: string, themeId?: string): Promise<boolean> => {
+export const deletePage = async (id: string, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<boolean> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
@@ -249,13 +265,17 @@ export const deletePage = async (id: string, siteId?: string, themeId?: string):
 };
 
 // Dil API fonksiyonları
-export const getLanguages = async (siteId?: string, themeId?: string): Promise<Language[]> => {
+export const getLanguages = async (siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Language[]> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
     
     // Senin site-languages API'ni kullan
-    const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const response = await fetch(`/api/site-languages?${queryParams}`);
     if (response.ok) {
       const data = await response.json();
@@ -276,7 +296,11 @@ export const getLanguages = async (siteId?: string, themeId?: string): Promise<L
     }
     
     // Fallback: /api/languages (ID'li format)
-    const fallbackQueryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const fallbackQueryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const fallbackResponse = await fetch(`/api/languages?${fallbackQueryParams}`);
     if (!fallbackResponse.ok) throw new Error('Diller getirilemedi');
     const fallbackData = await fallbackResponse.json();
@@ -295,14 +319,19 @@ export const getLanguages = async (siteId?: string, themeId?: string): Promise<L
   }
 };
 
-export const addLanguage = async (language: Omit<Language, 'id'>, siteId?: string, themeId?: string): Promise<Language | null> => {
+export const addLanguage = async (language: Omit<Language, 'id'>, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Language | null> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
     const response = await fetch('/api/languages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...language, siteId: validSiteId, themeId: validThemeId }),
+      body: JSON.stringify({ 
+        ...language, 
+        siteId: validSiteId, 
+        themeId: validThemeId,
+        ...(isAdmin && { isAdmin: true })
+      }),
     });
     if (!response.ok) {
       let message = 'Dil eklenemedi';
@@ -319,15 +348,24 @@ export const addLanguage = async (language: Omit<Language, 'id'>, siteId?: strin
   }
 };
 
-export const updateLanguage = async (id: string, data: Partial<Language>, siteId?: string, themeId?: string): Promise<Language | null> => {
+export const updateLanguage = async (id: string, data: Partial<Language>, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<Language | null> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
-    const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const response = await fetch(`/api/languages/${id}?${queryParams}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, siteId: validSiteId, themeId: validThemeId }),
+      body: JSON.stringify({ 
+        ...data, 
+        siteId: validSiteId, 
+        themeId: validThemeId,
+        ...(isAdmin && { isAdmin: true })
+      }),
     });
     if (!response.ok) throw new Error('Dil güncellenemedi');
     return response.json();
@@ -337,11 +375,15 @@ export const updateLanguage = async (id: string, data: Partial<Language>, siteId
   }
 };
 
-export const deleteLanguage = async (id: string, siteId?: string, themeId?: string): Promise<boolean> => {
+export const deleteLanguage = async (id: string, siteId?: string, themeId?: string, isAdmin?: boolean): Promise<boolean> => {
   try {
     const validSiteId = validateSiteId(siteId);
     const validThemeId = validateThemeId(themeId);
-    const queryParams = buildQueryParams({ siteId: validSiteId, themeId: validThemeId });
+    const queryParams = buildQueryParams({ 
+      siteId: validSiteId, 
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: 'true' })
+    });
     const response = await fetch(`/api/languages/${id}?${queryParams}`, {
       method: 'DELETE',
     });
@@ -356,7 +398,8 @@ export const deleteLanguage = async (id: string, siteId?: string, themeId?: stri
 export const createPagePrivate = async (
   page: Omit<Page, "id">,
   siteId?: string,
-  themeId?: string
+  themeId?: string,
+  isAdmin?: boolean
 ): Promise<Page | null> => {
   try {
     const validSiteId = validateSiteId(siteId);
@@ -368,7 +411,8 @@ export const createPagePrivate = async (
       languageCode: page.languageId,
       languageId: undefined,
       siteId: validSiteId,
-      themeId: validThemeId
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: true })
     };
     
     const response = await fetch("/api/private/create/page", {
@@ -400,7 +444,8 @@ export const updatePagePrivate = async (
   id: string,
   data: Partial<Page>,
   siteId?: string,
-  themeId?: string
+  themeId?: string,
+  isAdmin?: boolean
 ): Promise<Page | null> => {
   try {
     const validSiteId = validateSiteId(siteId);
@@ -412,7 +457,8 @@ export const updatePagePrivate = async (
       languageCode: data.languageId,
       languageId: undefined,
       siteId: validSiteId,
-      themeId: validThemeId
+      themeId: validThemeId,
+      ...(isAdmin && { isAdmin: true })
     };
     
     const response = await fetch("/api/private/update/page", {

@@ -41,20 +41,21 @@ export const getPages = async (siteId?: string, themeId?: string, isAdmin?: bool
     
     console.log('📄 Raw Pages API Response:', rawPages.map((p: any) => ({
       id: p.id,
-      title: p.title,
-      languageCode: p.languageCode,
-      slug: p.slug
+      name: p.name,
+      title: p.meta?.title,
+      languageCode: p.meta?.languageCode,
+      slug: p.meta?.slug
     })));
     
     // Backend formatını frontend formatına çevir
     const pages = rawPages.map((p: any) => ({
       id: String(p.id),
-      title: p.title,
-      slug: p.slug,
+      title: p.name || p.meta?.title || p.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: p.meta?.slug || p.slug || '',
       content: p.page?.content || p.content || '',
-      seo: p.seo,
-      isActive: p.isActive,
-      languageId: p.languageCode // languageCode -> languageId dönüşümü
+      seo: p.meta || p.seo,
+      isActive: p.meta?.isActive ?? p.isActive ?? true,
+      languageId: p.meta?.languageCode || p.languageCode || p.languageId // Öncelik meta.languageCode
     }));
     
     console.log('🎯 Converted Pages:', pages.map((p: any) => ({
@@ -86,19 +87,20 @@ export const getPage = async (id: string, siteId?: string, themeId?: string, isA
     
     console.log('📄 Raw Page API Response:', {
       id: rawPage.id,
-      title: rawPage.title,
-      languageCode: rawPage.languageCode
+      name: rawPage.name,
+      title: rawPage.meta?.title,
+      languageCode: rawPage.meta?.languageCode
     });
     
     // Backend formatını frontend formatına çevir
     const page = {
       id: String(rawPage.id),
-      title: rawPage.title,
-      slug: rawPage.slug,
+      title: rawPage.name || rawPage.meta?.title || rawPage.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: rawPage.meta?.slug || rawPage.slug || '',
       content: rawPage.page?.content || rawPage.content || '',
-      seo: rawPage.seo,
-      isActive: rawPage.isActive,
-      languageId: rawPage.languageCode // languageCode -> languageId dönüşümü
+      seo: rawPage.meta || rawPage.seo,
+      isActive: rawPage.meta?.isActive ?? rawPage.isActive ?? true,
+      languageId: rawPage.meta?.languageCode || rawPage.languageCode || rawPage.languageId // Öncelik meta.languageCode
     };
     
     console.log('🎯 Converted Page:', {
@@ -123,6 +125,7 @@ export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?:
     
     // Frontend formatını backend formatına çevir
     const backendPage = {
+      name: page.title, // title -> name olarak gönder
       ...page,
       languageCode: page.languageId, // languageId -> languageCode dönüşümü
       languageId: undefined, // Backend alanını temizle
@@ -151,12 +154,12 @@ export const addPage = async (page: Omit<Page, 'id'>, siteId?: string, themeId?:
     // Backend response'unu frontend formatına çevir
     const result = {
       id: String(rawResult.id),
-      title: rawResult.title,
-      slug: rawResult.slug,
+      title: rawResult.name || rawResult.meta?.title || rawResult.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: rawResult.meta?.slug || rawResult.slug || '',
       content: rawResult.page?.content || rawResult.content || '',
-      seo: rawResult.seo,
-      isActive: rawResult.isActive,
-      languageId: rawResult.languageCode // languageCode -> languageId dönüşümü
+      seo: rawResult.meta || rawResult.seo,
+      isActive: rawResult.meta?.isActive ?? rawResult.isActive ?? true,
+      languageId: rawResult.meta?.languageCode || rawResult.languageCode // languageCode -> languageId dönüşümü
     };
     
     console.log('✅ Page Added (Frontend Format):', result);
@@ -205,12 +208,12 @@ export const duplicatePage = async (id: string, siteId?: string, themeId?: strin
     // Backend response'unu frontend formatına çevir
     const result = {
       id: String(rawResult.id),
-      title: rawResult.title,
-      slug: rawResult.slug,
+      title: rawResult.name || rawResult.meta?.title || rawResult.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: rawResult.meta?.slug || rawResult.slug || '',
       content: rawResult.page?.content || rawResult.content || '',
-      seo: rawResult.seo,
-      isActive: rawResult.isActive,
-      languageId: rawResult.languageCode // languageCode -> languageId dönüşümü
+      seo: rawResult.meta || rawResult.seo,
+      isActive: rawResult.meta?.isActive ?? rawResult.isActive ?? true,
+      languageId: rawResult.meta?.languageCode || rawResult.languageCode // languageCode -> languageId dönüşümü
     };
     
     console.log('✅ Page Duplicated (Frontend Format):', result);
@@ -230,6 +233,7 @@ export const updatePage = async (id: string, data: Partial<Page>, siteId?: strin
     
     // Frontend formatını backend formatına çevir
     const backendData = {
+      name: data.title, // title -> name olarak gönder
       ...data,
       languageCode: data.languageId, // languageId -> languageCode dönüşümü
       languageId: undefined, // Backend alanını temizle
@@ -259,12 +263,12 @@ export const updatePage = async (id: string, data: Partial<Page>, siteId?: strin
     // Backend response'unu frontend formatına çevir
     const result = {
       id: String(rawResult.id),
-      title: rawResult.title,
-      slug: rawResult.slug,
+      title: rawResult.name || rawResult.meta?.title || rawResult.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: rawResult.meta?.slug || rawResult.slug || '',
       content: rawResult.page?.content || rawResult.content || '',
-      seo: rawResult.seo,
-      isActive: rawResult.isActive,
-      languageId: rawResult.languageCode // languageCode -> languageId dönüşümü
+      seo: rawResult.meta || rawResult.seo,
+      isActive: rawResult.meta?.isActive ?? rawResult.isActive ?? true,
+      languageId: rawResult.meta?.languageCode || rawResult.languageCode // languageCode -> languageId dönüşümü
     };
     
     console.log('✅ Page Updated (Frontend Format):', result);
@@ -461,6 +465,7 @@ export const createPagePrivate = async (
     
     // Frontend formatını backend formatına çevir
     const backendPage = {
+      name: page.title, // title -> name olarak gönder
       ...page,
       languageCode: page.languageId,
       languageId: undefined,
@@ -481,12 +486,12 @@ export const createPagePrivate = async (
     // Backend response'unu frontend formatına çevir
     return {
       id: String(rawResult.id),
-      title: rawResult.title,
-      slug: rawResult.slug,
+      title: rawResult.name || rawResult.meta?.title || rawResult.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: rawResult.meta?.slug || rawResult.slug || '',
       content: rawResult.page?.content || rawResult.content || '',
-      seo: rawResult.seo,
-      isActive: rawResult.isActive,
-      languageId: rawResult.languageCode
+      seo: rawResult.meta || rawResult.seo,
+      isActive: rawResult.meta?.isActive ?? rawResult.isActive ?? true,
+      languageId: rawResult.meta?.languageCode || rawResult.languageCode
     };
   } catch (error) {
     console.warn("/api/private/create/page çağrısı başarısız, /api/pages kullanılacak.", error);
@@ -507,6 +512,7 @@ export const updatePagePrivate = async (
     
     // Frontend formatını backend formatına çevir
     const backendData = {
+      name: data.title, // title -> name olarak gönder
       ...data,
       languageCode: data.languageId,
       languageId: undefined,
@@ -527,12 +533,12 @@ export const updatePagePrivate = async (
     // Backend response'unu frontend formatına çevir
     return {
       id: String(rawResult.id),
-      title: rawResult.title,
-      slug: rawResult.slug,
+      title: rawResult.name || rawResult.meta?.title || rawResult.title || 'İsimsiz Sayfa', // Öncelik name, sonra meta.title
+      slug: rawResult.meta?.slug || rawResult.slug || '',
       content: rawResult.page?.content || rawResult.content || '',
-      seo: rawResult.seo,
-      isActive: rawResult.isActive,
-      languageId: rawResult.languageCode
+      seo: rawResult.meta || rawResult.seo,
+      isActive: rawResult.meta?.isActive ?? rawResult.isActive ?? true,
+      languageId: rawResult.meta?.languageCode || rawResult.languageCode
     };
   } catch (error) {
     console.warn("/api/private/update/page çağrısı başarısız, /api/pages kullanılacak.", error);
